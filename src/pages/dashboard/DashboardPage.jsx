@@ -1,13 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box, Grid, Card, CardContent, Typography, Skeleton,
   List, ListItem, ListItemAvatar, ListItemText, Avatar, ListItemIcon,
-  Chip, Divider,
+  Chip, Divider, Button,
 } from '@mui/material';
 import {
   Business, MeetingRoom, DevicesOther, OnlinePrediction, OfflineBolt,
   People, AdminPanelSettings, WaterDrop, Receipt, Warning, CheckCircle,
-  Adjust as ValveIcon, TrendingUp,
+  Adjust as ValveIcon, TrendingUp, Assessment, NotificationsActive,
+  Analytics, Settings, ListAlt,
 } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';
 import { PageHeader, StatCard } from '@/components/common';
@@ -55,8 +57,23 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
+const quickActions = [
+  { label: 'Rooms', path: '/admin/rooms', icon: <MeetingRoom />, color: 'primary', roles: ['ADMIN', 'SUPER_ADMIN'] },
+  { label: 'Devices', path: '/admin/devices', icon: <DevicesOther />, color: 'info', roles: ['ADMIN', 'SUPER_ADMIN'] },
+  { label: 'Tenants', path: '/admin/tenants', icon: <People />, color: 'success', roles: ['ADMIN', 'SUPER_ADMIN'] },
+  { label: 'Billing', path: '/admin/billing', icon: <Receipt />, color: 'warning', roles: ['ADMIN', 'SUPER_ADMIN'] },
+  { label: 'Reports', path: '/admin/reports', icon: <Assessment />, color: 'secondary', roles: ['ADMIN', 'SUPER_ADMIN'] },
+  { label: 'Alerts', path: '/admin/alerts', icon: <NotificationsActive />, color: 'error', roles: ['ADMIN', 'SUPER_ADMIN'] },
+  { label: 'Buildings', path: '/super-admin/buildings', icon: <Business />, color: 'primary', roles: ['SUPER_ADMIN'] },
+  { label: 'Admins', path: '/super-admin/admins', icon: <AdminPanelSettings />, color: 'warning', roles: ['SUPER_ADMIN'] },
+  { label: 'Analytics', path: '/super-admin/analytics', icon: <Analytics />, color: 'info', roles: ['SUPER_ADMIN'] },
+  { label: 'Settings', path: '/super-admin/settings', icon: <Settings />, color: 'secondary', roles: ['SUPER_ADMIN'] },
+  { label: 'Logs', path: '/super-admin/logs', icon: <ListAlt />, color: 'default', roles: ['SUPER_ADMIN'] },
+];
+
 export function DashboardPage() {
   const { profile, isSuperAdmin, isAdmin, isTenant } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -236,6 +253,46 @@ export function DashboardPage() {
             </Card>
           </motion.div>
         </Grid>
+
+        {(isAdmin || isSuperAdmin) && (
+          <Grid item xs={12}>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" sx={{ mb: 2 }}>Quick Actions</Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
+                    {quickActions
+                      .filter((action) => action.roles.includes(profile?.role))
+                      .map((action) => (
+                        <Button
+                          key={action.label}
+                          variant="outlined"
+                          startIcon={action.icon}
+                          onClick={() => navigate(action.path)}
+                          sx={{
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            px: 2.5,
+                            py: 1,
+                            borderColor: 'grey.300',
+                            color: 'text.primary',
+                            '&:hover': {
+                              borderColor: `${action.color}.main`,
+                              bgcolor: `${action.color}.light`,
+                              color: `${action.color}.dark`,
+                            },
+                          }}
+                        >
+                          {action.label}
+                        </Button>
+                      ))}
+                  </Box>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </Grid>
+        )}
       </Grid>
     </Box>
   );

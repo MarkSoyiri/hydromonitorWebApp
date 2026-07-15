@@ -21,8 +21,8 @@ export function ProtectedRoute({ children, roles }) {
   if (roles && profile && !roles.includes(profile.role)) {
     const redirectMap = {
       TENANT: '/app/dashboard',
-      ADMIN: '/app/dashboard',
-      SUPER_ADMIN: '/app/dashboard',
+      ADMIN: '/admin/dashboard',
+      SUPER_ADMIN: '/super-admin/dashboard',
     };
     return <Navigate to={redirectMap[profile.role] || '/app/dashboard'} replace />;
   }

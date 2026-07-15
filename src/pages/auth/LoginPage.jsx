@@ -27,7 +27,7 @@ export function LoginPage() {
     setLoading(true);
     try {
       await login(email, password);
-      navigate('/dashboard');
+      navigate('/app/dashboard');
     } catch (err) {
       const msg = err?.code === 'auth/user-not-found' || err?.code === 'auth/wrong-password' || err?.code === 'auth/invalid-credential'
         ? 'Invalid email or password'

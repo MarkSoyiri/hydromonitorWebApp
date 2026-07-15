@@ -3,10 +3,11 @@ import {
   Box, Card, CardContent, Typography, Button, Stack, Avatar, List, ListItem,
   ListItemAvatar, ListItemText, Chip, Divider,
   Dialog, DialogTitle, DialogContent, DialogActions, TextField,
+  IconButton, Tooltip,
 } from '@mui/material';
-import { Add, AdminPanelSettings, Shield } from '@mui/icons-material';
-import { PageHeader, StatCard, StatusChip } from '@/components/common';
-import { apiGet, apiPost } from '@/services/api';
+import { Add, AdminPanelSettings, Shield, Edit, Delete } from '@mui/icons-material';
+import { PageHeader, StatCard, StatusChip, ConfirmDialog } from '@/components/common';
+import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api';
 import { ENDPOINTS } from '@/constants';
 import { extractList } from '@/utils/response';
 import toast from 'react-hot-toast';
@@ -15,6 +16,8 @@ export function AdminManagementPage() {
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ fullName: '', email: '', role: 'ADMIN' });
 
@@ -34,7 +37,14 @@ export function AdminManagementPage() {
   useEffect(() => { fetchAdmins(); }, [fetchAdmins]);
 
   const openCreate = () => {
+    setEditing(null);
     setForm({ fullName: '', email: '', role: 'ADMIN' });
+    setDialogOpen(true);
+  };
+
+  const openEdit = (admin) => {
+    setEditing(admin);
+    setForm({ fullName: admin.fullName || '', email: admin.email || '', role: admin.role || 'ADMIN' });
     setDialogOpen(true);
   };
 
@@ -45,14 +55,31 @@ export function AdminManagementPage() {
     }
     setSaving(true);
     try {
-      await apiPost(ENDPOINTS.USERS, form);
-      toast.success('Admin created');
+      if (editing) {
+        await apiPut(`${ENDPOINTS.USERS}/${editing.uid || editing.id}`, form);
+        toast.success('Admin updated');
+      } else {
+        await apiPost(ENDPOINTS.USERS, form);
+        toast.success('Admin created');
+      }
       setDialogOpen(false);
       fetchAdmins();
     } catch (err) {
-      toast.error(err?.message || 'Failed to create admin');
+      toast.error(err?.message || `Failed to ${editing ? 'update' : 'create'} admin`);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await apiDelete(`${ENDPOINTS.USERS}/${deleteTarget.uid || deleteTarget.id}`);
+      toast.success('Admin deleted');
+      setDeleteTarget(null);
+      fetchAdmins();
+    } catch (err) {
+      toast.error(err?.message || 'Failed to delete admin');
     }
   };
 
@@ -80,10 +107,20 @@ export function AdminManagementPage() {
                     primary={<Typography variant="subtitle2">{admin.fullName || admin.name}</Typography>}
                     secondary={admin.email}
                   />
-                  <Stack direction="row" spacing={1}>
+                  <Stack direction="row" spacing={1} alignItems="center">
                     <Chip label={admin.role} size="small"
                       color={admin.role === 'SUPER_ADMIN' ? 'error' : 'primary'} variant="outlined" />
                     <StatusChip status={admin.status || 'ACTIVE'} />
+                    <Tooltip title="Edit">
+                      <IconButton size="small" onClick={() => openEdit(admin)}>
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                      <IconButton size="small" color="error" onClick={() => setDeleteTarget(admin)}>
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                   </Stack>
                 </ListItem>
                 {i < admins.length - 1 && <Divider />}
@@ -94,7 +131,7 @@ export function AdminManagementPage() {
       </Card>
 
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Admin</DialogTitle>
+        <DialogTitle>{editing ? 'Edit Admin' : 'Add Admin'}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             <TextField label="Full Name" fullWidth value={form.fullName}
@@ -111,10 +148,15 @@ export function AdminManagementPage() {
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
           <Button onClick={handleSave} variant="contained" disabled={saving}>
-            {saving ? 'Saving...' : 'Create'}
+            {saving ? 'Saving...' : (editing ? 'Update' : 'Create')}
           </Button>
         </DialogActions>
       </Dialog>
+
+      <ConfirmDialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete} title="Delete Admin"
+        message={`Are you sure you want to delete "${deleteTarget?.fullName || deleteTarget?.name}"?`}
+        color="error" confirmLabel="Delete" />
     </Box>
   );
 }

@@ -2,28 +2,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Stack,
-  TextField, Typography,
+  TextField, Typography, IconButton, Tooltip,
 } from '@mui/material';
-import { Add } from '@mui/icons-material';
+import { Add, Edit, Block } from '@mui/icons-material';
 import { PageHeader, DataTable, StatusChip, ConfirmDialog } from '@/components/common';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api';
 import { ENDPOINTS, tenantPath } from '@/constants';
 import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
-
-const columns = [
-  { field: 'fullName', label: 'Name', width: 180 },
-  { field: 'email', label: 'Email', width: 220 },
-  { field: 'phoneNumber', label: 'Phone', width: 140 },
-  { field: 'buildingId', label: 'Building', width: 150 },
-  { field: 'roomId', label: 'Room', width: 80 },
-  { field: 'status', label: 'Status', width: 100, render: (r) => <StatusChip status={r.status} /> },
-  {
-    field: 'usage', label: 'Usage', width: 100,
-    render: (r) => `${(r.usage?.totalUsageMonth || 0).toLocaleString()} L`,
-  },
-];
 
 export function TenantsPage() {
   const navigate = useNavigate();
@@ -97,6 +84,48 @@ export function TenantsPage() {
       toast.error(err?.message || 'Failed to delete tenant');
     }
   };
+
+  const handleDisable = async (tenant) => {
+    const newStatus = tenant.status === 'DISABLED' ? 'ACTIVE' : 'DISABLED';
+    try {
+      await apiPut(tenantPath(tenant.uid), { status: newStatus });
+      toast.success(`Tenant ${newStatus === 'DISABLED' ? 'disabled' : 'enabled'}`);
+      fetchTenants();
+    } catch (err) {
+      toast.error(err?.message || 'Failed to update tenant status');
+    }
+  };
+
+  const columns = [
+    { field: 'fullName', label: 'Name', width: 180 },
+    { field: 'email', label: 'Email', width: 220 },
+    { field: 'phoneNumber', label: 'Phone', width: 140 },
+    { field: 'buildingId', label: 'Building', width: 150 },
+    { field: 'roomId', label: 'Room', width: 80 },
+    { field: 'status', label: 'Status', width: 100, render: (r) => <StatusChip status={r.status} /> },
+    {
+      field: 'usage', label: 'Usage', width: 100,
+      render: (r) => `${(r.usage?.totalUsageMonth || 0).toLocaleString()} L`,
+    },
+    {
+      field: 'actions', label: 'Actions', width: 100, align: 'center',
+      render: (row) => (
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
+          <Tooltip title="Edit">
+            <IconButton size="small" onClick={(e) => { e.stopPropagation(); openEdit(row); }}>
+              <Edit fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={row.status === 'DISABLED' ? 'Enable' : 'Disable'}>
+            <IconButton size="small" color={row.status === 'DISABLED' ? 'success' : 'error'}
+              onClick={(e) => { e.stopPropagation(); handleDisable(row); }}>
+              <Block fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      ),
+    },
+  ];
 
   return (
     <Box>

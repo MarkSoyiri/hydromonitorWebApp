@@ -6,8 +6,9 @@ import {
 } from '@mui/material';
 import { Add, Edit, Block } from '@mui/icons-material';
 import { PageHeader, DataTable, StatusChip, ConfirmDialog } from '@/components/common';
-import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api';
-import { ENDPOINTS, tenantPath } from '@/constants';
+import { apiGet, apiPost } from '@/services/api';
+import { rtdbUpdate, rtdbRemove } from '@/services/firebaseRealtime';
+import { ENDPOINTS } from '@/constants';
 import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
@@ -60,7 +61,7 @@ export function TenantsPage() {
     setSaving(true);
     try {
       if (editing) {
-        await apiPut(tenantPath(getTenantId(editing)), form);
+        await rtdbUpdate(`tenants/${getTenantId(editing)}`, form);
         toast.success('Tenant updated');
       } else {
         await apiPost(ENDPOINTS.TENANTS, form);
@@ -78,7 +79,7 @@ export function TenantsPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await apiDelete(tenantPath(getTenantId(deleteTarget)));
+      await rtdbRemove(`tenants/${getTenantId(deleteTarget)}`);
       toast.success('Tenant deleted');
       setDeleteTarget(null);
       fetchTenants();
@@ -90,7 +91,7 @@ export function TenantsPage() {
   const handleDisable = async (tenant) => {
     const newStatus = tenant.status === 'DISABLED' ? 'ACTIVE' : 'DISABLED';
     try {
-      await apiPut(tenantPath(getTenantId(tenant)), { status: newStatus });
+      await rtdbUpdate(`tenants/${getTenantId(tenant)}`, { status: newStatus });
       toast.success(`Tenant ${newStatus === 'DISABLED' ? 'disabled' : 'enabled'}`);
       fetchTenants();
     } catch (err) {

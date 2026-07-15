@@ -7,7 +7,8 @@ import {
 } from '@mui/material';
 import { Add, AdminPanelSettings, Shield, Edit, Delete } from '@mui/icons-material';
 import { PageHeader, StatCard, StatusChip, ConfirmDialog } from '@/components/common';
-import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api';
+import { apiGet, apiPost } from '@/services/api';
+import { rtdbUpdate, rtdbRemove } from '@/services/firebaseRealtime';
 import { ENDPOINTS } from '@/constants';
 import { extractList } from '@/utils/response';
 import toast from 'react-hot-toast';
@@ -58,7 +59,7 @@ export function AdminManagementPage() {
     setSaving(true);
     try {
       if (editing) {
-        await apiPut(`${ENDPOINTS.USERS}/${getUserId(editing)}`, form);
+        await rtdbUpdate(`users/${getUserId(editing)}`, form);
         toast.success('Admin updated');
       } else {
         await apiPost(ENDPOINTS.USERS, form);
@@ -76,7 +77,7 @@ export function AdminManagementPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await apiDelete(`${ENDPOINTS.USERS}/${getUserId(deleteTarget)}`);
+      await rtdbRemove(`users/${getUserId(deleteTarget)}`);
       toast.success('Admin deleted');
       setDeleteTarget(null);
       fetchAdmins();

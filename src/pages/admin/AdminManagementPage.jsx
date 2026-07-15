@@ -48,7 +48,7 @@ export function AdminManagementPage() {
     setDialogOpen(true);
   };
 
-  const getUserId = (user) => user._id || user.uid || user.id;
+  const getUserId = (user) => user.uid || user.id;
 
   const handleSave = async () => {
     if (!form.fullName.trim() || !form.email.trim()) {
@@ -98,7 +98,7 @@ export function AdminManagementPage() {
           <Typography variant="h6" sx={{ mb: 2 }}>Administrators</Typography>
           <List disablePadding>
             {admins.map((admin, i) => (
-              <Box key={admin._id || admin.uid || admin.id}>
+              <Box key={admin.uid || admin.id}>
                 <ListItem sx={{ px: 0 }}>
                   <ListItemAvatar>
                     <Avatar sx={{ bgcolor: admin.role === 'SUPER_ADMIN' ? 'error.main' : 'primary.main' }}>

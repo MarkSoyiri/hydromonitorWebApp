@@ -7,8 +7,7 @@ import {
 } from '@mui/material';
 import { Add, AdminPanelSettings, Shield, Edit, Delete } from '@mui/icons-material';
 import { PageHeader, StatCard, StatusChip, ConfirmDialog } from '@/components/common';
-import { apiGet, apiPost } from '@/services/api';
-import { rtdbUpdate, rtdbRemove } from '@/services/firebaseRealtime';
+import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api';
 import { ENDPOINTS } from '@/constants';
 import { extractList } from '@/utils/response';
 import toast from 'react-hot-toast';
@@ -49,7 +48,7 @@ export function AdminManagementPage() {
     setDialogOpen(true);
   };
 
-  const getUserId = (user) => user.id || user.uid;
+  const getUserId = (user) => user.uid || user.id;
 
   const handleSave = async () => {
     if (!form.fullName.trim() || !form.email.trim()) {
@@ -59,7 +58,7 @@ export function AdminManagementPage() {
     setSaving(true);
     try {
       if (editing) {
-        await rtdbUpdate(`users/${getUserId(editing)}`, form);
+        await apiPut(`${ENDPOINTS.USERS}/${getUserId(editing)}`, form);
         toast.success('Admin updated');
       } else {
         await apiPost(ENDPOINTS.USERS, form);
@@ -77,7 +76,7 @@ export function AdminManagementPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await rtdbRemove(`users/${getUserId(deleteTarget)}`);
+      await apiDelete(`${ENDPOINTS.USERS}/${getUserId(deleteTarget)}`);
       toast.success('Admin deleted');
       setDeleteTarget(null);
       fetchAdmins();

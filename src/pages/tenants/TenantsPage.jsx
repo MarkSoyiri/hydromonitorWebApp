@@ -50,6 +50,8 @@ export function TenantsPage() {
     setDialogOpen(true);
   };
 
+  const getTenantId = (t) => t.uid || t.id;
+
   const handleSave = async () => {
     if (!form.fullName.trim() || !form.email.trim()) {
       toast.error('Name and email are required');
@@ -58,7 +60,7 @@ export function TenantsPage() {
     setSaving(true);
     try {
       if (editing) {
-        await apiPut(tenantPath(editing.uid), form);
+        await apiPut(tenantPath(getTenantId(editing)), form);
         toast.success('Tenant updated');
       } else {
         await apiPost(ENDPOINTS.TENANTS, form);
@@ -76,7 +78,7 @@ export function TenantsPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await apiDelete(tenantPath(deleteTarget.uid));
+      await apiDelete(tenantPath(getTenantId(deleteTarget)));
       toast.success('Tenant deleted');
       setDeleteTarget(null);
       fetchTenants();
@@ -88,7 +90,7 @@ export function TenantsPage() {
   const handleDisable = async (tenant) => {
     const newStatus = tenant.status === 'DISABLED' ? 'ACTIVE' : 'DISABLED';
     try {
-      await apiPut(tenantPath(tenant.uid), { status: newStatus });
+      await apiPut(tenantPath(getTenantId(tenant)), { status: newStatus });
       toast.success(`Tenant ${newStatus === 'DISABLED' ? 'disabled' : 'enabled'}`);
       fetchTenants();
     } catch (err) {
@@ -135,7 +137,7 @@ export function TenantsPage() {
         columns={columns}
         rows={tenants}
         loading={loading}
-        onRowClick={(row) => navigate(`/tenants/${row.uid}`)}
+        onRowClick={(row) => navigate(`/tenants/${getTenantId(row)}`)}
         emptyTitle="No tenants found"
         emptyAction={isSuperAdmin && <Button variant="contained" startIcon={<Add />} onClick={openCreate}>Add Tenant</Button>}
       />

@@ -50,7 +50,7 @@ export function TenantsPage() {
     setDialogOpen(true);
   };
 
-  const getTenantId = (t) => t.uid || t.id;
+  const getTenantId = (t) => t.id || t.uid;
 
   const handleSave = async () => {
     if (!form.fullName.trim() || !form.email.trim()) {

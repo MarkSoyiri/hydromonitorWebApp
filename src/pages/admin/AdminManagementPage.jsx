@@ -48,7 +48,7 @@ export function AdminManagementPage() {
     setDialogOpen(true);
   };
 
-  const getUserId = (user) => user.uid || user.id;
+  const getUserId = (user) => user.id || user.uid;
 
   const handleSave = async () => {
     if (!form.fullName.trim() || !form.email.trim()) {

@@ -1,0 +1,163 @@
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Box, Grid, Card, CardContent, Typography, Button, IconButton, TextField,
+  Dialog, DialogTitle, DialogContent, DialogActions, Stack, Chip, Tooltip,
+} from '@mui/material';
+import {
+  Add, Edit, Delete, Business, MeetingRoom, DevicesOther, People,
+} from '@mui/icons-material';
+import { PageHeader, StatCard, DataTable, ConfirmDialog, StatusChip } from '@/components/common';
+import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api';
+import { ENDPOINTS, buildPath } from '@/constants';
+import { extractList } from '@/utils/response';
+import { useAuth } from '@/contexts/AuthContext';
+import toast from 'react-hot-toast';
+
+const columns = [
+  { field: 'name', label: 'Name', width: 200 },
+  { field: 'address', label: 'Address', width: 250 },
+  {
+    field: 'status', label: 'Status', width: 100,
+    render: (row) => <StatusChip status={row.status} />,
+  },
+  {
+    field: 'occupancy', label: 'Rooms', width: 80, align: 'center',
+    render: (row) => row.occupancy?.totalRooms ?? 0,
+  },
+  {
+    field: 'occupancy', label: 'Occupied', width: 80, align: 'center',
+    render: (row) => row.occupancy?.occupiedRooms ?? 0,
+  },
+  {
+    field: 'occupancy', label: 'Tenants', width: 80, align: 'center',
+    render: (row) => row.occupancy?.totalTenants ?? 0,
+  },
+];
+
+export function BuildingsPage() {
+  const navigate = useNavigate();
+  const { isSuperAdmin } = useAuth();
+  const [buildings, setBuildings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [form, setForm] = useState({ name: '', address: '', description: '' });
+  const [saving, setSaving] = useState(false);
+
+  const fetchBuildings = useCallback(async () => {
+    try {
+      const { data } = await apiGet(ENDPOINTS.BUILDINGS);
+      if (data?.success) {
+        setBuildings(extractList(data.data));
+      }
+    } catch {
+      toast.error('Failed to load buildings');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchBuildings(); }, [fetchBuildings]);
+
+  const openCreate = () => {
+    setEditing(null);
+    setForm({ name: '', address: '', description: '' });
+    setDialogOpen(true);
+  };
+
+  const openEdit = (building) => {
+    setEditing(building);
+    setForm({ name: building.name || '', address: building.address || '', description: building.description || '' });
+    setDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!form.name.trim()) { toast.error('Building name is required'); return; }
+    setSaving(true);
+    try {
+      if (editing) {
+        await apiPut(buildPath(editing.buildingId), form);
+        toast.success('Building updated');
+      } else {
+        await apiPost(ENDPOINTS.BUILDINGS, form);
+        toast.success('Building created');
+      }
+      setDialogOpen(false);
+      fetchBuildings();
+    } catch (err) {
+      toast.error(err?.message || 'Failed to save building');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await apiDelete(buildPath(deleteTarget.buildingId));
+      toast.success('Building deleted');
+      setDeleteTarget(null);
+      fetchBuildings();
+    } catch (err) {
+      toast.error(err?.message || 'Failed to delete building');
+    }
+  };
+
+  return (
+    <Box>
+      <PageHeader
+        title="Buildings"
+        subtitle="Manage all buildings in the system"
+        action
+        actionLabel="Add Building"
+        onAction={openCreate}
+      />
+
+      <DataTable
+        columns={columns}
+        rows={buildings}
+        loading={loading}
+        onRowClick={(row) => navigate(`/buildings/${row.buildingId}`)}
+        emptyTitle="No buildings found"
+        emptyDescription="Create your first building to get started."
+        emptyAction={isSuperAdmin && (
+          <Button variant="contained" startIcon={<Add />} onClick={openCreate}>
+            Add Building
+          </Button>
+        )}
+      />
+
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>{editing ? 'Edit Building' : 'Add Building'}</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <TextField label="Building Name" fullWidth value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })} autoFocus />
+            <TextField label="Address" fullWidth value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })} />
+            <TextField label="Description" fullWidth multiline rows={3} value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleSave} variant="contained" disabled={saving}>
+            {saving ? 'Saving...' : (editing ? 'Update' : 'Create')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        title="Delete Building"
+        message={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
+        color="error"
+        confirmLabel="Delete"
+      />
+    </Box>
+  );
+}

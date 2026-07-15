@@ -48,6 +48,8 @@ export function AdminManagementPage() {
     setDialogOpen(true);
   };
 
+  const getUserId = (user) => user._id || user.uid || user.id;
+
   const handleSave = async () => {
     if (!form.fullName.trim() || !form.email.trim()) {
       toast.error('Name and email are required');
@@ -56,7 +58,7 @@ export function AdminManagementPage() {
     setSaving(true);
     try {
       if (editing) {
-        await apiPut(`${ENDPOINTS.USERS}/${editing.uid || editing.id}`, form);
+        await apiPut(`${ENDPOINTS.USERS}/${getUserId(editing)}`, form);
         toast.success('Admin updated');
       } else {
         await apiPost(ENDPOINTS.USERS, form);
@@ -74,7 +76,7 @@ export function AdminManagementPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await apiDelete(`${ENDPOINTS.USERS}/${deleteTarget.uid || deleteTarget.id}`);
+      await apiDelete(`${ENDPOINTS.USERS}/${getUserId(deleteTarget)}`);
       toast.success('Admin deleted');
       setDeleteTarget(null);
       fetchAdmins();
@@ -96,7 +98,7 @@ export function AdminManagementPage() {
           <Typography variant="h6" sx={{ mb: 2 }}>Administrators</Typography>
           <List disablePadding>
             {admins.map((admin, i) => (
-              <Box key={admin.uid || admin.id}>
+              <Box key={admin._id || admin.uid || admin.id}>
                 <ListItem sx={{ px: 0 }}>
                   <ListItemAvatar>
                     <Avatar sx={{ bgcolor: admin.role === 'SUPER_ADMIN' ? 'error.main' : 'primary.main' }}>

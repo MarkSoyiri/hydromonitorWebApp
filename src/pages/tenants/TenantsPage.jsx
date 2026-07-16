@@ -6,8 +6,7 @@ import {
 } from '@mui/material';
 import { Add, Edit, Block } from '@mui/icons-material';
 import { PageHeader, DataTable, StatusChip, ConfirmDialog } from '@/components/common';
-import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api';
-import { ENDPOINTS, tenantPath } from '@/constants';
+import { tenantService } from '@/services';
 import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
@@ -15,6 +14,7 @@ import toast from 'react-hot-toast';
 export function TenantsPage() {
   const navigate = useNavigate();
   const { isSuperAdmin } = useAuth();
+  const basePath = isSuperAdmin ? '/super-admin' : '/admin';
   const [tenants, setTenants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -25,7 +25,7 @@ export function TenantsPage() {
 
   const fetchTenants = useCallback(async () => {
     try {
-      const { data } = await apiGet(ENDPOINTS.TENANTS);
+      const { data } = await tenantService.getAll();
       if (data?.success) {
         setTenants(extractList(data.data));
       }
@@ -60,10 +60,10 @@ export function TenantsPage() {
     setSaving(true);
     try {
       if (editing) {
-        await apiPut(tenantPath(getTenantId(editing)), form);
+        await tenantService.update(getTenantId(editing), form);
         toast.success('Tenant updated');
       } else {
-        await apiPost(ENDPOINTS.TENANTS, form);
+        await tenantService.create(form);
         toast.success('Tenant created');
       }
       setDialogOpen(false);
@@ -78,7 +78,7 @@ export function TenantsPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await apiDelete(tenantPath(getTenantId(deleteTarget)));
+      await tenantService.delete(getTenantId(deleteTarget));
       toast.success('Tenant deleted');
       setDeleteTarget(null);
       fetchTenants();
@@ -90,7 +90,7 @@ export function TenantsPage() {
   const handleDisable = async (tenant) => {
     const newStatus = tenant.status === 'DISABLED' ? 'ACTIVE' : 'DISABLED';
     try {
-      await apiPut(tenantPath(getTenantId(tenant)), { status: newStatus });
+      await tenantService.update(getTenantId(tenant), { status: newStatus });
       toast.success(`Tenant ${newStatus === 'DISABLED' ? 'disabled' : 'enabled'}`);
       fetchTenants();
     } catch (err) {
@@ -137,7 +137,7 @@ export function TenantsPage() {
         columns={columns}
         rows={tenants}
         loading={loading}
-        onRowClick={(row) => navigate(`/tenants/${getTenantId(row)}`)}
+        onRowClick={(row) => navigate(`${basePath}/tenants/${getTenantId(row)}`)}
         emptyTitle="No tenants found"
         emptyAction={isSuperAdmin && <Button variant="contained" startIcon={<Add />} onClick={openCreate}>Add Tenant</Button>}
       />

@@ -4,10 +4,10 @@ import {
   Box, Grid, Card, CardContent, Typography, IconButton, Chip, Button, Stack,
 } from '@mui/material';
 import { ArrowBack, WaterDrop, MeetingRoom, DevicesOther, Warning } from '@mui/icons-material';
-import { StatCard, StatusChip } from '@/components/common';
-import { apiGet } from '@/services/api';
-import { ENDPOINTS, roomPath, deviceReadingsPath } from '@/constants';
+import { StatCard, StatusChip, LoadingScreen } from '@/components/common';
+import { roomService, usageService } from '@/services';
 import { extractList } from '@/utils/response';
+import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import dayjs from 'dayjs';
@@ -15,13 +15,15 @@ import dayjs from 'dayjs';
 export function RoomDetailPage() {
   const { roomId } = useParams();
   const navigate = useNavigate();
+  const { isSuperAdmin } = useAuth();
+  const basePath = isSuperAdmin ? '/super-admin' : '/admin';
   const [room, setRoom] = useState(null);
   const [readings, setReadings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchRoom = useCallback(async () => {
     try {
-      const { data } = await apiGet(roomPath(roomId));
+      const { data } = await roomService.getById(roomId);
       if (data?.success) {
         const roomData = { ...data.data, roomId };
         setRoom(roomData);
@@ -29,7 +31,7 @@ export function RoomDetailPage() {
         const deviceId = roomData.device?.deviceId;
         if (deviceId) {
           try {
-            const { data: readingsData } = await apiGet(deviceReadingsPath(deviceId));
+            const { data: readingsData } = await usageService.getDeviceReadings(deviceId);
             if (readingsData?.success) {
               const list = extractList(readingsData.data);
               setReadings(list.map((r) => ({
@@ -51,13 +53,13 @@ export function RoomDetailPage() {
 
   useEffect(() => { fetchRoom(); }, [fetchRoom]);
 
-  if (loading) return <Typography>Loading...</Typography>;
+  if (loading) return <LoadingScreen />;
   if (!room) return <Typography>Room not found</Typography>;
 
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        <IconButton onClick={() => navigate('/rooms')}><ArrowBack /></IconButton>
+        <IconButton onClick={() => navigate(`${basePath}/rooms`)}><ArrowBack /></IconButton>
         <Box sx={{ flex: 1 }}>
           <Typography variant="h4" sx={{ fontWeight: 700 }}>Room {room.roomNumber}</Typography>
           <Typography variant="body2" color="text.secondary">

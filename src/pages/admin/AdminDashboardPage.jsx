@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import {
   MeetingRoom, DevicesOther, People, WaterDrop, Warning,
-  CheckCircle, TrendingUp, OnlinePrediction, OfflineBolt,
+  CheckCircle, TrendingUp, OfflineBolt,
 } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';

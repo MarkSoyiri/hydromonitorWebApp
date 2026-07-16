@@ -43,8 +43,7 @@ api.interceptors.response.use(
             return api(error.config);
           }
         } catch {
-          auth.signOut();
-          window.location.href = '/login';
+          // token refresh failed, fall through to sign out
         }
         auth.signOut();
         window.location.href = '/login';

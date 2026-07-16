@@ -81,7 +81,6 @@ export function SuperAdminDashboardPage() {
   const totalRooms = stats?.occupiedRooms ?? rooms.length ?? 0;
   const totalDevices = devices.length ?? 0;
   const totalTenants = stats?.activeTenants ?? tenants.filter((t) => t?.status === 'ACTIVE').length ?? 0;
-  const totalAdmins = tenants.filter((t) => t?.role === 'ADMIN').length ?? tenants.filter((t) => t?.role === 'ADMIN').length ?? 0;
   const totalRevenue = stats?.totalRevenue ?? 0;
   const activeAlerts = stats?.recentAlerts ?? 0;
 

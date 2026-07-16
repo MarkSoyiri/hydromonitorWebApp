@@ -32,7 +32,7 @@ export function SearchPage() {
           items.push({
             type: 'Building',
             label: b.name || 'Building',
-            path: `/buildings/${b.buildingId}`,
+            path: `/super-admin/buildings/${b.buildingId}`,
             icon: <Business color="primary" />,
           });
         });
@@ -43,7 +43,7 @@ export function SearchPage() {
           items.push({
             type: 'Room',
             label: `Room ${r.roomNumber || r.roomId}`,
-            path: `/rooms/${r.roomId}`,
+            path: `/super-admin/rooms/${r.roomId}`,
             icon: <MeetingRoom color="info" />,
           });
         });
@@ -54,7 +54,7 @@ export function SearchPage() {
           items.push({
             type: 'Device',
             label: d.deviceName || d.serialNumber || 'Device',
-            path: `/devices/${d.deviceId}`,
+            path: `/super-admin/devices/${d.deviceId}`,
             icon: <DevicesOther color="success" />,
           });
         });
@@ -65,7 +65,7 @@ export function SearchPage() {
           items.push({
             type: 'Tenant',
             label: t.fullName || t.name || 'Tenant',
-            path: `/tenants/${t.tenantId || t.uid || t.id}`,
+            path: `/super-admin/tenants/${t.tenantId || t.uid || t.id}`,
             icon: <People color="warning" />,
           });
         });
@@ -76,7 +76,7 @@ export function SearchPage() {
           items.push({
             type: 'Alert',
             label: a.message || `Alert ${a.alertId || ''}`,
-            path: '/alerts',
+            path: '/super-admin/logs',
             icon: <Warning color="error" />,
           });
         });

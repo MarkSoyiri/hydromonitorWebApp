@@ -6,8 +6,8 @@ import {
   Tooltip, Select, MenuItem, FormControl, InputLabel,
 } from '@mui/material';
 import {
-  ArrowBack, Edit, MeetingRoom, DevicesOther, People, WaterDrop,
-  Add, Warning, CheckCircle, TrendingUp,
+  ArrowBack, Edit, MeetingRoom, DevicesOther, People,
+  Add, Warning,
 } from '@mui/icons-material';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as ReTooltip,
@@ -264,7 +264,7 @@ export function BuildingDetailPage() {
     return (
       <Box>
         <PageHeader title="Building not found" />
-        <Button startIcon={<ArrowBack />} onClick={() => navigate('/buildings')}>
+        <Button startIcon={<ArrowBack />} onClick={() => navigate('/super-admin/buildings')}>
           Back to Buildings
         </Button>
       </Box>
@@ -274,7 +274,7 @@ export function BuildingDetailPage() {
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        <IconButton onClick={() => navigate('/buildings')}><ArrowBack /></IconButton>
+        <IconButton onClick={() => navigate('/super-admin/buildings')}><ArrowBack /></IconButton>
         <Box sx={{ flex: 1 }}>
           <Typography variant="h4" sx={{ fontWeight: 700 }}>{building.name}</Typography>
           <Typography variant="body2" color="text.secondary">{building.address}</Typography>
@@ -283,7 +283,7 @@ export function BuildingDetailPage() {
           )}
         </Box>
         <StatusChip status={building.status} />
-        <Button variant="outlined" startIcon={<Edit />} onClick={() => navigate('/buildings')}>
+        <Button variant="outlined" startIcon={<Edit />} onClick={() => navigate('/super-admin/buildings')}>
           Edit Building
         </Button>
       </Box>
@@ -404,7 +404,7 @@ export function BuildingDetailPage() {
                     : c
                 )}
                 rows={rooms}
-                onRowClick={(row) => navigate(`/rooms/${row.roomId}`)}
+                onRowClick={(row) => navigate(`/super-admin/rooms/${row.roomId}`)}
                 emptyTitle="No rooms"
                 emptyDescription="Add a room to this building."
                 emptyAction={<Button variant="contained" startIcon={<Add />} onClick={openAddRoom}>Add Room</Button>}
@@ -416,7 +416,7 @@ export function BuildingDetailPage() {
             <DataTable
               columns={deviceColumns}
               rows={devices}
-              onRowClick={(row) => navigate(`/devices/${row.deviceId}`)}
+              onRowClick={(row) => navigate(`/super-admin/devices/${row.deviceId}`)}
               emptyTitle="No devices"
               emptyDescription="No devices are assigned to this building."
             />
@@ -426,7 +426,7 @@ export function BuildingDetailPage() {
             <DataTable
               columns={tenantColumns}
               rows={tenants}
-              onRowClick={(row) => navigate(`/tenants/${row.tenantId}`)}
+              onRowClick={(row) => navigate(`/super-admin/tenants/${row.tenantId}`)}
               emptyTitle="No tenants"
               emptyDescription="No tenants are assigned to this building."
             />

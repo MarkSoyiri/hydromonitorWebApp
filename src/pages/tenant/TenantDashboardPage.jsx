@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import {
   WaterDrop, Receipt, AccountBalance, CheckCircle, Warning,
-  Home, Adjust as ValveIcon, TrendingUp, TrendingDown,
+  Home, Adjust as ValveIcon, TrendingUp,
   Download, ArrowForward, NotificationsActive,
   Paid, Description, ErrorOutline,
 } from '@mui/icons-material';
@@ -128,7 +128,7 @@ export function TenantDashboardPage() {
         ]);
         if (!cancelled) {
           if (historyRes.status === 'fulfilled' && historyRes.value.data?.success) {
-            setBillingHistory(historyRes.value.data.data || []);
+            setBillingHistory(extractList(historyRes.value.data.data));
           }
           if (billRes.status === 'fulfilled' && billRes.value.data?.success) {
             setCurrentBill(billRes.value.data.data);

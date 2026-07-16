@@ -1,14 +1,14 @@
-import { ref, onValue, off, set, update, push, remove, get, query, limitToLast, orderByChild, equalTo } from 'firebase/database';
+import { ref, onValue, set, update, push, remove, get, query, limitToLast, orderByChild, equalTo } from 'firebase/database';
 import { database } from './firebase';
 
 export const rtdbRef = (path) => ref(database, path);
 
 export const rtdbOnValue = (path, callback, errorCallback) => {
   const dbRef = rtdbRef(path);
-  onValue(dbRef, (snapshot) => {
+  const unsubscribe = onValue(dbRef, (snapshot) => {
     callback(snapshot.val());
   }, errorCallback);
-  return () => off(dbRef);
+  return unsubscribe;
 };
 
 export const rtdbGet = (path) => get(rtdbRef(path));
@@ -32,7 +32,7 @@ export const rtdbQuery = (path, constraints) => {
 
 export const listenToChildAdded = (path, callback) => {
   const dbRef = rtdbRef(path);
-  const listener = onValue(dbRef, (snapshot) => {
+  const unsubscribe = onValue(dbRef, (snapshot) => {
     const data = snapshot.val();
     if (data) {
       Object.entries(data).forEach(([key, value]) => {
@@ -40,7 +40,7 @@ export const listenToChildAdded = (path, callback) => {
       });
     }
   });
-  return () => off(dbRef, 'value', listener);
+  return unsubscribe;
 };
 
 export const rtdbSubscriptions = {};

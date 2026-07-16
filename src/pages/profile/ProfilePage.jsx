@@ -4,13 +4,11 @@ import {
 } from '@mui/material';
 import { PageHeader, StatusChip } from '@/components/common';
 import { useAuth } from '@/contexts/AuthContext';
-import { useThemeMode } from '@/contexts/ThemeContext';
 import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
 
 export function ProfilePage() {
   const { profile, updateProfile } = useAuth();
-  const { toggleTheme, isDark } = useThemeMode();
   const [name, setName] = useState(profile?.fullName || '');
   const [phone, setPhone] = useState(profile?.phoneNumber || '');
   const [saving, setSaving] = useState(false);

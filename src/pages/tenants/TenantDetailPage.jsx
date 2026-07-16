@@ -4,20 +4,22 @@ import {
   Box, Grid, Card, CardContent, Typography, IconButton, Stack,
 } from '@mui/material';
 import { ArrowBack, WaterDrop, MeetingRoom, Receipt, People } from '@mui/icons-material';
-import { StatCard, StatusChip } from '@/components/common';
-import { apiGet } from '@/services/api';
-import { ENDPOINTS, tenantPath } from '@/constants';
+import { StatCard, StatusChip, LoadingScreen } from '@/components/common';
+import { tenantService } from '@/services';
+import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 export function TenantDetailPage() {
   const { tenantId } = useParams();
   const navigate = useNavigate();
+  const { isSuperAdmin } = useAuth();
+  const basePath = isSuperAdmin ? '/super-admin' : '/admin';
   const [tenant, setTenant] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const fetchTenant = useCallback(async () => {
     try {
-      const { data } = await apiGet(tenantPath(tenantId));
+      const { data } = await tenantService.getById(tenantId);
       if (data?.success) {
         setTenant({ ...data.data, uid: tenantId });
       }
@@ -30,13 +32,13 @@ export function TenantDetailPage() {
 
   useEffect(() => { fetchTenant(); }, [fetchTenant]);
 
-  if (loading) return <Typography>Loading...</Typography>;
+  if (loading) return <LoadingScreen />;
   if (!tenant) return <Typography>Tenant not found</Typography>;
 
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        <IconButton onClick={() => navigate('/tenants')}><ArrowBack /></IconButton>
+        <IconButton onClick={() => navigate(`${basePath}/tenants`)}><ArrowBack /></IconButton>
         <Box sx={{ flex: 1 }}>
           <Typography variant="h4" sx={{ fontWeight: 700 }}>{tenant.fullName}</Typography>
           <Typography variant="body2" color="text.secondary">{tenant.email} · {tenant.phoneNumber || 'No phone'}</Typography>

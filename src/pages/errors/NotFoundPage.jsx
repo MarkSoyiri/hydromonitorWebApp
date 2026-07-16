@@ -21,8 +21,8 @@ export function NotFoundPage() {
       <Typography variant="h6" color="text.secondary" sx={{ mb: 3 }}>
         Page not found
       </Typography>
-      <Button variant="contained" onClick={() => navigate('/dashboard')}>
-        Back to Dashboard
+      <Button variant="contained" onClick={() => window.history.back()}>
+        Go Back
       </Button>
     </Box>
   );

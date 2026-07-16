@@ -4,13 +4,13 @@ import {
   Box, Grid, Card, CardContent, Typography, IconButton, Button, Stack, Chip, Divider,
 } from '@mui/material';
 import {
-  ArrowBack, PowerSettingsNew, Wifi, SignalCellularAlt, Warning,
-  CheckCircle, PlayArrow, Stop, Refresh, History,
+  ArrowBack, Wifi, SignalCellularAlt, Warning,
+  PlayArrow, Stop, Refresh, History,
 } from '@mui/icons-material';
-import { StatCard, StatusChip, PageHeader } from '@/components/common';
-import { apiGet, apiPost } from '@/services/api';
-import { devicePath, deviceOpenValvePath, deviceCloseValvePath, deviceResetAlertPath, deviceStartSimPath, deviceStopSimPath, deviceReadingsPath, ENDPOINTS } from '@/constants';
+import { StatCard, StatusChip, PageHeader, LoadingScreen } from '@/components/common';
+import { deviceService, usageService } from '@/services';
 import { extractList } from '@/utils/response';
+import { useAuth } from '@/contexts/AuthContext';
 import { subscribeRealtime, unsubscribeRealtime } from '@/services/firebaseRealtime';
 import toast from 'react-hot-toast';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -24,6 +24,8 @@ const fallbackTelemetryHistory = Array.from({ length: 24 }, (_, i) => ({
 export function DeviceDetailPage() {
   const { deviceId } = useParams();
   const navigate = useNavigate();
+  const { isSuperAdmin } = useAuth();
+  const basePath = isSuperAdmin ? '/super-admin' : '/admin';
   const [device, setDevice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [commandLoading, setCommandLoading] = useState(false);
@@ -31,15 +33,15 @@ export function DeviceDetailPage() {
 
   const fetchDevice = useCallback(async () => {
     try {
-      const [deviceRes, readingsRes] = await Promise.all([
-        apiGet(devicePath(deviceId)),
-        apiGet(deviceReadingsPath(deviceId)),
+      const [deviceRes, readingsRes] = await Promise.allSettled([
+        deviceService.getById(deviceId),
+        usageService.getDeviceReadings(deviceId),
       ]);
-      if (deviceRes.data?.success) {
-        setDevice({ ...deviceRes.data.data, deviceId });
+      if (deviceRes.status === 'fulfilled' && deviceRes.value.data?.success) {
+        setDevice({ ...deviceRes.value.data.data, deviceId });
       }
-      if (readingsRes.data?.success) {
-        const list = extractList(readingsRes.data.data);
+      if (readingsRes.status === 'fulfilled' && readingsRes.value.data?.success) {
+        const list = extractList(readingsRes.value.data.data);
         setReadings(list.map((r) => ({
           time: r.timestamp ? dayjs(r.timestamp).format('HH:mm') : '',
           flow: r.flowRate || r.flow || 0,
@@ -59,26 +61,25 @@ export function DeviceDetailPage() {
     });
     return () => {
       unsubscribeRealtime(`devices/${deviceId}`);
-      if (unsubscribe) unsubscribe();
     };
   }, [deviceId, fetchDevice]);
 
   const sendCommand = async (action) => {
     setCommandLoading(true);
     try {
-      const commandPaths = {
-        OPEN: deviceOpenValvePath(deviceId),
-        CLOSE: deviceCloseValvePath(deviceId),
-        RESET_ALERT: deviceResetAlertPath(deviceId),
-        START_SIMULATION: deviceStartSimPath(deviceId),
-        STOP_SIMULATION: deviceStopSimPath(deviceId),
+      const commandMap = {
+        OPEN: () => deviceService.openValve(deviceId),
+        CLOSE: () => deviceService.closeValve(deviceId),
+        RESET_ALERT: () => deviceService.resetAlert(deviceId),
+        START_SIMULATION: () => deviceService.startSimulation(deviceId),
+        STOP_SIMULATION: () => deviceService.stopSimulation(deviceId),
       };
-      const url = commandPaths[action];
-      if (!url) {
+      const fn = commandMap[action];
+      if (!fn) {
         toast.error(`Unknown command: ${action}`);
         return;
       }
-      const { data } = await apiPost(url);
+      const { data } = await fn();
       if (data?.success) {
         toast.success(`Command "${action}" sent`);
         fetchDevice();
@@ -92,7 +93,7 @@ export function DeviceDetailPage() {
     }
   };
 
-  if (loading) return <PageHeader title="Loading device..." />;
+  if (loading) return <LoadingScreen />;
   if (!device) return <PageHeader title="Device not found" />;
 
   const telemetry = device.telemetry || {};
@@ -100,7 +101,7 @@ export function DeviceDetailPage() {
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-        <IconButton onClick={() => navigate('/devices')}><ArrowBack /></IconButton>
+        <IconButton onClick={() => navigate(`${basePath}/devices`)}><ArrowBack /></IconButton>
         <Box sx={{ flex: 1 }}>
           <Typography variant="h4" sx={{ fontWeight: 700 }}>{device.deviceName}</Typography>
           <Typography variant="body2" color="text.secondary">

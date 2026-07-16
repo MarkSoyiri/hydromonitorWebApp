@@ -5,11 +5,10 @@ import {
   TextField, Typography, IconButton, Chip, Tooltip,
 } from '@mui/material';
 import {
-  Add, PowerSettingsNew, SignalCellularAlt, BatteryStd, Router,
+  Add, SignalCellularAlt,
 } from '@mui/icons-material';
 import { PageHeader, DataTable, StatusChip, ConfirmDialog } from '@/components/common';
-import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api';
-import { ENDPOINTS, devicePath } from '@/constants';
+import { deviceService, buildingService } from '@/services';
 import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
@@ -51,6 +50,7 @@ const columns = [
 export function DevicesPage() {
   const navigate = useNavigate();
   const { isSuperAdmin } = useAuth();
+  const basePath = isSuperAdmin ? '/super-admin' : '/admin';
   const [devices, setDevices] = useState([]);
   const [buildings, setBuildings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -62,15 +62,15 @@ export function DevicesPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [dRes, bRes] = await Promise.all([
-        apiGet(ENDPOINTS.DEVICES),
-        apiGet(ENDPOINTS.BUILDINGS),
+      const [dRes, bRes] = await Promise.allSettled([
+        deviceService.getAll(),
+        buildingService.getAll(),
       ]);
-      if (dRes.data?.success) {
-        setDevices(extractList(dRes.data.data));
+      if (dRes.status === 'fulfilled' && dRes.value.data?.success) {
+        setDevices(extractList(dRes.value.data.data));
       }
-      if (bRes.data?.success) {
-        setBuildings(extractList(bRes.data.data));
+      if (bRes.status === 'fulfilled' && bRes.value.data?.success) {
+        setBuildings(extractList(bRes.value.data.data));
       }
     } catch {
       toast.error('Failed to load devices');
@@ -95,10 +95,10 @@ export function DevicesPage() {
     setSaving(true);
     try {
       if (editing) {
-        await apiPut(devicePath(editing.deviceId), form);
+        await deviceService.update(editing.deviceId, form);
         toast.success('Device updated');
       } else {
-        await apiPost(ENDPOINTS.DEVICES, form);
+        await deviceService.create(form);
         toast.success('Device created');
       }
       setDialogOpen(false);
@@ -113,7 +113,7 @@ export function DevicesPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await apiDelete(devicePath(deleteTarget.deviceId));
+      await deviceService.delete(deleteTarget.deviceId);
       toast.success('Device deleted');
       setDeleteTarget(null);
       fetchData();
@@ -130,7 +130,7 @@ export function DevicesPage() {
         columns={columns}
         rows={devices}
         loading={loading}
-        onRowClick={(row) => navigate(`/devices/${row.deviceId}`)}
+        onRowClick={(row) => navigate(`${basePath}/devices/${row.deviceId}`)}
         emptyTitle="No devices registered"
         emptyAction={isSuperAdmin && <Button variant="contained" startIcon={<Add />} onClick={openCreate}>Add Device</Button>}
       />

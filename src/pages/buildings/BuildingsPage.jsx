@@ -119,7 +119,7 @@ export function BuildingsPage() {
         columns={columns}
         rows={buildings}
         loading={loading}
-        onRowClick={(row) => navigate(`/buildings/${row.buildingId}`)}
+        onRowClick={(row) => navigate(`/super-admin/buildings/${row.buildingId}`)}
         emptyTitle="No buildings found"
         emptyDescription="Create your first building to get started."
         emptyAction={isSuperAdmin && (

@@ -6,8 +6,7 @@ import {
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { PageHeader, DataTable, StatusChip, ConfirmDialog } from '@/components/common';
-import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api';
-import { ENDPOINTS, buildPath, roomPath } from '@/constants';
+import { roomService, buildingService } from '@/services';
 import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
@@ -26,6 +25,7 @@ const columns = [
 export function RoomsPage() {
   const navigate = useNavigate();
   const { isSuperAdmin } = useAuth();
+  const basePath = isSuperAdmin ? '/super-admin' : '/admin';
   const [rooms, setRooms] = useState([]);
   const [buildings, setBuildings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,15 +37,15 @@ export function RoomsPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [rRes, bRes] = await Promise.all([
-        apiGet(ENDPOINTS.ROOMS),
-        apiGet(ENDPOINTS.BUILDINGS),
+      const [rRes, bRes] = await Promise.allSettled([
+        roomService.getAll(),
+        buildingService.getAll(),
       ]);
-      if (rRes.data?.success) {
-        setRooms(extractList(rRes.data.data));
+      if (rRes.status === 'fulfilled' && rRes.value.data?.success) {
+        setRooms(extractList(rRes.value.data.data));
       }
-      if (bRes.data?.success) {
-        setBuildings(extractList(bRes.data.data));
+      if (bRes.status === 'fulfilled' && bRes.value.data?.success) {
+        setBuildings(extractList(bRes.value.data.data));
       }
     } catch {
       toast.error('Failed to load rooms');
@@ -76,10 +76,10 @@ export function RoomsPage() {
     setSaving(true);
     try {
       if (editing) {
-        await apiPut(roomPath(editing.roomId), form);
+        await roomService.update(editing.roomId, form);
         toast.success('Room updated');
       } else {
-        await apiPost(ENDPOINTS.ROOMS, form);
+        await roomService.create(form);
         toast.success('Room created');
       }
       setDialogOpen(false);
@@ -94,7 +94,7 @@ export function RoomsPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await apiDelete(roomPath(deleteTarget.roomId));
+      await roomService.delete(deleteTarget.roomId);
       toast.success('Room deleted');
       setDeleteTarget(null);
       fetchData();
@@ -111,7 +111,7 @@ export function RoomsPage() {
         columns={columns}
         rows={rooms}
         loading={loading}
-        onRowClick={(row) => navigate(`/rooms/${row.roomId}`)}
+        onRowClick={(row) => navigate(`${basePath}/rooms/${row.roomId}`)}
         emptyTitle="No rooms found"
         emptyAction={isSuperAdmin && <Button variant="contained" startIcon={<Add />} onClick={openCreate}>Add Room</Button>}
       />

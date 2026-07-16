@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Card, CardContent, Typography, Button, Stack, Avatar, List, ListItem,
-  ListItemAvatar, ListItemText, Chip, Divider,
+  Box, Card, CardContent, Typography, Button, Stack, Avatar,
+  Chip,
   Dialog, DialogTitle, DialogContent, DialogActions, TextField,
   IconButton, Tooltip,
 } from '@mui/material';
@@ -94,41 +94,45 @@ export function AdminManagementPage() {
       </Box>
 
       <Card>
-        <CardContent>
+        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
           <Typography variant="h6" sx={{ mb: 2 }}>Administrators</Typography>
-          <List disablePadding>
-            {admins.map((admin, i) => (
-              <Box key={admin.uid || admin.id}>
-                <ListItem sx={{ px: 0 }}>
-                  <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: admin.role === 'SUPER_ADMIN' ? 'error.main' : 'primary.main' }}>
-                      <Shield />
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={<Typography variant="subtitle2">{admin.fullName || admin.name}</Typography>}
-                    secondary={admin.email}
-                  />
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Chip label={admin.role} size="small"
-                      color={admin.role === 'SUPER_ADMIN' ? 'error' : 'primary'} variant="outlined" />
-                    <StatusChip status={admin.status || 'ACTIVE'} />
-                    <Tooltip title="Edit">
-                      <IconButton size="small" onClick={() => openEdit(admin)}>
-                        <Edit fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete">
-                      <IconButton size="small" color="error" onClick={() => setDeleteTarget(admin)}>
-                        <Delete fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </Stack>
-                </ListItem>
-                {i < admins.length - 1 && <Divider />}
+          <Stack spacing={2}>
+            {admins.map((admin) => (
+              <Box key={admin.uid || admin.id} sx={{
+                p: 2, borderRadius: 2, border: 1, borderColor: 'divider',
+              }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+                  <Avatar sx={{ bgcolor: admin.role === 'SUPER_ADMIN' ? 'error.main' : 'primary.main' }}>
+                    <Shield />
+                  </Avatar>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                      {admin.fullName || admin.name}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {admin.email}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5, flexWrap: 'wrap' }}>
+                  <Chip label={admin.role} size="small"
+                    color={admin.role === 'SUPER_ADMIN' ? 'error' : 'primary'} variant="outlined" />
+                  <StatusChip status={admin.status || 'ACTIVE'} />
+                  <Box sx={{ flex: 1 }} />
+                  <Tooltip title="Edit">
+                    <IconButton size="small" onClick={() => openEdit(admin)}>
+                      <Edit fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Delete">
+                    <IconButton size="small" color="error" onClick={() => setDeleteTarget(admin)}>
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
               </Box>
             ))}
-          </List>
+          </Stack>
         </CardContent>
       </Card>
 

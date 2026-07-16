@@ -363,7 +363,7 @@ export function SuperAdminLayout() {
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <SuperAdminSidebar
-        open={effectiveOpen}
+        open={isMobile ? sidebarOpen : effectiveOpen}
         onClose={() => setSidebarOpen(false)}
         isMobile={isMobile}
       />

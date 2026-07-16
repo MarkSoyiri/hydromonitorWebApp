@@ -323,7 +323,7 @@ export function AdminLayout() {
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <AdminSidebar
-        open={effectiveOpen}
+        open={isMobile ? sidebarOpen : effectiveOpen}
         onClose={() => setSidebarOpen(false)}
         isMobile={isMobile}
       />
@@ -335,7 +335,7 @@ export function AdminLayout() {
         transition: 'width 0.25s ease',
         minWidth: 0,
       }}>
-        <AdminTopbar />
+        <AdminTopbar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
         <Box
           component="main"
           sx={{

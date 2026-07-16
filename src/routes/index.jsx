@@ -12,6 +12,7 @@ const Lazy = (Component) => (props) => (
   </Suspense>
 );
 
+const LandingPage = Lazy(lazy(() => import('@/pages/landing/LandingPage').then((m) => ({ default: m.LandingPage }))));
 const LoginPage = Lazy(lazy(() => import('@/pages/auth/LoginPage').then((m) => ({ default: m.LoginPage }))));
 const ForgotPasswordPage = Lazy(lazy(() => import('@/pages/auth/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage }))));
 
@@ -46,6 +47,10 @@ const NotFoundPage = Lazy(lazy(() => import('@/pages/errors/NotFoundPage').then(
 
 export const router = createBrowserRouter([
   {
+    path: '/',
+    element: <LandingPage />,
+  },
+  {
     path: '/login',
     element: <PublicRoute><LoginPage /></PublicRoute>,
   },
@@ -54,18 +59,18 @@ export const router = createBrowserRouter([
     element: <PublicRoute><ForgotPasswordPage /></PublicRoute>,
   },
   {
-    path: '/',
+    path: '/app',
     element: <ProtectedRoute><TenantLayout /></ProtectedRoute>,
     children: [
       { index: true, element: <Navigate to="/app/dashboard" replace /> },
-      { path: 'app/dashboard', element: <TenantDashboardPage /> },
-      { path: 'app/usage', element: <TenantRoute><TenantUsagePage /></TenantRoute> },
-      { path: 'app/bills', element: <TenantRoute><TenantBillsPage /></TenantRoute> },
-      { path: 'app/payments', element: <TenantRoute><TenantPaymentsPage /></TenantRoute> },
-      { path: 'app/invoices', element: <TenantRoute><TenantInvoicesPage /></TenantRoute> },
-      { path: 'app/alerts', element: <TenantRoute><TenantAlertsPage /></TenantRoute> },
-      { path: 'app/support', element: <TenantRoute><ContactSupportPage /></TenantRoute> },
-      { path: 'app/profile', element: <ProfilePage /> },
+      { path: 'dashboard', element: <TenantDashboardPage /> },
+      { path: 'usage', element: <TenantRoute><TenantUsagePage /></TenantRoute> },
+      { path: 'bills', element: <TenantRoute><TenantBillsPage /></TenantRoute> },
+      { path: 'payments', element: <TenantRoute><TenantPaymentsPage /></TenantRoute> },
+      { path: 'invoices', element: <TenantRoute><TenantInvoicesPage /></TenantRoute> },
+      { path: 'alerts', element: <TenantRoute><TenantAlertsPage /></TenantRoute> },
+      { path: 'support', element: <TenantRoute><ContactSupportPage /></TenantRoute> },
+      { path: 'profile', element: <ProfilePage /> },
     ],
   },
   {

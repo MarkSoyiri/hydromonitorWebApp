@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Card, CardContent, Typography, Button, Avatar, List,
-  Chip,
+  Box, Card, CardContent, Typography, Button, Stack, Avatar, List, ListItem,
+  ListItemAvatar, ListItemText, Chip, Divider,
   Dialog, DialogTitle, DialogContent, DialogActions, TextField,
   IconButton, Tooltip,
 } from '@mui/material';
@@ -94,37 +94,25 @@ export function AdminManagementPage() {
       </Box>
 
       <Card>
-        <CardContent sx={{ p: { xs: 1.5, sm: 3 } }}>
+        <CardContent>
           <Typography variant="h6" sx={{ mb: 2 }}>Administrators</Typography>
           <List disablePadding>
             {admins.map((admin, i) => (
               <Box key={admin.uid || admin.id}>
-                <Box sx={{
-                  py: 2,
-                  borderBottom: i < admins.length - 1 ? 1 : 0,
-                  borderColor: 'divider',
-                }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
-                    <Avatar sx={{
-                      bgcolor: admin.role === 'SUPER_ADMIN' ? 'error.main' : 'primary.main',
-                      width: 42, height: 42,
-                    }}>
+                <ListItem sx={{ px: 0 }}>
+                  <ListItemAvatar>
+                    <Avatar sx={{ bgcolor: admin.role === 'SUPER_ADMIN' ? 'error.main' : 'primary.main' }}>
                       <Shield />
                     </Avatar>
-                    <Box sx={{ minWidth: 0, flex: 1 }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }} noWrap>
-                        {admin.fullName || admin.name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>
-                        {admin.email}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', pl: 0 }}>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={<Typography variant="subtitle2">{admin.fullName || admin.name}</Typography>}
+                    secondary={admin.email}
+                  />
+                  <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'wrap', gap: 0.5 }}>
                     <Chip label={admin.role} size="small"
                       color={admin.role === 'SUPER_ADMIN' ? 'error' : 'primary'} variant="outlined" />
                     <StatusChip status={admin.status || 'ACTIVE'} />
-                    <Box sx={{ flex: 1 }} />
                     <Tooltip title="Edit">
                       <IconButton size="small" onClick={() => openEdit(admin)}>
                         <Edit fontSize="small" />
@@ -135,8 +123,9 @@ export function AdminManagementPage() {
                         <Delete fontSize="small" />
                       </IconButton>
                     </Tooltip>
-                  </Box>
-                </Box>
+                  </Stack>
+                </ListItem>
+                {i < admins.length - 1 && <Divider />}
               </Box>
             ))}
           </List>

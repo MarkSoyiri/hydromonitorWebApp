@@ -238,7 +238,7 @@ function SuperAdminSidebar({ open, onClose, isMobile }) {
         ModalProps={{ keepMounted: true }}
         sx={{
           '& .MuiDrawer-paper': {
-            width: SIDEBAR_WIDTH,
+            width: SIDEBAR_WIDTH * 0.85,
             background: isDark ? '#070F1A' : '#0F1923',
             borderRight: '1px solid rgba(255,255,255,0.04)',
           },

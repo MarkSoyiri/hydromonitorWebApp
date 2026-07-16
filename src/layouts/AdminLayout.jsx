@@ -198,7 +198,7 @@ function AdminSidebar({ open, onClose, isMobile }) {
         ModalProps={{ keepMounted: true }}
         sx={{
           '& .MuiDrawer-paper': {
-            width: SIDEBAR_WIDTH,
+            width: SIDEBAR_WIDTH * 0.85,
             background: isDark ? '#0D1B2A' : '#1A202C',
             borderRight: 'none',
           },

@@ -29,7 +29,7 @@ const adminNavItems = [
 
 const SIDEBAR_WIDTH = 260;
 
-function AdminSidebar({ open, onToggle }) {
+function AdminSidebar({ open, onClose, isMobile }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { profile } = useAuth();
@@ -39,6 +39,175 @@ function AdminSidebar({ open, onToggle }) {
     if (path === '/admin/dashboard') return location.pathname === '/admin/dashboard';
     return location.pathname.startsWith(path);
   };
+
+  const handleNav = (path) => {
+    navigate(path);
+    if (isMobile && onClose) onClose();
+  };
+
+  const renderNavItems = (expanded) => adminNavItems.map((item) => {
+    const active = isActive(item.path);
+    return (
+      <ListItemButton
+        key={item.path}
+        selected={active}
+        onClick={() => handleNav(item.path)}
+        sx={{
+          borderRadius: 1.5,
+          mb: 0.3,
+          minHeight: 44,
+          justifyContent: expanded ? 'initial' : 'center',
+          px: expanded ? 1.5 : 0.5,
+          mx: expanded ? 0 : 0.5,
+          '&.Mui-selected': {
+            bgcolor: 'rgba(47,128,237,0.15)',
+            '&:hover': { bgcolor: 'rgba(47,128,237,0.2)' },
+          },
+        }}
+      >
+        <ListItemIcon sx={{
+          minWidth: 0,
+          mr: expanded ? 2 : 'auto',
+          justifyContent: 'center',
+          color: active ? '#5FA4FF' : 'rgba(255,255,255,0.5)',
+        }}>
+          {item.icon}
+        </ListItemIcon>
+        {expanded && (
+          <ListItemText
+            primary={item.label}
+            sx={{
+              '& .MuiListItemText-primary': {
+                fontSize: '0.85rem',
+                fontWeight: active ? 600 : 400,
+                color: active ? '#fff' : 'rgba(255,255,255,0.7)',
+              },
+            }}
+          />
+        )}
+      </ListItemButton>
+    );
+  });
+
+  const renderProfileItem = (expanded) => (
+    <ListItemButton
+      selected={location.pathname === '/admin/profile'}
+      onClick={() => handleNav('/admin/profile')}
+      sx={{
+        borderRadius: 1.5,
+        minHeight: 44,
+        justifyContent: expanded ? 'initial' : 'center',
+        px: expanded ? 1.5 : 0.5,
+        mx: expanded ? 0 : 0.5,
+      }}
+    >
+      <ListItemIcon sx={{
+        minWidth: 0, mr: expanded ? 2 : 'auto', justifyContent: 'center',
+        color: 'rgba(255,255,255,0.5)',
+      }}>
+        <Person />
+      </ListItemIcon>
+      {expanded && (
+        <ListItemText primary="Profile" sx={{
+          '& .MuiListItemText-primary': { fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)' },
+        }} />
+      )}
+    </ListItemButton>
+  );
+
+  const renderHeader = (expanded, showToggle, onToggle) => (
+    <Box sx={{
+      display: 'flex', alignItems: 'center',
+      p: expanded ? 2.5 : 1.5, minHeight: 72,
+      justifyContent: expanded ? 'space-between' : 'center',
+    }}>
+      {expanded ? (
+        <Box onClick={() => handleNav('/admin/dashboard')} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer' }}>
+          <Box sx={{
+            width: 36, height: 36, borderRadius: 1.5,
+            background: 'linear-gradient(135deg, #2F80ED 0%, #00B4D8 100%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <WaterDrop sx={{ color: '#fff', fontSize: 22 }} />
+          </Box>
+          <Box>
+            <Typography sx={{ fontWeight: 700, fontSize: '0.95rem', color: '#fff', lineHeight: 1.2 }}>
+              HydroMonitor
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.6rem' }}>
+              Admin Panel
+            </Typography>
+          </Box>
+        </Box>
+      ) : (
+        <Box onClick={() => handleNav('/admin/dashboard')} sx={{ cursor: 'pointer' }}>
+          <Box sx={{
+            width: 36, height: 36, borderRadius: 1.5,
+            background: 'linear-gradient(135deg, #2F80ED 0%, #00B4D8 100%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <WaterDrop sx={{ color: '#fff', fontSize: 22 }} />
+          </Box>
+        </Box>
+      )}
+      {showToggle && (
+        <IconButton onClick={onToggle} size="small" sx={{ color: 'rgba(255,255,255,0.5)' }}>
+          {expanded ? <ChevronLeft fontSize="small" /> : <MenuIcon fontSize="small" />}
+        </IconButton>
+      )}
+    </Box>
+  );
+
+  const sidebarBody = (expanded, showToggle, onToggle) => (
+    <>
+      {renderHeader(expanded, showToggle, onToggle)}
+      <Divider sx={{ mx: 2, borderColor: 'rgba(255,255,255,0.06)' }} />
+      <List sx={{ flex: 1, py: 1.5, px: expanded ? 1.5 : 0.5 }}>
+        {renderNavItems(expanded)}
+      </List>
+      <Divider sx={{ mx: 2, borderColor: 'rgba(255,255,255,0.06)' }} />
+      <List sx={{ py: 1.5, px: expanded ? 1.5 : 0.5 }}>
+        {renderProfileItem(expanded)}
+      </List>
+      {expanded && profile && (
+        <Box sx={{
+          p: 2, mx: 1.5, mb: 2, borderRadius: 1.5,
+          background: 'rgba(47,128,237,0.1)',
+          border: '1px solid rgba(47,128,237,0.15)',
+        }}>
+          <Chip
+            label={ROLE_LABELS[profile?.role] || 'Admin'}
+            size="small"
+            color={ROLE_COLORS[profile?.role] || 'primary'}
+            sx={{ height: 20, '& .MuiChip-label': { fontSize: '0.65rem' }, mb: 0.3 }}
+          />
+          <Typography variant="body2" sx={{ color: '#fff', fontWeight: 600, mt: 0.3 }}>
+            {profile?.fullName || 'Admin'}
+          </Typography>
+        </Box>
+      )}
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer
+        variant="temporary"
+        open={open}
+        onClose={onClose}
+        ModalProps={{ keepMounted: true }}
+        sx={{
+          '& .MuiDrawer-paper': {
+            width: SIDEBAR_WIDTH,
+            background: isDark ? '#0D1B2A' : '#1A202C',
+            borderRight: 'none',
+          },
+        }}
+      >
+        {sidebarBody(true, false, null)}
+      </Drawer>
+    );
+  }
 
   return (
     <Drawer
@@ -58,134 +227,7 @@ function AdminSidebar({ open, onToggle }) {
         },
       }}
     >
-      <Box sx={{
-        display: 'flex', alignItems: 'center',
-        p: open ? 2.5 : 1.5, minHeight: 72,
-        justifyContent: open ? 'space-between' : 'center',
-      }}>
-        {open && (
-          <Box onClick={() => navigate('/admin/dashboard')} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer' }}>
-            <Box sx={{
-              width: 36, height: 36, borderRadius: 1.5,
-              background: 'linear-gradient(135deg, #2F80ED 0%, #00B4D8 100%)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <WaterDrop sx={{ color: '#fff', fontSize: 22 }} />
-            </Box>
-            <Box>
-              <Typography sx={{ fontWeight: 700, fontSize: '0.95rem', color: '#fff', lineHeight: 1.2 }}>
-                HydroMonitor
-              </Typography>
-              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.6rem' }}>
-                Admin Panel
-              </Typography>
-            </Box>
-          </Box>
-        )}
-        {open ? (
-          <IconButton onClick={onToggle} size="small" sx={{ color: 'rgba(255,255,255,0.5)' }}>
-            <ChevronLeft fontSize="small" />
-          </IconButton>
-        ) : (
-          <IconButton onClick={onToggle} size="small" sx={{ color: 'rgba(255,255,255,0.5)' }}>
-            <MenuIcon fontSize="small" />
-          </IconButton>
-        )}
-      </Box>
-
-      <Divider sx={{ mx: 2, borderColor: 'rgba(255,255,255,0.06)' }} />
-
-      <List sx={{ flex: 1, py: 1.5, px: open ? 1.5 : 0.5 }}>
-        {adminNavItems.map((item) => {
-          const active = isActive(item.path);
-          return (
-            <ListItemButton
-              key={item.path}
-              selected={active}
-              onClick={() => navigate(item.path)}
-              sx={{
-                borderRadius: 1.5,
-                mb: 0.3,
-                minHeight: 44,
-                justifyContent: open ? 'initial' : 'center',
-                px: open ? 1.5 : 0.5,
-                mx: open ? 0 : 0.5,
-                '&.Mui-selected': {
-                  bgcolor: 'rgba(47,128,237,0.15)',
-                  '&:hover': { bgcolor: 'rgba(47,128,237,0.2)' },
-                },
-              }}
-            >
-              <ListItemIcon sx={{
-                minWidth: 0,
-                mr: open ? 2 : 'auto',
-                justifyContent: 'center',
-                color: active ? '#5FA4FF' : 'rgba(255,255,255,0.5)',
-              }}>
-                {item.icon}
-              </ListItemIcon>
-              {open && (
-                <ListItemText
-                  primary={item.label}
-                  sx={{
-                    '& .MuiListItemText-primary': {
-                      fontSize: '0.85rem',
-                      fontWeight: active ? 600 : 400,
-                      color: active ? '#fff' : 'rgba(255,255,255,0.7)',
-                    },
-                  }}
-                />
-              )}
-            </ListItemButton>
-          );
-        })}
-      </List>
-
-      <Divider sx={{ mx: 2, borderColor: 'rgba(255,255,255,0.06)' }} />
-
-      <List sx={{ py: 1.5, px: open ? 1.5 : 0.5 }}>
-        <ListItemButton
-          selected={location.pathname === '/admin/profile'}
-          onClick={() => navigate('/admin/profile')}
-          sx={{
-            borderRadius: 1.5,
-            minHeight: 44,
-            justifyContent: open ? 'initial' : 'center',
-            px: open ? 1.5 : 0.5,
-            mx: open ? 0 : 0.5,
-          }}
-        >
-          <ListItemIcon sx={{
-            minWidth: 0, mr: open ? 2 : 'auto', justifyContent: 'center',
-            color: 'rgba(255,255,255,0.5)',
-          }}>
-            <Person />
-          </ListItemIcon>
-          {open && (
-            <ListItemText primary="Profile" sx={{
-              '& .MuiListItemText-primary': { fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)' },
-            }} />
-          )}
-        </ListItemButton>
-      </List>
-
-      {open && profile && (
-        <Box sx={{
-          p: 2, mx: 1.5, mb: 2, borderRadius: 1.5,
-          background: 'rgba(47,128,237,0.1)',
-          border: '1px solid rgba(47,128,237,0.15)',
-        }}>
-          <Chip
-            label={ROLE_LABELS[profile?.role] || 'Admin'}
-            size="small"
-            color={ROLE_COLORS[profile?.role] || 'primary'}
-            sx={{ height: 20, '& .MuiChip-label': { fontSize: '0.65rem' }, mb: 0.3 }}
-          />
-          <Typography variant="body2" sx={{ color: '#fff', fontWeight: 600, mt: 0.3 }}>
-            {profile?.fullName || 'Admin'}
-          </Typography>
-        </Box>
-      )}
+      {sidebarBody(open, true, onClose)}
     </Drawer>
   );
 }
@@ -282,14 +324,16 @@ export function AdminLayout() {
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <AdminSidebar
         open={effectiveOpen}
-        onToggle={() => setSidebarOpen(!sidebarOpen)}
+        onClose={() => setSidebarOpen(false)}
+        isMobile={isMobile}
       />
       <Box sx={{
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        width: `calc(100% - ${effectiveOpen ? 260 : 72}px)`,
+        width: isMobile ? '100%' : `calc(100% - ${effectiveOpen ? 260 : 72}px)`,
         transition: 'width 0.25s ease',
+        minWidth: 0,
       }}>
         <AdminTopbar />
         <Box

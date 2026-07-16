@@ -100,7 +100,7 @@ export function DeviceDetailPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
         <IconButton onClick={() => navigate(`${basePath}/devices`)}><ArrowBack /></IconButton>
         <Box sx={{ flex: 1 }}>
           <Typography variant="h4" sx={{ fontWeight: 700 }}>{device.deviceName}</Typography>

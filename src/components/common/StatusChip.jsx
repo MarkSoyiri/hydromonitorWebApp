@@ -20,6 +20,7 @@ const statusIcons = {
 export function StatusChip({ status, size = 'small' }) {
   const color = STATUS_COLORS[status] || 'default';
   const icon = statusIcons[status] || null;
+  const isActive = status === 'ACTIVE' || status === 'ONLINE' || status === 'OCCUPIED';
 
   return (
     <Chip
@@ -32,6 +33,11 @@ export function StatusChip({ status, size = 'small' }) {
         fontWeight: 600,
         fontSize: '0.75rem',
         '& .MuiChip-icon': { fontSize: 14, ml: 0.5 },
+        ...(isActive && {
+          bgcolor: '#43a047',
+          color: '#fff',
+          '& .MuiChip-icon': { color: '#fff' },
+        }),
       }}
     />
   );

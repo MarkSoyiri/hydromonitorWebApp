@@ -332,8 +332,8 @@ export function TenantDashboardPage() {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                     <Box sx={{
                       width: 12, height: 12, borderRadius: '50%',
-                      bgcolor: deviceOnline ? '#10B981' : '#EF4444',
-                      boxShadow: deviceOnline ? '0 0 8px rgba(16,185,129,0.5)' : 'none',
+                      bgcolor: deviceOnline ? '#43a047' : '#EF4444',
+                      boxShadow: deviceOnline ? '0 0 8px rgba(67,160,71,0.6)' : 'none',
                     }} />
                     <Box>
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>
@@ -506,7 +506,8 @@ export function TenantDashboardPage() {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
                       <Box sx={{
                         width: 10, height: 10, borderRadius: '50%',
-                        bgcolor: deviceOnline ? '#10B981' : '#EF4444',
+                        bgcolor: deviceOnline ? '#43a047' : '#EF4444',
+                        boxShadow: deviceOnline ? '0 0 8px rgba(67,160,71,0.6)' : 'none',
                       }} />
                       <Typography variant="body2" sx={{ fontWeight: 600, color: deviceOnline ? 'success.main' : 'error.main' }}>
                         {deviceOnline ? 'Online' : 'Offline'}

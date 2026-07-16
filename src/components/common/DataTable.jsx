@@ -23,7 +23,7 @@ export function DataTable({
 
   if (loading && displayRows.length === 0) {
     return (
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
         <LinearProgress />
         <Table>
           <TableHead>
@@ -53,7 +53,7 @@ export function DataTable({
 
   if (displayRows.length === 0) {
     return (
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
         <EmptyState
           title={emptyTitle || 'No data found'}
           description={emptyDescription}
@@ -64,7 +64,7 @@ export function DataTable({
   }
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
       {loading && <LinearProgress />}
       <Table stickyHeader={stickyHeader}>
         <TableHead>

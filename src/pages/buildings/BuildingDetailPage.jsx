@@ -56,7 +56,7 @@ const deviceColumns = [
     field: 'online', label: 'Online', width: 90, align: 'center',
     render: (d) => (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
-        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: d.online ? 'success.main' : 'grey.400' }} />
+        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: d.online ? '#43a047' : 'grey.400', boxShadow: d.online ? '0 0 6px rgba(67,160,71,0.6)' : 'none' }} />
         <Typography variant="caption">{d.online ? 'Yes' : 'No'}</Typography>
       </Box>
     ),
@@ -273,7 +273,7 @@ export function BuildingDetailPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
         <IconButton onClick={() => navigate('/super-admin/buildings')}><ArrowBack /></IconButton>
         <Box sx={{ flex: 1 }}>
           <Typography variant="h4" sx={{ fontWeight: 700 }}>{building.name}</Typography>

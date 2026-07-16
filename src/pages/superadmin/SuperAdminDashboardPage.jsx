@@ -7,7 +7,7 @@ import {
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '@/contexts/AuthContext';
-import { dashboardService, buildingService, deviceService, tenantService, roomService } from '@/services';
+import { dashboardService, buildingService, deviceService, tenantService, roomService, analyticsService } from '@/services';
 import { extractList } from '@/utils/response';
 
 const fallbackMonthlyRevenue = [
@@ -45,18 +45,20 @@ export function SuperAdminDashboardPage() {
   const [devices, setDevices] = useState([]);
   const [tenants, setTenants] = useState([]);
   const [stats, setStats] = useState(null);
+  const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       try {
-        const [buildingsRes, roomsRes, devicesRes, tenantsRes, statsRes] = await Promise.allSettled([
+        const [buildingsRes, roomsRes, devicesRes, tenantsRes, statsRes, analyticsRes] = await Promise.allSettled([
           buildingService.getAll(),
           roomService.getAll(),
           deviceService.getAll(),
           tenantService.getAll(),
           dashboardService.getStats(),
+          analyticsService.getSystem(),
         ]);
         if (cancelled) return;
         if (buildingsRes.value?.data?.success) setBuildings(extractList(buildingsRes.value.data.data));
@@ -64,6 +66,7 @@ export function SuperAdminDashboardPage() {
         if (devicesRes.value?.data?.success) setDevices(extractList(devicesRes.value.data.data));
         if (tenantsRes.value?.data?.success) setTenants(extractList(tenantsRes.value.data.data));
         if (statsRes.value?.data?.success) setStats(statsRes.value.data.data);
+        if (analyticsRes.value?.data?.success) setAnalytics(analyticsRes.value.data.data);
       } catch {
         // Use defaults
       } finally {
@@ -144,7 +147,7 @@ export function SuperAdminDashboardPage() {
               <CardContent sx={{ p: 2.5 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Monthly Revenue (GHS)</Typography>
                 <ResponsiveContainer width="100%" height={300}>
-                   <AreaChart data={fallbackMonthlyRevenue}>
+                   <AreaChart data={analytics?.monthlyTrend || fallbackMonthlyRevenue}>
                     <defs><linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#2F80ED" stopOpacity={0.3} /><stop offset="95%" stopColor="#2F80ED" stopOpacity={0} /></linearGradient></defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                     <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#A0AEC0" />

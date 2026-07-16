@@ -15,6 +15,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { PageHeader, StatCard } from '@/components/common';
 import { apiGet } from '@/services/api';
 import { ENDPOINTS } from '@/constants';
+import { analyticsService } from '@/services';
+import { extractList } from '@/utils/response';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { motion } from 'framer-motion';
 
@@ -75,13 +77,20 @@ export function DashboardPage() {
   const { profile, isSuperAdmin, isAdmin, isTenant } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
+  const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const fetchDashboard = useCallback(async () => {
     try {
-      const { data } = await apiGet(ENDPOINTS.DASHBOARD);
-      if (data?.success) {
-        setStats(data.data);
+      const [dashRes, analyticsRes] = await Promise.allSettled([
+        apiGet(ENDPOINTS.DASHBOARD),
+        analyticsService.getSystem(),
+      ]);
+      if (dashRes.status === 'fulfilled' && dashRes.value.data?.success) {
+        setStats(dashRes.value.data.data);
+      }
+      if (analyticsRes.status === 'fulfilled' && analyticsRes.value.data?.success) {
+        setAnalytics(analyticsRes.value.data.data);
       }
     } catch {
       // Use defaults on error
@@ -183,7 +192,7 @@ export function DashboardPage() {
               <CardContent>
                 <Typography variant="h6" sx={{ mb: 2 }}>Weekly Water Consumption</Typography>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={fallbackWeeklyData}>
+                  <BarChart data={analytics?.weeklyUsage || fallbackWeeklyData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                     <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
                     <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
@@ -235,7 +244,7 @@ export function DashboardPage() {
               <CardContent>
                 <Typography variant="h6" sx={{ mb: 2 }}>Yearly Consumption Trend</Typography>
                 <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={fallbackYearlyData}>
+                  <AreaChart data={analytics?.monthlyTrend || fallbackYearlyData}>
                     <defs>
                       <linearGradient id="colorUsage" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#2F80ED" stopOpacity={0.3} />

@@ -1,40 +1,60 @@
-import { Box, Card, CardContent, Typography, Chip, List, ListItem, ListItemText, ListItemIcon, Button, TextField, InputAdornment } from '@mui/material';
+import { useState, useEffect, useCallback } from 'react';
+import { Box, Card, CardContent, Typography, Chip, List, ListItem, ListItemText, ListItemIcon, TextField, InputAdornment, Skeleton } from '@mui/material';
 import { ListAlt, Search, Info, Warning, Error as ErrorIcon, CheckCircle } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
-
-const logEntries = [
-  { time: '09 Jul 2026 14:32:18', level: 'info', message: 'User admin@hydromonitor.com logged in', source: 'Auth' },
-  { time: '09 Jul 2026 14:30:05', level: 'warn', message: 'Device WM-0042 heartbeat delay: 3.2s', source: 'Device' },
-  { time: '09 Jul 2026 14:28:44', level: 'info', message: 'Tenant John Doe viewed dashboard', source: 'App' },
-  { time: '09 Jul 2026 14:25:00', level: 'error', message: 'Device WM-0012 connection timeout', source: 'Device' },
-  { time: '09 Jul 2026 14:20:12', level: 'info', message: 'Monthly bill generated for Building A', source: 'Billing' },
-  { time: '09 Jul 2026 14:15:33', level: 'warn', message: 'High water usage alert: Room 204 (510L/day)', source: 'Alert' },
-  { time: '09 Jul 2026 14:10:00', level: 'info', message: 'System health check completed: OK', source: 'System' },
-  { time: '09 Jul 2026 14:00:00', level: 'info', message: 'Database backup completed successfully', source: 'System' },
-  { time: '09 Jul 2026 13:45:22', level: 'info', message: 'User admin2@hydromonitor.com created tenant', source: 'Admin' },
-  { time: '09 Jul 2026 13:30:00', level: 'warn', message: 'Memory usage at 72% on app-server-01', source: 'System' },
-];
+import { alertService } from '@/services';
+import { extractList } from '@/utils/response';
+import dayjs from 'dayjs';
 
 const levelIcons = {
-  info: <Info color="primary" />,
-  warn: <Warning color="warning" />,
-  error: <ErrorIcon color="error" />,
+  INFO: <Info color="primary" />,
+  LEAK: <ErrorIcon color="error" />,
+  CRITICAL: <ErrorIcon color="error" />,
+  WARNING: <Warning color="warning" />,
+  RESOLVED: <CheckCircle color="success" />,
 };
 
 const levelColors = {
-  info: 'primary',
-  warn: 'warning',
-  error: 'error',
+  INFO: 'primary',
+  LEAK: 'error',
+  CRITICAL: 'error',
+  WARNING: 'warning',
+  RESOLVED: 'success',
 };
 
 export function LogsPage() {
   const [search, setSearch] = useState('');
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = logEntries.filter((log) =>
+  const fetchLogs = useCallback(async () => {
+    try {
+      const { data } = await alertService.getAll();
+      if (data?.success) {
+        const alerts = extractList(data.data);
+        const logEntries = alerts.map((alert) => ({
+          time: alert.createdAt || alert.timestamp || '',
+          level: alert.type || alert.severity || 'INFO',
+          message: alert.message || `Alert ${alert.alertId || ''}`,
+          source: alert.deviceId ? 'Device' : alert.type === 'LEAK' ? 'Alert' : 'System',
+          status: alert.status || 'PENDING',
+        }));
+        logEntries.sort((a, b) => new Date(b.time) - new Date(a.time));
+        setLogs(logEntries);
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchLogs(); }, [fetchLogs]);
+
+  const filtered = logs.filter((log) =>
     log.message.toLowerCase().includes(search.toLowerCase()) ||
     log.source.toLowerCase().includes(search.toLowerCase()) ||
-    log.level.includes(search.toLowerCase())
+    log.level.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -60,29 +80,54 @@ export function LogsPage() {
 
       <Card sx={{ borderRadius: 2 }}>
         <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-          <List sx={{ p: 0 }}>
-            {filtered.map((log, i) => (
-              <Box key={i}>
-                <ListItem sx={{ px: 0, py: 1 }}>
-                  <ListItemIcon sx={{ minWidth: 36 }}>{levelIcons[log.level]}</ListItemIcon>
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography variant="body2" sx={{ fontWeight: 500, fontFamily: 'monospace' }}>{log.message}</Typography>
-                        <Chip label={log.level} size="small" color={levelColors[log.level]} sx={{ height: 18, fontSize: '0.6rem' }} />
-                      </Box>
-                    }
-                    secondary={
-                      <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
-                        {log.time} · {log.source}
-                      </Typography>
-                    }
-                  />
-                </ListItem>
-                {i < filtered.length - 1 && <Box sx={{ borderBottom: '1px solid', borderColor: 'divider' }} />}
-              </Box>
-            ))}
-          </List>
+          {loading ? (
+            <List sx={{ p: 0 }}>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Box key={i}>
+                  <ListItem sx={{ px: 0, py: 1 }}>
+                    <Skeleton variant="circular" width={24} height={24} sx={{ mr: 1.5 }} />
+                    <Box sx={{ flex: 1 }}>
+                      <Skeleton variant="text" width="70%" />
+                      <Skeleton variant="text" width="40%" />
+                    </Box>
+                  </ListItem>
+                </Box>
+              ))}
+            </List>
+          ) : (
+            <List sx={{ p: 0 }}>
+              {filtered.length === 0 ? (
+                <Box sx={{ py: 4, textAlign: 'center' }}>
+                  <ListAlt sx={{ color: 'text.disabled', fontSize: 40, mb: 1 }} />
+                  <Typography variant="body2" color="text.secondary">
+                    {search ? 'No logs match your search' : 'No system logs available'}
+                  </Typography>
+                </Box>
+              ) : (
+                filtered.map((log, i) => (
+                  <Box key={i}>
+                    <ListItem sx={{ px: 0, py: 1 }}>
+                      <ListItemIcon sx={{ minWidth: 36 }}>{levelIcons[log.level] || <Info color="primary" />}</ListItemIcon>
+                      <ListItemText
+                        primary={
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 500, fontFamily: 'monospace' }}>{log.message}</Typography>
+                            <Chip label={log.level} size="small" color={levelColors[log.level] || 'default'} sx={{ height: 18, fontSize: '0.6rem' }} />
+                          </Box>
+                        }
+                        secondary={
+                          <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+                            {log.time ? dayjs(log.time).format('DD MMM YYYY HH:mm:ss') : '—'} · {log.source}
+                          </Typography>
+                        }
+                      />
+                    </ListItem>
+                    {i < filtered.length - 1 && <Box sx={{ borderBottom: '1px solid', borderColor: 'divider' }} />}
+                  </Box>
+                ))
+              )}
+            </List>
+          )}
         </CardContent>
       </Card>
     </Box>

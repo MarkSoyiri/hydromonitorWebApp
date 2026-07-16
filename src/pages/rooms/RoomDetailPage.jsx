@@ -6,26 +6,41 @@ import {
 import { ArrowBack, WaterDrop, MeetingRoom, DevicesOther, Warning } from '@mui/icons-material';
 import { StatCard, StatusChip } from '@/components/common';
 import { apiGet } from '@/services/api';
-import { ENDPOINTS, roomPath } from '@/constants';
+import { ENDPOINTS, roomPath, deviceReadingsPath } from '@/constants';
+import { extractList } from '@/utils/response';
 import toast from 'react-hot-toast';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-const usageHistory = [
-  { time: '00:00', flow: 0 }, { time: '04:00', flow: 0 }, { time: '08:00', flow: 0 },
-  { time: '12:00', flow: 0 }, { time: '16:00', flow: 0 }, { time: '20:00', flow: 0 },
-];
+import dayjs from 'dayjs';
 
 export function RoomDetailPage() {
   const { roomId } = useParams();
   const navigate = useNavigate();
   const [room, setRoom] = useState(null);
+  const [readings, setReadings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchRoom = useCallback(async () => {
     try {
       const { data } = await apiGet(roomPath(roomId));
       if (data?.success) {
-        setRoom({ ...data.data, roomId });
+        const roomData = { ...data.data, roomId };
+        setRoom(roomData);
+
+        const deviceId = roomData.device?.deviceId;
+        if (deviceId) {
+          try {
+            const { data: readingsData } = await apiGet(deviceReadingsPath(deviceId));
+            if (readingsData?.success) {
+              const list = extractList(readingsData.data);
+              setReadings(list.map((r) => ({
+                time: r.timestamp ? dayjs(r.timestamp).format('HH:mm') : '',
+                flow: r.flowRate || r.flow || r.usage || 0,
+              })));
+            }
+          } catch {
+            // readings fetch failed silently
+          }
+        }
       }
     } catch {
       toast.error('Failed to load room');
@@ -74,15 +89,23 @@ export function RoomDetailPage() {
       <Card>
         <CardContent>
           <Typography variant="h6" sx={{ mb: 2 }}>Flow Rate (Today)</Typography>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={usageHistory}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-              <XAxis dataKey="time" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
-              <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
-              <Tooltip />
-              <Line type="monotone" dataKey="flow" stroke="#2F80ED" strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
+          {readings.length > 0 ? (
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={readings}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                <XAxis dataKey="time" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
+                <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
+                <Tooltip />
+                <Line type="monotone" dataKey="flow" stroke="#2F80ED" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 250 }}>
+              <Typography color="text.secondary">
+                {room.device ? 'No readings data available for this device' : 'No device assigned to this room'}
+              </Typography>
+            </Box>
+          )}
         </CardContent>
       </Card>
     </Box>

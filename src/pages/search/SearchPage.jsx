@@ -1,27 +1,96 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Card, CardContent, Typography, TextField, InputAdornment, List, ListItemButton,
-  ListItemIcon, ListItemText, Chip, Divider,
+  ListItemIcon, ListItemText, Chip, Divider, Skeleton,
 } from '@mui/material';
 import { Search, Business, MeetingRoom, DevicesOther, People, Warning } from '@mui/icons-material';
 import { PageHeader, EmptyState } from '@/components/common';
-
-const searchData = [
-  { type: 'Building', label: 'Building A', path: '/buildings/bld1', icon: <Business color="primary" /> },
-  { type: 'Building', label: 'Building B', path: '/buildings/bld2', icon: <Business color="primary" /> },
-  { type: 'Room', label: 'Room 101', path: '/rooms/rm1', icon: <MeetingRoom color="info" /> },
-  { type: 'Room', label: 'Room 204', path: '/rooms/rm2', icon: <MeetingRoom color="info" /> },
-  { type: 'Device', label: 'WM-001', path: '/devices/dev1', icon: <DevicesOther color="success" /> },
-  { type: 'Device', label: 'WM-002', path: '/devices/dev2', icon: <DevicesOther color="success" /> },
-  { type: 'Tenant', label: 'Mark Soyiri', path: '/tenants/tnt1', icon: <People color="warning" /> },
-  { type: 'Tenant', label: 'Theresa Bangniyel', path: '/tenants/tnt2', icon: <People color="warning" /> },
-  { type: 'Alert', label: 'Leak detected - Room 105', path: '/alerts', icon: <Warning color="error" /> },
-];
+import { buildingService, roomService, deviceService, tenantService, alertService } from '@/services';
+import { extractList } from '@/utils/response';
 
 export function SearchPage() {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
+  const [searchData, setSearchData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchAllData = useCallback(async () => {
+    try {
+      const [buildingsRes, roomsRes, devicesRes, tenantsRes, alertsRes] = await Promise.allSettled([
+        buildingService.getAll(),
+        roomService.getAll(),
+        deviceService.getAll(),
+        tenantService.getAll(),
+        alertService.getAll(),
+      ]);
+
+      const items = [];
+
+      if (buildingsRes.status === 'fulfilled' && buildingsRes.value.data?.success) {
+        extractList(buildingsRes.value.data.data).forEach((b) => {
+          items.push({
+            type: 'Building',
+            label: b.name || 'Building',
+            path: `/buildings/${b.buildingId}`,
+            icon: <Business color="primary" />,
+          });
+        });
+      }
+
+      if (roomsRes.status === 'fulfilled' && roomsRes.value.data?.success) {
+        extractList(roomsRes.value.data.data).forEach((r) => {
+          items.push({
+            type: 'Room',
+            label: `Room ${r.roomNumber || r.roomId}`,
+            path: `/rooms/${r.roomId}`,
+            icon: <MeetingRoom color="info" />,
+          });
+        });
+      }
+
+      if (devicesRes.status === 'fulfilled' && devicesRes.value.data?.success) {
+        extractList(devicesRes.value.data.data).forEach((d) => {
+          items.push({
+            type: 'Device',
+            label: d.deviceName || d.serialNumber || 'Device',
+            path: `/devices/${d.deviceId}`,
+            icon: <DevicesOther color="success" />,
+          });
+        });
+      }
+
+      if (tenantsRes.status === 'fulfilled' && tenantsRes.value.data?.success) {
+        extractList(tenantsRes.value.data.data).forEach((t) => {
+          items.push({
+            type: 'Tenant',
+            label: t.fullName || t.name || 'Tenant',
+            path: `/tenants/${t.tenantId || t.uid || t.id}`,
+            icon: <People color="warning" />,
+          });
+        });
+      }
+
+      if (alertsRes.status === 'fulfilled' && alertsRes.value.data?.success) {
+        extractList(alertsRes.value.data.data).forEach((a) => {
+          items.push({
+            type: 'Alert',
+            label: a.message || `Alert ${a.alertId || ''}`,
+            path: '/alerts',
+            icon: <Warning color="error" />,
+          });
+        });
+      }
+
+      setSearchData(items);
+    } catch {
+      // silently fail
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchAllData(); }, [fetchAllData]);
 
   const filtered = query
     ? searchData.filter(
@@ -53,11 +122,21 @@ export function SearchPage() {
         </CardContent>
       </Card>
 
-      {query && filtered.length === 0 && (
+      {loading && (
+        <Card>
+          <CardContent>
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} variant="text" width="100%" height={48} sx={{ my: 0.5 }} />
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {!loading && query && filtered.length === 0 && (
         <EmptyState title="No results found" description={`No results match "${query}"`} />
       )}
 
-      {filtered.length > 0 && (
+      {!loading && filtered.length > 0 && (
         <Card>
           <List disablePadding>
             {filtered.map((item, i) => (

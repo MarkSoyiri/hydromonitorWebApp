@@ -5,18 +5,13 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { billingService } from '@/services';
-
-const fallbackBills = [
-  { id: 'INV-2026-06', period: '1 - 30 Jun 2026', amount: 128.50, usage: 2340, status: 'Pending', dueDate: '15 Jun 2026', tariff: 0.055 },
-  { id: 'INV-2026-05', period: '1 - 31 May 2026', amount: 142.00, usage: 2580, status: 'Paid', dueDate: '15 May 2026', paidOn: '05 May 2026' },
-  { id: 'INV-2026-04', period: '1 - 30 Apr 2026', amount: 115.80, usage: 2105, status: 'Paid', dueDate: '15 Apr 2026', paidOn: '04 Apr 2026' },
-  { id: 'INV-2026-03', period: '1 - 31 Mar 2026', amount: 98.40, usage: 1790, status: 'Paid', dueDate: '15 Mar 2026', paidOn: '03 Mar 2026' },
-];
+import { extractList } from '@/utils/response';
 
 export function BillsPage() {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const [bills, setBills] = useState([]);
+  const [currentBill, setCurrentBill] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,16 +23,19 @@ export function BillsPage() {
           billingService.getHistory(),
         ]);
         if (!cancelled) {
-          const current = currentRes.status === 'fulfilled' ? currentRes.value?.data?.data : null;
-          const history = historyRes.status === 'fulfilled' ? (historyRes.value?.data?.data || []) : [];
-          const billList = Array.isArray(history) ? history : [];
+          const current = currentRes.status === 'fulfilled' && currentRes.value?.data?.success
+            ? currentRes.value.data.data : null;
+          const history = historyRes.status === 'fulfilled' && historyRes.value?.data?.success
+            ? extractList(historyRes.value.data.data) : [];
           if (current) {
-            billList.unshift(current);
+            setCurrentBill(current);
+            setBills([current, ...history]);
+          } else {
+            setBills(history);
           }
-          setBills(billList.length > 0 ? billList : fallbackBills);
         }
       } catch {
-        if (!cancelled) setBills(fallbackBills);
+        // silently fail
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -46,8 +44,9 @@ export function BillsPage() {
     return () => { cancelled = true; };
   }, []);
 
-  const currentBill = profile?.billing?.currentBill ?? 128.50;
-  const totalPaid = profile?.billing?.totalPaid ?? 356.20;
+  const currentBillAmount = currentBill?.amount ?? profile?.billing?.currentBill ?? 0;
+  const totalPaid = profile?.billing?.totalPaid ?? 0;
+  const outstandingBalance = currentBill?.outstandingBalance ?? profile?.billing?.outstandingBalance ?? 0;
 
   if (loading) {
     return (
@@ -82,7 +81,7 @@ export function BillsPage() {
           <Card sx={{ borderRadius: 3, background: 'linear-gradient(135deg, #2F80ED 0%, #00B4D8 100%)', color: '#fff' }}>
             <CardContent sx={{ p: 2.5 }}>
               <Typography variant="caption" sx={{ opacity: 0.8, fontWeight: 600 }}>CURRENT BILL</Typography>
-              <Typography variant="h3" sx={{ fontWeight: 800, mt: 1 }}>GHS {currentBill.toFixed(2)}</Typography>
+              <Typography variant="h3" sx={{ fontWeight: 800, mt: 1 }}>GHS {currentBillAmount.toFixed(2)}</Typography>
               <Typography variant="caption" sx={{ opacity: 0.8 }}>Current period</Typography>
               <Box sx={{ mt: 2 }}>
                 <Button variant="contained" fullWidth sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }} endIcon={<PaymentIcon />}>
@@ -105,10 +104,10 @@ export function BillsPage() {
           <Card sx={{ borderRadius: 3 }}>
             <CardContent sx={{ p: 2.5 }}>
               <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>OUTSTANDING</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 800, mt: 1, color: (profile?.billing?.outstandingBalance ?? 0) > 0 ? 'error.main' : 'success.main' }}>
-                GHS {(profile?.billing?.outstandingBalance ?? 0).toFixed(2)}
+              <Typography variant="h4" sx={{ fontWeight: 800, mt: 1, color: outstandingBalance > 0 ? 'error.main' : 'success.main' }}>
+                GHS {outstandingBalance.toFixed(2)}
               </Typography>
-              <Typography variant="caption" color="text.secondary">{profile?.billing?.outstandingBalance > 0 ? 'Due for payment' : 'All paid'}</Typography>
+              <Typography variant="caption" color="text.secondary">{outstandingBalance > 0 ? 'Due for payment' : 'All paid'}</Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -120,20 +119,20 @@ export function BillsPage() {
           {bills.length > 0 ? (
             <List sx={{ p: 0 }}>
               {bills.map((bill, i) => (
-                <Box key={bill.id || i}>
+                <Box key={bill.billId || bill.id || i}>
                   <ListItem sx={{ px: 0, py: 1.5 }}>
                     <ListItemIcon sx={{ minWidth: 40 }}>
-                      <Receipt sx={{ color: bill.status === 'Paid' ? 'success.main' : 'warning.main' }} />
+                      <Receipt sx={{ color: bill.status === 'PAID' ? 'success.main' : 'warning.main' }} />
                     </ListItemIcon>
                     <ListItemText
                       primary={
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
                           <Box>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>{bill.id || `Bill #${i + 1}`}</Typography>
-                            <Typography variant="caption" color="text.secondary">{bill.period || bill.date || ''}</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>{bill.billId || bill.id || `Bill #${i + 1}`}</Typography>
+                            <Typography variant="caption" color="text.secondary">{bill.period || bill.billDate || ''}</Typography>
                           </Box>
                           <Box sx={{ textAlign: 'right' }}>
-                            <Typography variant="body2" sx={{ fontWeight: 700 }}>GHS {bill.amount?.toFixed(2) || '0.00'}</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }}>GHS {(bill.amount || bill.totalAmount || 0).toFixed(2)}</Typography>
                             {bill.usage && <Typography variant="caption" color="text.secondary">{bill.usage.toLocaleString()} L used</Typography>}
                           </Box>
                         </Box>
@@ -141,14 +140,14 @@ export function BillsPage() {
                       secondary={
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
                           <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-                            <Chip label={bill.status} size="small" color={bill.status === 'Paid' ? 'success' : 'warning'} sx={{ height: 20, fontSize: '0.6rem' }} />
+                            <Chip label={bill.status || 'PENDING'} size="small" color={bill.status === 'PAID' ? 'success' : 'warning'} sx={{ height: 20, fontSize: '0.6rem' }} />
                             <Typography variant="caption" color="text.secondary">Due: {bill.dueDate || ''}</Typography>
                           </Box>
                           <Box sx={{ display: 'flex', gap: 0.5 }}>
                             <Button size="small" variant="outlined" startIcon={<Download />} sx={{ fontSize: '0.7rem' }}>
                               Invoice
                             </Button>
-                            {bill.status === 'Pending' && (
+                            {bill.status !== 'PAID' && (
                               <Button size="small" variant="contained" startIcon={<PaymentIcon />} sx={{ fontSize: '0.7rem' }}>
                                 Pay
                               </Button>

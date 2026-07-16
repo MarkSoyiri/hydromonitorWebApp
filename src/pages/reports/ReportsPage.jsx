@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box, Grid, Card, CardContent, Typography, Button, Stack, TextField,
-  Select, MenuItem, FormControl, InputLabel,
+  Select, MenuItem, FormControl, InputLabel, Skeleton, Alert,
 } from '@mui/material';
 import { PictureAsPdf, Description, TableChart, Download } from '@mui/icons-material';
 import { PageHeader } from '@/components/common';
+import { analyticsService, dashboardService } from '@/services';
+import { extractList } from '@/utils/response';
 import dayjs from 'dayjs';
 
 const reportTypes = [
@@ -27,10 +29,52 @@ const reportCategories = [
 export function ReportsPage() {
   const [reportType, setReportType] = useState('monthly');
   const [category, setCategory] = useState('buildings');
+  const [analytics, setAnalytics] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchData = useCallback(async () => {
+    try {
+      const [analyticsRes, statsRes] = await Promise.allSettled([
+        analyticsService.getSystem(),
+        dashboardService.getStats(),
+      ]);
+      if (analyticsRes.status === 'fulfilled' && analyticsRes.value.data?.success) {
+        setAnalytics(analyticsRes.value.data.data);
+      }
+      if (statsRes.status === 'fulfilled' && statsRes.value.data?.success) {
+        setStats(statsRes.value.data.data);
+      }
+    } catch (err) {
+      setError(err?.message || 'Failed to load report data');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const totalUsage = stats?.totalUsageToday ?? 0;
+  const totalBuildings = stats?.totalBuildings ?? 0;
+  const totalRooms = stats?.totalRooms ?? 0;
+  const totalDevices = stats?.totalDevices ?? 0;
+  const activeAlerts = stats?.unresolvedAlerts ?? 0;
+
+  const availableReports = [
+    { title: 'Monthly Consumption Report', desc: `Water usage across ${totalBuildings} building(s)`, icon: <TableChart />, color: 'primary', data: analytics?.weeklyUsage },
+    { title: 'Revenue Summary', desc: 'Billing and payment overview', icon: <Description />, color: 'success', data: analytics?.monthlyTrend },
+    { title: 'Device Health Report', desc: `${totalDevices} device(s) monitored`, icon: <PictureAsPdf />, color: 'info', data: analytics?.buildingComparison },
+    { title: 'Leak Analysis', desc: `${activeAlerts} active alert(s)`, icon: <PictureAsPdf />, color: 'error', data: analytics?.leakTrend },
+    { title: 'Tenant Usage Report', desc: 'Individual tenant consumption', icon: <TableChart />, color: 'warning', data: null },
+    { title: 'System Audit Log', desc: 'All administrative actions', icon: <Description />, color: 'text.secondary', data: null },
+  ];
 
   return (
     <Box>
       <PageHeader title="Reports" subtitle="Generate and export system reports" />
+
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
       <Grid container spacing={2.5}>
         <Grid item xs={12} md={4}>
@@ -56,7 +100,7 @@ export function ReportsPage() {
                 </FormControl>
                 <TextField label="Date" type="date" defaultValue={dayjs().format('YYYY-MM-DD')} fullWidth
                   InputLabelProps={{ shrink: true }} />
-                <Button variant="contained" startIcon={<Download />} fullWidth>
+                <Button variant="contained" startIcon={<Download />} fullWidth disabled={loading}>
                   Generate Report
                 </Button>
               </Stack>
@@ -66,28 +110,33 @@ export function ReportsPage() {
 
         <Grid item xs={12} md={8}>
           <Grid container spacing={2}>
-            {[
-
-              { title: 'Monthly Consumption Report', desc: 'Water usage by building', icon: <TableChart />, color: 'primary' },
-              { title: 'Revenue Summary', desc: 'Billing and payment overview', icon: <Description />, color: 'success' },
-              { title: 'Device Health Report', desc: 'Online/offline status, alerts, faults', icon: <PictureAsPdf />, color: 'info' },
-              { title: 'Leak Analysis', desc: 'Leak events by severity and location', icon: <PictureAsPdf />, color: 'error' },
-              { title: 'Tenant Usage Report', desc: 'Individual tenant consumption', icon: <TableChart />, color: 'warning' },
-              { title: 'System Audit Log', desc: 'All administrative actions', icon: <Description />, color: 'text.secondary' },
-            ].map((report, i) => (
-              <Grid item xs={12} sm={6} key={i}>
-                <Card sx={{ cursor: 'pointer', '&:hover': { boxShadow: 4 } }}>
-                  <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Box sx={{ color: `${report.color}.main`, opacity: 0.7 }}>{report.icon}</Box>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="subtitle2">{report.title}</Typography>
-                      <Typography variant="caption" color="text.secondary">{report.desc}</Typography>
-                    </Box>
-                    <Button size="small" startIcon={<Download />}>Export</Button>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
+            {loading ? (
+              [1, 2, 3, 4, 5, 6].map((i) => (
+                <Grid item xs={12} sm={6} key={i}>
+                  <Card>
+                    <CardContent>
+                      <Skeleton variant="text" width="60%" />
+                      <Skeleton variant="text" width="80%" />
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))
+            ) : (
+              availableReports.map((report, i) => (
+                <Grid item xs={12} sm={6} key={i}>
+                  <Card sx={{ cursor: 'pointer', '&:hover': { boxShadow: 4 } }}>
+                    <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Box sx={{ color: `${report.color}.main`, opacity: 0.7 }}>{report.icon}</Box>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="subtitle2">{report.title}</Typography>
+                        <Typography variant="caption" color="text.secondary">{report.desc}</Typography>
+                      </Box>
+                      <Button size="small" startIcon={<Download />}>Export</Button>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))
+            )}
           </Grid>
         </Grid>
       </Grid>

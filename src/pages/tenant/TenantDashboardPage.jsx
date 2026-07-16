@@ -21,39 +21,9 @@ import { Paper as MuiPaper } from '@mui/material';
 import { WaterFlowIndicator } from '@/components/tenant/WaterFlowIndicator';
 import { QuickActions } from '@/components/tenant/QuickActions';
 import { WaterSavingTip } from '@/components/tenant/WaterSavingTip';
-import { billingService } from '@/services';
-
-const fallbackWeeklyData = [
-  { day: 'Mon', usage: 0, lastWeek: 0 },
-  { day: 'Tue', usage: 0, lastWeek: 0 },
-  { day: 'Wed', usage: 0, lastWeek: 0 },
-  { day: 'Thu', usage: 0, lastWeek: 0 },
-  { day: 'Fri', usage: 0, lastWeek: 0 },
-  { day: 'Sat', usage: 0, lastWeek: 0 },
-  { day: 'Sun', usage: 0, lastWeek: 0 },
-];
-
-const fallbackMonthlyData = [
-  { month: 'Jan', usage: 0, lastYear: 0 },
-  { month: 'Feb', usage: 0, lastYear: 0 },
-  { month: 'Mar', usage: 0, lastYear: 0 },
-  { month: 'Apr', usage: 0, lastYear: 0 },
-  { month: 'May', usage: 0, lastYear: 0 },
-  { month: 'Jun', usage: 0, lastYear: 0 },
-];
-
-const fallbackDailyData = [
-  { time: '00:00', usage: 0 }, { time: '02:00', usage: 0 }, { time: '04:00', usage: 0 },
-  { time: '06:00', usage: 0 }, { time: '08:00', usage: 0 }, { time: '10:00', usage: 0 },
-  { time: '12:00', usage: 0 }, { time: '14:00', usage: 0 }, { time: '16:00', usage: 0 },
-  { time: '18:00', usage: 0 }, { time: '20:00', usage: 0 }, { time: '22:00', usage: 0 },
-];
-
-const fallbackPaymentHistory = [];
-
-const fallbackInvoiceHistory = [];
-
-const fallbackNotifications = [];
+import { billingService, usageService } from '@/services';
+import { extractList } from '@/utils/response';
+import dayjs from 'dayjs';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -88,6 +58,7 @@ export function TenantDashboardPage() {
   const { profile, building, room, device, loading: authLoading } = useAuth();
   const [billingHistory, setBillingHistory] = useState([]);
   const [currentBill, setCurrentBill] = useState(null);
+  const [readings, setReadings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const firstName = profile?.fullName?.split(' ')[0] || 'there';
@@ -97,6 +68,54 @@ export function TenantDashboardPage() {
     const interval = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(interval);
   }, []);
+
+  const now = dayjs();
+  const todayStr = now.format('YYYY-MM-DD');
+
+  const todayReadings = readings.filter((r) => {
+    if (!r.timestamp) return false;
+    return dayjs(r.timestamp).format('YYYY-MM-DD') === todayStr;
+  });
+
+  const dailyData = Array.from({ length: 12 }, (_, i) => {
+    const h = i * 2;
+    const hourReadings = todayReadings.filter((r) => dayjs(r.timestamp).hour() === h);
+    const usage = hourReadings.reduce((sum, r) => sum + (r.flowRate || r.flow || r.usage || 0), 0);
+    return { time: `${String(h).padStart(2, '0')}:00`, usage };
+  });
+
+  const weeklyData = Array.from({ length: 7 }, (_, d) => {
+    const dayDate = now.subtract(6 - d, 'day');
+    const dayStr = dayDate.format('YYYY-MM-DD');
+    const lastWeekStr = dayDate.subtract(7, 'day').format('YYYY-MM-DD');
+    const thisWeekReadings = readings.filter((r) => r.timestamp && dayjs(r.timestamp).format('YYYY-MM-DD') === dayStr);
+    const lastWeekReadings = readings.filter((r) => r.timestamp && dayjs(r.timestamp).format('YYYY-MM-DD') === lastWeekStr);
+    return {
+      day: dayDate.format('ddd'),
+      usage: thisWeekReadings.reduce((sum, r) => sum + (r.flowRate || r.flow || r.usage || 0), 0),
+      lastWeek: lastWeekReadings.reduce((sum, r) => sum + (r.flowRate || r.flow || r.usage || 0), 0),
+    };
+  });
+
+  const monthlyData = Array.from({ length: 6 }, (_, m) => {
+    const monthDate = now.subtract(5 - m, 'month');
+    const yearAgoDate = monthDate.subtract(1, 'year');
+    const monthReadings = readings.filter((r) => {
+      if (!r.timestamp) return false;
+      const rd = dayjs(r.timestamp);
+      return rd.month() === monthDate.month() && rd.year() === monthDate.year();
+    });
+    const lastYearReadings = readings.filter((r) => {
+      if (!r.timestamp) return false;
+      const rd = dayjs(r.timestamp);
+      return rd.month() === yearAgoDate.month() && rd.year() === yearAgoDate.year();
+    });
+    return {
+      month: monthDate.format('MMM'),
+      usage: monthReadings.reduce((sum, r) => sum + (r.flowRate || r.flow || r.usage || 0), 0),
+      lastYear: lastYearReadings.reduce((sum, r) => sum + (r.flowRate || r.flow || r.usage || 0), 0),
+    };
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -124,6 +143,24 @@ export function TenantDashboardPage() {
     loadBilling();
     return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadReadings = async () => {
+      const deviceId = device?.deviceId || profile?.deviceId;
+      if (!deviceId) return;
+      try {
+        const { data } = await usageService.getDeviceReadings(deviceId);
+        if (!cancelled && data?.success) {
+          setReadings(extractList(data.data));
+        }
+      } catch {
+        // silently fail
+      }
+    };
+    loadReadings();
+    return () => { cancelled = true; };
+  }, [device, profile]);
 
   const hour = currentTime.getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
@@ -336,7 +373,7 @@ export function TenantDashboardPage() {
                 </Typography>
                 <Box sx={{ flex: 1 }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={fallbackDailyData}>
+                    <AreaChart data={dailyData}>
                       <defs>
                         <linearGradient id="dailyGrad" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#2F80ED" stopOpacity={0.3} />
@@ -352,7 +389,7 @@ export function TenantDashboardPage() {
                   </ResponsiveContainer>
                 </Box>
                 <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', mt: 1 }}>
-                  {currentUsage > 0 ? `Today: ${currentUsage.toLocaleString()} L` : 'No usage data available'}
+                  {todayReadings.length > 0 ? `${todayReadings.reduce((s, r) => s + (r.flowRate || r.flow || r.usage || 0), 0).toLocaleString()} L today` : 'No usage data available'}
                 </Typography>
               </CardContent>
             </Card>
@@ -395,7 +432,7 @@ export function TenantDashboardPage() {
                   </Box>
                 </Box>
                 <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={fallbackWeeklyData}>
+                  <BarChart data={weeklyData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                     <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
                     <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
@@ -419,7 +456,7 @@ export function TenantDashboardPage() {
                   </Typography>
                 </Box>
                 <ResponsiveContainer width="100%" height={250}>
-                  <LineChart data={fallbackMonthlyData}>
+                  <LineChart data={monthlyData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                     <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
                     <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
@@ -444,7 +481,7 @@ export function TenantDashboardPage() {
                   <Box>
                     <Typography variant="body2" color="text.secondary">Estimated Bill</Typography>
                     <Typography variant="h5" sx={{ fontWeight: 700, mt: 0.3 }}>
-                      GHS {(currentBill * 1.15).toFixed(2)}
+                      GHS {((currentBill?.amount || billAmount) * 1.15).toFixed(2)}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.3 }}>
                       <TrendingUp color="warning" sx={{ fontSize: 14 }} />

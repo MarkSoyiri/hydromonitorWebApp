@@ -4,15 +4,7 @@ import { Payment, CheckCircle, Schedule } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { billingService } from '@/services';
-
-const fallbackPayments = [
-  { date: '05 Jun 2026', amount: 128.50, status: 'Pending', method: '—' },
-  { date: '05 May 2026', amount: 142.00, status: 'Paid', method: 'Mobile Money' },
-  { date: '04 Apr 2026', amount: 115.80, status: 'Paid', method: 'Cash' },
-  { date: '03 Mar 2026', amount: 98.40, status: 'Paid', method: 'Mobile Money' },
-  { date: '05 Feb 2026', amount: 110.20, status: 'Paid', method: 'Bank Transfer' },
-  { date: '06 Jan 2026', amount: 95.60, status: 'Paid', method: 'Mobile Money' },
-];
+import { extractList } from '@/utils/response';
 
 export function PaymentsPage() {
   const { profile } = useAuth();
@@ -25,12 +17,10 @@ export function PaymentsPage() {
       try {
         const { data } = await billingService.getHistory();
         if (!cancelled && data?.success) {
-          setPayments(Array.isArray(data.data) ? data.data : []);
-        } else {
-          setPayments(fallbackPayments);
+          setPayments(extractList(data.data));
         }
       } catch {
-        if (!cancelled) setPayments(fallbackPayments);
+        // silently fail
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -39,9 +29,9 @@ export function PaymentsPage() {
     return () => { cancelled = true; };
   }, []);
 
-  const totalPaid = profile?.billing?.totalPaid ?? 562.00;
-  const outstandingBalance = profile?.billing?.outstandingBalance ?? 128.50;
-  const successfulPayments = payments.filter((p) => p.status === 'Paid').length;
+  const totalPaid = profile?.billing?.totalPaid ?? 0;
+  const outstandingBalance = profile?.billing?.outstandingBalance ?? 0;
+  const successfulPayments = payments.filter((p) => p.status === 'PAID' || p.status === 'Paid').length;
 
   if (loading) {
     return (
@@ -110,21 +100,21 @@ export function PaymentsPage() {
                 <Box key={i}>
                   <ListItem sx={{ px: 0, py: 1.2 }}>
                     <ListItemIcon sx={{ minWidth: 40 }}>
-                      <Payment sx={{ color: p.status === 'Paid' ? 'success.main' : 'warning.main' }} />
+                      <Payment sx={{ color: (p.status === 'PAID' || p.status === 'Paid') ? 'success.main' : 'warning.main' }} />
                     </ListItemIcon>
                     <ListItemText
                       primary={
                         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{p.date}</Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 700 }}>GHS {p.amount?.toFixed(2) || '0.00'}</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>{p.date || p.billDate || ''}</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 700 }}>GHS {(p.amount || p.totalAmount || 0).toFixed(2)}</Typography>
                         </Box>
                       }
                       secondary={
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.2 }}>
                           <Typography variant="caption" color="text.secondary">
-                            {p.status === 'Paid' ? `${p.method || ''}` : 'Awaiting payment'}
+                            {(p.status === 'PAID' || p.status === 'Paid') ? `${p.method || 'Paid'}` : 'Awaiting payment'}
                           </Typography>
-                          <Chip label={p.status} size="small" color={p.status === 'Paid' ? 'success' : 'warning'} sx={{ height: 18, fontSize: '0.6rem' }} />
+                          <Chip label={p.status || 'PENDING'} size="small" color={(p.status === 'PAID' || p.status === 'Paid') ? 'success' : 'warning'} sx={{ height: 18, fontSize: '0.6rem' }} />
                         </Box>
                       }
                     />

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 import {
-  WaterDrop, Apartment, CheckCircle, Warning, ShowChart,
+  WaterDrop, Apartment, CheckCircle, Warning,
 } from '@mui/icons-material';
 
 function AnimatedBar({ height, delay = 0, color = '#2F80ED' }) {
@@ -67,7 +67,7 @@ export function DashboardPreview() {
 
   return (
     <Box
-      id="pricing"
+      id="dashboard-preview"
       sx={{
         py: { xs: 10, md: 16 },
         background: 'linear-gradient(180deg, #0D2137 0%, #0A1A2B 100%)',

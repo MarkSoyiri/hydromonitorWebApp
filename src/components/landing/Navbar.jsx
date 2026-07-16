@@ -4,14 +4,14 @@ import {
   AppBar, Toolbar, Box, Button, Container, IconButton, Drawer, List, ListItem,
   ListItemButton, ListItemText, Typography, Divider,
 } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Menu, WaterDrop } from '@mui/icons-material';
 
 const NAV_LINKS = [
   { label: 'Home', href: '#home' },
   { label: 'Features', href: '#features' },
   { label: 'How It Works', href: '#how-it-works' },
-  { label: 'Pricing', href: '#pricing' },
+  { label: 'Dashboard', href: '#dashboard-preview' },
   { label: 'About', href: '#about' },
   { label: 'Contact', href: '#contact' },
 ];

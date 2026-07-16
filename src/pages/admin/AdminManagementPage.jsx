@@ -109,7 +109,7 @@ export function AdminManagementPage() {
                     primary={<Typography variant="subtitle2">{admin.fullName || admin.name}</Typography>}
                     secondary={admin.email}
                   />
-                  <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+                  <Stack direction="row" spacing={1} alignItems="center">
                     <Chip label={admin.role} size="small"
                       color={admin.role === 'SUPER_ADMIN' ? 'error' : 'primary'} variant="outlined" />
                     <StatusChip status={admin.status || 'ACTIVE'} />

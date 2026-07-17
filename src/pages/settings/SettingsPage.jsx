@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import { PageHeader } from '@/components/common';
 import { ratesService } from '@/services';
+import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 export function SettingsPage() {
@@ -82,59 +83,67 @@ export function SettingsPage() {
 
   return (
     <Box>
-      <PageHeader title="Settings" subtitle="System configuration" />
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <PageHeader title="Settings" subtitle="System configuration" />
+      </motion.div>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
       <Grid container spacing={2.5}>
         <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 3 }}>Water Rates</Typography>
-              <Stack spacing={2}>
-                <TextField label="Rate per Liter" type="number" value={waterRate}
-                  onChange={(e) => setWaterRate(parseFloat(e.target.value) || 0)}
-                  InputProps={{ startAdornment: <Typography sx={{ mr: 1, color: 'text.secondary' }}>{currency}</Typography> }} />
-                <FormControl fullWidth>
-                  <InputLabel>Currency</InputLabel>
-                  <Select value={currency} label="Currency" onChange={(e) => setCurrency(e.target.value)}>
-                    <MenuItem value="GHS">GHS (Ghanaian Cedi)</MenuItem>
-                    <MenuItem value="USD">USD (US Dollar)</MenuItem>
-                    <MenuItem value="EUR">EUR (Euro)</MenuItem>
-                  </Select>
-                </FormControl>
-              </Stack>
-            </CardContent>
-          </Card>
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.3 }}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" sx={{ mb: 3 }}>Water Rates</Typography>
+                <Stack spacing={2}>
+                  <TextField label="Rate per Liter" type="number" value={waterRate}
+                    onChange={(e) => setWaterRate(parseFloat(e.target.value) || 0)}
+                    InputProps={{ startAdornment: <Typography sx={{ mr: 1, color: 'text.secondary' }}>{currency}</Typography> }} />
+                  <FormControl fullWidth>
+                    <InputLabel>Currency</InputLabel>
+                    <Select value={currency} label="Currency" onChange={(e) => setCurrency(e.target.value)}>
+                      <MenuItem value="GHS">GHS (Ghanaian Cedi)</MenuItem>
+                      <MenuItem value="USD">USD (US Dollar)</MenuItem>
+                      <MenuItem value="EUR">EUR (Euro)</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Stack>
+              </CardContent>
+            </Card>
+          </motion.div>
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 3 }}>Leak Detection</Typography>
-              <Stack spacing={2}>
-                <TextField label="Leak Threshold (L/min)" type="number" value={leakThreshold}
-                  onChange={(e) => setLeakThreshold(parseInt(e.target.value) || 0)} />
-                <Typography variant="caption" color="text.secondary">
-                  Flow rates above this threshold will trigger leak alerts.
-                </Typography>
-              </Stack>
-            </CardContent>
-          </Card>
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.3 }}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" sx={{ mb: 3 }}>Leak Detection</Typography>
+                <Stack spacing={2}>
+                  <TextField label="Leak Threshold (L/min)" type="number" value={leakThreshold}
+                    onChange={(e) => setLeakThreshold(parseInt(e.target.value) || 0)} />
+                  <Typography variant="caption" color="text.secondary">
+                    Flow rates above this threshold will trigger leak alerts.
+                  </Typography>
+                </Stack>
+              </CardContent>
+            </Card>
+          </motion.div>
         </Grid>
 
         <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 3 }}>Notifications</Typography>
-              <Stack spacing={2}>
-                <FormControlLabel control={<Switch checked={notifications} onChange={(e) => setNotifications(e.target.checked)} />}
-                  label="Enable push notifications" />
-                <FormControlLabel control={<Switch checked={emailAlerts} onChange={(e) => setEmailAlerts(e.target.checked)} />}
-                  label="Email alerts for critical events" />
-              </Stack>
-            </CardContent>
-          </Card>
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.3 }}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" sx={{ mb: 3 }}>Notifications</Typography>
+                <Stack spacing={2}>
+                  <FormControlLabel control={<Switch checked={notifications} onChange={(e) => setNotifications(e.target.checked)} />}
+                    label="Enable push notifications" />
+                  <FormControlLabel control={<Switch checked={emailAlerts} onChange={(e) => setEmailAlerts(e.target.checked)} />}
+                    label="Email alerts for critical events" />
+                </Stack>
+              </CardContent>
+            </Card>
+          </motion.div>
         </Grid>
 
         <Grid item xs={12}>

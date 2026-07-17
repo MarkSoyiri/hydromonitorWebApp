@@ -9,6 +9,7 @@ import { PageHeader, DataTable, StatusChip, ConfirmDialog } from '@/components/c
 import { roomService, buildingService } from '@/services';
 import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
+import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 const columns = [
@@ -105,16 +106,20 @@ export function RoomsPage() {
 
   return (
     <Box>
-      <PageHeader title="Rooms" subtitle="Manage rooms across all buildings" action actionLabel="Add Room" onAction={openCreate} />
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <PageHeader title="Rooms" subtitle="Manage rooms across all buildings" action actionLabel="Add Room" onAction={openCreate} />
+      </motion.div>
 
-      <DataTable
-        columns={columns}
-        rows={rooms}
-        loading={loading}
-        onRowClick={(row) => navigate(`${basePath}/rooms/${row.roomId}`)}
-        emptyTitle="No rooms found"
-        emptyAction={isSuperAdmin && <Button variant="contained" startIcon={<Add />} onClick={openCreate}>Add Room</Button>}
-      />
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.3 }}>
+        <DataTable
+          columns={columns}
+          rows={rooms}
+          loading={loading}
+          onRowClick={(row) => navigate(`${basePath}/rooms/${row.roomId}`)}
+          emptyTitle="No rooms found"
+          emptyAction={isSuperAdmin && <Button variant="contained" startIcon={<Add />} onClick={openCreate}>Add Room</Button>}
+        />
+      </motion.div>
 
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>{editing ? 'Edit Room' : 'Add Room'}</DialogTitle>

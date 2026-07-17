@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Grid, Card, CardContent, Typography, Skeleton, Chip, LinearProgress, Paper } from '@mui/material';
+import { Box, Grid, Card, CardContent, Typography, Skeleton, Chip, LinearProgress, Paper, Divider } from '@mui/material';
 import {
   Business, MeetingRoom, DevicesOther, People, AdminPanelSettings,
   TrendingUp, AttachMoney, Storage, Cloud, Memory, CheckCircle,
@@ -21,6 +21,21 @@ const defaultHealth = [
   { label: 'Memory', status: 'warning', value: 72, icon: <Memory /> },
   { label: 'Firebase Sync', status: 'healthy', value: 100, icon: <CheckCircle /> },
 ];
+
+const sectionVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i) => ({
+    opacity: 1, y: 0,
+    transition: { delay: i * 0.1, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
+  }),
+};
+
+const SectionHeader = ({ title, subtitle }) => (
+  <Box sx={{ mb: 2 }}>
+    <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem' }}>{title}</Typography>
+    {subtitle && <Typography variant="caption" color="text.secondary">{subtitle}</Typography>}
+  </Box>
+);
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -99,7 +114,7 @@ export function SuperAdminDashboardPage() {
         <Grid container spacing={2}>
           {[1, 2, 3, 4, 5].map((i) => (
             <Grid item xs={12} sm={6} md={2.4} key={i}>
-              <Card sx={{ borderRadius: 2 }}><CardContent sx={{ p: 2, textAlign: 'center' }}>
+              <Card><CardContent sx={{ p: 2, textAlign: 'center' }}>
                 <Skeleton variant="circular" width={28} height={28} sx={{ mx: 'auto', mb: 0.5 }} />
                 <Skeleton variant="text" width="40%" sx={{ mx: 'auto' }} />
               </CardContent></Card>
@@ -121,32 +136,42 @@ export function SuperAdminDashboardPage() {
         </Box>
       </motion.div>
 
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        {[
-          { icon: <Business />, label: 'Buildings', value: totalBuildings, color: 'primary.main' },
-          { icon: <MeetingRoom />, label: 'Rooms', value: totalRooms, color: 'info.main' },
-          { icon: <DevicesOther />, label: 'Devices', value: totalDevices, color: 'success.main' },
-          { icon: <People />, label: 'Tenants', value: totalTenants, color: 'warning.main' },
-          { icon: <AttachMoney />, label: 'Revenue (GHS)', value: totalRevenue.toLocaleString(), color: 'error.main' },
-        ].map((item, idx) => (
-          <Grid item xs={12} sm={6} md={2.4} key={idx}>
-            <Card sx={{ borderRadius: 2 }}><CardContent sx={{ p: 2, textAlign: 'center' }}>
-              <Box sx={{ color: item.color, fontSize: 28, mb: 0.5 }}>{item.icon}</Box>
-              <Typography variant="h5" sx={{ fontWeight: 700 }}>{item.value}</Typography>
-              <Typography variant="caption" color="text.secondary">{item.label}</Typography>
-            </CardContent></Card>
-          </Grid>
-        ))}
-      </Grid>
+      {/* Overview Section */}
+      <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={0}>
+        <SectionHeader title="Overview" subtitle="System-wide metrics" />
+        <Grid container spacing={2} sx={{ mb: 4 }}>
+          {[
+            { icon: <Business />, label: 'Buildings', value: totalBuildings, color: 'primary.main' },
+            { icon: <MeetingRoom />, label: 'Rooms', value: totalRooms, color: 'info.main' },
+            { icon: <DevicesOther />, label: 'Devices', value: totalDevices, color: 'success.main' },
+            { icon: <People />, label: 'Tenants', value: totalTenants, color: 'warning.main' },
+            { icon: <AttachMoney />, label: 'Revenue (GHS)', value: totalRevenue.toLocaleString(), color: 'error.main' },
+          ].map((item, idx) => (
+            <Grid item xs={12} sm={6} md={2.4} key={idx}>
+              <Card>
+                <CardContent sx={{ p: 2, textAlign: 'center' }}>
+                  <Box sx={{ color: item.color, fontSize: 28, mb: 0.5 }}>{item.icon}</Box>
+                  <Typography variant="h5" sx={{ fontWeight: 800 }}>{item.value}</Typography>
+                  <Typography variant="caption" color="text.secondary">{item.label}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </motion.div>
 
-      <Grid container spacing={2.5}>
-        <Grid item xs={12} md={8}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <Card sx={{ borderRadius: 2 }}>
+      <Divider sx={{ mb: 4 }} />
+
+      {/* Revenue & System Health Section */}
+      <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={1}>
+        <SectionHeader title="Revenue & System Health" subtitle="Financial performance and infrastructure status" />
+        <Grid container spacing={2.5} sx={{ mb: 4 }}>
+          <Grid item xs={12} md={8}>
+            <Card>
               <CardContent sx={{ p: 2.5 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Monthly Revenue (GHS)</Typography>
                 <ResponsiveContainer width="100%" height={300}>
-                   <AreaChart data={analytics?.monthlyTrend || fallbackMonthlyRevenue}>
+                  <AreaChart data={analytics?.monthlyTrend || fallbackMonthlyRevenue}>
                     <defs><linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#2F80ED" stopOpacity={0.3} /><stop offset="95%" stopColor="#2F80ED" stopOpacity={0} /></linearGradient></defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                     <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
@@ -157,12 +182,10 @@ export function SuperAdminDashboardPage() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </motion.div>
-        </Grid>
+          </Grid>
 
-        <Grid item xs={12} md={4}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-            <Card sx={{ borderRadius: 2, height: '100%' }}>
+          <Grid item xs={12} md={4}>
+            <Card sx={{ height: '100%' }}>
               <CardContent sx={{ p: 2.5 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>System Health</Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -183,38 +206,44 @@ export function SuperAdminDashboardPage() {
                 </Box>
               </CardContent>
             </Card>
-          </motion.div>
-        </Grid>
-
-        {buildingData.length > 0 && (
-          <Grid item xs={12}>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <Card sx={{ borderRadius: 2 }}>
-                <CardContent sx={{ p: 2.5 }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Buildings Overview</Typography>
-                  <Grid container spacing={2}>
-                    {buildingData.map((b, i) => (
-                      <Grid item xs={12} md={4} key={i}>
-                        <Paper sx={{ p: 2, borderRadius: 2 }} elevation={0}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>{b.name}</Typography>
-                          <Box sx={{ display: 'flex', gap: 2 }}>
-                            <Box><Typography variant="caption" color="text.secondary">Usage</Typography>
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>{(b.usage).toLocaleString()} L</Typography></Box>
-                            <Box><Typography variant="caption" color="text.secondary">Tenants</Typography>
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>{b.tenants}</Typography></Box>
-                            <Box><Typography variant="caption" color="text.secondary">Devices</Typography>
-                              <Typography variant="body2" sx={{ fontWeight: 600 }}>{b.devices}</Typography></Box>
-                          </Box>
-                        </Paper>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </CardContent>
-              </Card>
-            </motion.div>
           </Grid>
-        )}
-      </Grid>
+        </Grid>
+      </motion.div>
+
+      {/* Buildings Overview */}
+      {buildingData.length > 0 && (
+        <>
+          <Divider sx={{ mb: 4 }} />
+          <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={2}>
+            <SectionHeader title="Buildings Overview" subtitle="Individual building performance" />
+            <Grid container spacing={2}>
+              {buildingData.map((b, i) => (
+                <Grid item xs={12} md={4} key={i}>
+                  <Card>
+                    <CardContent sx={{ p: 2.5 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5 }}>{b.name}</Typography>
+                      <Box sx={{ display: 'flex', gap: 3 }}>
+                        <Box>
+                          <Typography variant="caption" color="text.secondary">Usage</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>{(b.usage).toLocaleString()} L</Typography>
+                        </Box>
+                        <Box>
+                          <Typography variant="caption" color="text.secondary">Tenants</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>{b.tenants}</Typography>
+                        </Box>
+                        <Box>
+                          <Typography variant="caption" color="text.secondary">Devices</Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>{b.devices}</Typography>
+                        </Box>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </motion.div>
+        </>
+      )}
     </Box>
   );
 }

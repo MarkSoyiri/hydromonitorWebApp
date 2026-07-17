@@ -32,16 +32,23 @@ export const getComponents = (mode) => ({
   MuiCard: {
     styleOverrides: {
       root: {
-        borderRadius: 12,
+        borderRadius: 16,
         boxShadow: mode === 'dark'
-          ? '0px 2px 8px rgba(0,0,0,0.2)'
+          ? '0px 2px 8px rgba(0,0,0,0.2), 0px 0px 0px 1px rgba(255,255,255,0.02)'
           : '0px 1px 3px rgba(0,0,0,0.04), 0px 1px 2px rgba(0,0,0,0.06)',
+        transition: 'box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease',
+        border: mode === 'dark' ? '1px solid rgba(255,255,255,0.04)' : '1px solid rgba(0,0,0,0.04)',
+        '&:hover': {
+          boxShadow: mode === 'dark'
+            ? '0px 8px 24px rgba(0,0,0,0.3), 0px 0px 0px 1px rgba(255,255,255,0.06)'
+            : '0px 8px 24px rgba(0,0,0,0.06), 0px 2px 8px rgba(0,0,0,0.04)',
+        },
       },
     },
   },
   MuiPaper: {
     styleOverrides: {
-      root: { borderRadius: 12 },
+      root: { borderRadius: 16 },
       elevation1: {
         boxShadow: mode === 'dark'
           ? '0px 2px 8px rgba(0,0,0,0.2)'

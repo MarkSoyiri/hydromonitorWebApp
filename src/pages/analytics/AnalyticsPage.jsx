@@ -7,6 +7,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line, AreaChart, Area, PieChart, Pie, Cell, Legend,
 } from 'recharts';
+import { motion } from 'framer-motion';
 import { analyticsService } from '@/services';
 
 const fallbackWeeklyUsage = [
@@ -88,101 +89,111 @@ export function AnalyticsPage() {
 
   return (
     <Box>
-      <PageHeader title="Analytics" subtitle="Water usage analytics and insights" />
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <PageHeader title="Analytics" subtitle="Water usage analytics and insights" />
+      </motion.div>
 
       {error && <Alert severity="warning" sx={{ mb: 2 }}>{error} - Showing default data.</Alert>}
 
       <Grid container spacing={2.5}>
         <Grid item xs={12} md={8}>
-          <Card>
-            <CardHeader title="Weekly Consumption vs Average" />
-            <CardContent>
-              {loading ? <ChartSkeleton /> : (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={weeklyUsage}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                    <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
-                    <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="usage" fill="#2F80ED" radius={[4, 4, 0, 0]} name="Usage" />
-                    <Bar dataKey="avg" fill="#A0AEC0" radius={[4, 4, 0, 0]} name="Average" />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </CardContent>
-          </Card>
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.3 }}>
+            <Card>
+              <CardHeader title="Weekly Consumption vs Average" />
+              <CardContent>
+                {loading ? <ChartSkeleton /> : (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={weeklyUsage}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                      <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
+                      <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Bar dataKey="usage" fill="#2F80ED" radius={[4, 4, 0, 0]} name="Usage" />
+                      <Bar dataKey="avg" fill="#A0AEC0" radius={[4, 4, 0, 0]} name="Average" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Card sx={{ height: '100%' }}>
-            <CardHeader title="Building Comparison" />
-            <CardContent>
-              {loading ? <ChartSkeleton /> : buildingComparison.length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie data={buildingComparison} cx="50%" cy="50%" innerRadius={60} outerRadius={100}
-                      dataKey="usage" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                      {buildingComparison.map((_, i) => (
-                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              ) : (
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}>
-                  <Typography color="text.secondary">No building data available</Typography>
-                </Box>
-              )}
-            </CardContent>
-          </Card>
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.3 }}>
+            <Card sx={{ height: '100%' }}>
+              <CardHeader title="Building Comparison" />
+              <CardContent>
+                {loading ? <ChartSkeleton /> : buildingComparison.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie data={buildingComparison} cx="50%" cy="50%" innerRadius={60} outerRadius={100}
+                        dataKey="usage" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                        {buildingComparison.map((_, i) => (
+                          <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}>
+                    <Typography color="text.secondary">No building data available</Typography>
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Card>
-            <CardHeader title="Usage Trend" />
-            <CardContent>
-              {loading ? <ChartSkeleton /> : (
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={monthlyTrend}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                    <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
-                    <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Line type="monotone" dataKey="current" stroke="#2F80ED" strokeWidth={2} name="Current" dot />
-                    {monthlyTrend[0]?.predicted !== undefined && (
-                      <Line type="monotone" dataKey="predicted" stroke="#FB8C00" strokeWidth={2} strokeDasharray="5 5" name="Predicted" dot />
-                    )}
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
-            </CardContent>
-          </Card>
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.3 }}>
+            <Card>
+              <CardHeader title="Usage Trend" />
+              <CardContent>
+                {loading ? <ChartSkeleton /> : (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={monthlyTrend}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                      <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
+                      <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Line type="monotone" dataKey="current" stroke="#2F80ED" strokeWidth={2} name="Current" dot />
+                      {monthlyTrend[0]?.predicted !== undefined && (
+                        <Line type="monotone" dataKey="predicted" stroke="#FB8C00" strokeWidth={2} strokeDasharray="5 5" name="Predicted" dot />
+                      )}
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Card>
-            <CardHeader title="Leak Detection Trend" />
-            <CardContent>
-              {loading ? <ChartSkeleton /> : (
-                <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={leakTrend}>
-                    <defs>
-                      <linearGradient id="leakGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#E53935" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#E53935" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                    <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
-                    <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
-                    <Tooltip />
-                    <Area type="monotone" dataKey="leaks" stroke="#E53935" fill="url(#leakGrad)" strokeWidth={2} name="Leaks" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              )}
-            </CardContent>
-          </Card>
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.3 }}>
+            <Card>
+              <CardHeader title="Leak Detection Trend" />
+              <CardContent>
+                {loading ? <ChartSkeleton /> : (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <AreaChart data={leakTrend}>
+                      <defs>
+                        <linearGradient id="leakGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#E53935" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#E53935" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                      <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
+                      <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
+                      <Tooltip />
+                      <Area type="monotone" dataKey="leaks" stroke="#E53935" fill="url(#leakGrad)" strokeWidth={2} name="Leaks" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
         </Grid>
       </Grid>
     </Box>

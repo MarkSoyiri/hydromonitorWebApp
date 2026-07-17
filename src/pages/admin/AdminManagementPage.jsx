@@ -10,6 +10,7 @@ import { PageHeader, StatCard, StatusChip, ConfirmDialog } from '@/components/co
 import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api';
 import { ENDPOINTS } from '@/constants';
 import { extractList } from '@/utils/response';
+import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 export function AdminManagementPage() {
@@ -87,54 +88,60 @@ export function AdminManagementPage() {
 
   return (
     <Box>
-      <PageHeader title="Admin Management" subtitle="Manage system administrators" action actionLabel="Add Admin" onAction={openCreate} />
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <PageHeader title="Admin Management" subtitle="Manage system administrators" action actionLabel="Add Admin" onAction={openCreate} />
+      </motion.div>
 
-      <Box sx={{ mb: 3 }}>
-        <StatCard title="Total Admins" value={admins.length} icon={<AdminPanelSettings />} color="primary" loading={loading} />
-      </Box>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
+        <Box sx={{ mb: 3 }}>
+          <StatCard title="Total Admins" value={admins.length} icon={<AdminPanelSettings />} color="primary" loading={loading} />
+        </Box>
+      </motion.div>
 
-      <Card>
-        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>Administrators</Typography>
-          <Stack spacing={2}>
-            {admins.map((admin) => (
-              <Box key={admin.uid || admin.id} sx={{
-                p: 2, borderRadius: 2, border: 1, borderColor: 'divider',
-              }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-                  <Avatar sx={{ bgcolor: admin.role === 'SUPER_ADMIN' ? 'error.main' : 'primary.main' }}>
-                    <Shield />
-                  </Avatar>
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                      {admin.fullName || admin.name}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {admin.email}
-                    </Typography>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.15 }}>
+        <Card>
+          <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>Administrators</Typography>
+            <Stack spacing={2}>
+              {admins.map((admin) => (
+                <Box key={admin.uid || admin.id} sx={{
+                  p: 2, borderRadius: 2, border: 1, borderColor: 'divider',
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+                    <Avatar sx={{ bgcolor: admin.role === 'SUPER_ADMIN' ? 'error.main' : 'primary.main' }}>
+                      <Shield />
+                    </Avatar>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                        {admin.fullName || admin.name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {admin.email}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5, flexWrap: 'wrap' }}>
+                    <Chip label={admin.role} size="small"
+                      color={admin.role === 'SUPER_ADMIN' ? 'error' : 'primary'} variant="outlined" />
+                    <StatusChip status={admin.status || 'ACTIVE'} />
+                    <Box sx={{ flex: 1 }} />
+                    <Tooltip title="Edit">
+                      <IconButton size="small" onClick={() => openEdit(admin)}>
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                      <IconButton size="small" color="error" onClick={() => setDeleteTarget(admin)}>
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                   </Box>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5, flexWrap: 'wrap' }}>
-                  <Chip label={admin.role} size="small"
-                    color={admin.role === 'SUPER_ADMIN' ? 'error' : 'primary'} variant="outlined" />
-                  <StatusChip status={admin.status || 'ACTIVE'} />
-                  <Box sx={{ flex: 1 }} />
-                  <Tooltip title="Edit">
-                    <IconButton size="small" onClick={() => openEdit(admin)}>
-                      <Edit fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Delete">
-                    <IconButton size="small" color="error" onClick={() => setDeleteTarget(admin)}>
-                      <Delete fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
-              </Box>
-            ))}
-          </Stack>
-        </CardContent>
-      </Card>
+              ))}
+            </Stack>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>{editing ? 'Edit Admin' : 'Add Admin'}</DialogTitle>

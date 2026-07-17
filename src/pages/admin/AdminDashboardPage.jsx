@@ -20,6 +20,21 @@ const fallbackWeeklyUsage = [
   { day: 'Sun', usage: 0 },
 ];
 
+const sectionVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i) => ({
+    opacity: 1, y: 0,
+    transition: { delay: i * 0.1, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
+  }),
+};
+
+const SectionHeader = ({ title, subtitle }) => (
+  <Box sx={{ mb: 2 }}>
+    <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem' }}>{title}</Typography>
+    {subtitle && <Typography variant="caption" color="text.secondary">{subtitle}</Typography>}
+  </Box>
+);
+
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
@@ -92,7 +107,7 @@ export function AdminDashboardPage() {
         <Grid container spacing={2.5}>
           {[1, 2, 3, 4].map((i) => (
             <Grid item xs={12} sm={6} md={3} key={i}>
-              <Card sx={{ borderRadius: 2 }}><CardContent sx={{ p: 2.5 }}>
+              <Card sx={{ borderRadius: 3 }}><CardContent sx={{ p: 2.5 }}>
                 <Skeleton variant="text" width="40%" />
                 <Skeleton variant="text" width="60%" sx={{ mt: 1 }} />
               </CardContent></Card>
@@ -117,74 +132,44 @@ export function AdminDashboardPage() {
         </Box>
       </motion.div>
 
-      <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ borderRadius: 2 }}>
-            <CardContent sx={{ p: 2.5 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>TOTAL ROOMS</Typography>
-                <Avatar sx={{ bgcolor: 'info.main', width: 36, height: 36, borderRadius: 1.5 }}><MeetingRoom /></Avatar>
-              </Box>
-              <Typography variant="h4" sx={{ fontWeight: 700 }}>{totalRooms}</Typography>
-              <Typography variant="caption" color="success.main" sx={{ fontWeight: 600 }}>
-                {activeTenants} occupied · {totalRooms - activeTenants} vacant
-              </Typography>
-            </CardContent>
-          </Card>
+      {/* Overview Section */}
+      <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={0}>
+        <SectionHeader title="Overview" subtitle="Building metrics at a glance" />
+        <Grid container spacing={2.5} sx={{ mb: 4 }}>
+          {[
+            { icon: <MeetingRoom />, label: 'TOTAL ROOMS', value: totalRooms, color: 'info', sub: `${activeTenants} occupied · ${totalRooms - activeTenants} vacant` },
+            { icon: <DevicesOther />, label: 'DEVICES', value: totalDevices, color: 'success', sub: `${onlineDevices} online · ${offlineDevices} offline` },
+            { icon: <People />, label: 'TENANTS', value: activeTenants, color: 'warning', sub: 'Active tenants' },
+            { icon: <WaterDrop />, label: "TODAY'S USAGE", value: `${todayUsage.toLocaleString()} L`, color: 'primary', sub: stats?.todayUsage ? "Today's reading" : 'No data' },
+          ].map((item, idx) => (
+            <Grid item xs={12} sm={6} md={3} key={idx}>
+              <Card>
+                <CardContent sx={{ p: 2.5 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: '0.06em', fontSize: '0.65rem' }}>{item.label}</Typography>
+                    <Avatar sx={{ bgcolor: `${item.color}.main`, width: 40, height: 40, borderRadius: 2.5 }}>{item.icon}</Avatar>
+                  </Box>
+                  <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.4rem', sm: '1.6rem' } }}>{item.value}</Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>{item.sub}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ borderRadius: 2 }}>
-            <CardContent sx={{ p: 2.5 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>DEVICES</Typography>
-                <Avatar sx={{ bgcolor: 'success.main', width: 36, height: 36, borderRadius: 1.5 }}><DevicesOther /></Avatar>
-              </Box>
-              <Typography variant="h4" sx={{ fontWeight: 700 }}>{totalDevices}</Typography>
-              <Typography variant="caption" color="success.main" sx={{ fontWeight: 600 }}>
-                {onlineDevices} online · {offlineDevices} offline
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ borderRadius: 2 }}>
-            <CardContent sx={{ p: 2.5 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>TENANTS</Typography>
-                <Avatar sx={{ bgcolor: 'warning.main', width: 36, height: 36, borderRadius: 1.5 }}><People /></Avatar>
-              </Box>
-              <Typography variant="h4" sx={{ fontWeight: 700 }}>{activeTenants}</Typography>
-              <Typography variant="caption" color="text.secondary">Active tenants</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ borderRadius: 2 }}>
-            <CardContent sx={{ p: 2.5 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>TODAY'S USAGE</Typography>
-                <Avatar sx={{ bgcolor: 'primary.main', width: 36, height: 36, borderRadius: 1.5 }}><WaterDrop /></Avatar>
-              </Box>
-              <Typography variant="h4" sx={{ fontWeight: 700 }}>{todayUsage.toLocaleString()} L</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <TrendingUp color="warning" sx={{ fontSize: 14 }} />
-                <Typography variant="caption" color="warning.main" sx={{ fontWeight: 600 }}>
-                  {stats?.todayUsage ? 'Today\'s reading' : 'No data'}
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+      </motion.div>
 
-      <Grid container spacing={2.5}>
-        <Grid item xs={12} md={8}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-            <Card sx={{ borderRadius: 2 }}>
+      <Divider sx={{ mb: 4 }} />
+
+      {/* Charts & Activity Section */}
+      <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={1}>
+        <SectionHeader title="Activity & Analytics" subtitle="Usage patterns and system status" />
+        <Grid container spacing={2.5}>
+          <Grid item xs={12} md={8}>
+            <Card>
               <CardContent sx={{ p: 2.5 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Weekly Building Usage</Typography>
                 <ResponsiveContainer width="100%" height={300}>
-                   <BarChart data={fallbackWeeklyUsage}>
+                  <BarChart data={fallbackWeeklyUsage}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                     <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
                     <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
@@ -194,12 +179,10 @@ export function AdminDashboardPage() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </motion.div>
-        </Grid>
+          </Grid>
 
-        <Grid item xs={12} md={4}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-            <Card sx={{ borderRadius: 2, height: '100%' }}>
+          <Grid item xs={12} md={4}>
+            <Card sx={{ height: '100%' }}>
               <CardContent sx={{ p: 2.5 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>System Activity</Typography>
                 {recentActivity.length > 0 ? (
@@ -222,9 +205,9 @@ export function AdminDashboardPage() {
                 )}
               </CardContent>
             </Card>
-          </motion.div>
+          </Grid>
         </Grid>
-      </Grid>
+      </motion.div>
     </Box>
   );
 }

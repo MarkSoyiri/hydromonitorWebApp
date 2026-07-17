@@ -54,9 +54,10 @@ export function InvoicesPage() {
         </Box>
       </motion.div>
 
-      <Card sx={{ borderRadius: 3 }}>
-        <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Invoice History</Typography>
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
+        <Card sx={{ borderRadius: 3 }}>
+          <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Invoice History</Typography>
           {invoices.length > 0 ? (
             <List sx={{ p: 0 }}>
               {invoices.map((inv, i) => (
@@ -98,8 +99,9 @@ export function InvoicesPage() {
               <Typography variant="body2" color="text.secondary">No invoices found</Typography>
             </Box>
           )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </motion.div>
     </Box>
   );
 }

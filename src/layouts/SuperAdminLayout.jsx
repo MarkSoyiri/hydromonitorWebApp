@@ -295,7 +295,7 @@ function SuperAdminTopbar({ onMenuToggle }) {
     <AppBar position="sticky" color="inherit" elevation={0} sx={{
       borderBottom: isDark ? '1px solid rgba(255,255,255,0.04)' : '1px solid rgba(0,0,0,0.06)',
       background: isDark ? 'rgba(7,15,26,0.9)' : 'rgba(255,255,255,0.9)',
-      backdropFilter: 'blur(20px)',
+      backdropFilter: 'blur(24px) saturate(180%)',
     }}>
       <Toolbar sx={{ minHeight: 64 }}>
         <Box sx={{ display: { md: 'none' }, mr: 1 }}>
@@ -388,7 +388,7 @@ export function SuperAdminLayout() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
             <Outlet />
           </motion.div>

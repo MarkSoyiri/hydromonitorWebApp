@@ -4,6 +4,7 @@ import { NotificationsOutlined, Warning, CheckCircle, Info, Error as ErrorIcon }
 import { PageHeader, EmptyState } from '@/components/common';
 import { alertService } from '@/services';
 import { extractList } from '@/utils/response';
+import { motion } from 'framer-motion';
 import dayjs from 'dayjs';
 
 const severityIcons = {
@@ -51,9 +52,12 @@ export function NotificationsPage() {
 
   return (
     <Box>
-      <PageHeader title="Notifications" subtitle="All system notifications" />
-      <Card>
-        <CardContent>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <PageHeader title="Notifications" subtitle="All system notifications" />
+      </motion.div>
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.3 }}>
+        <Card>
+          <CardContent>
           {loading ? (
             <List sx={{ p: 0 }}>
               {[1, 2, 3].map((i) => (
@@ -117,7 +121,8 @@ export function NotificationsPage() {
             </List>
           )}
         </CardContent>
-      </Card>
+        </Card>
+      </motion.div>
     </Box>
   );
 }

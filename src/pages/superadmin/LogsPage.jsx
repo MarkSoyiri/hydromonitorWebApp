@@ -78,58 +78,60 @@ export function LogsPage() {
         </Box>
       </motion.div>
 
-      <Card sx={{ borderRadius: 2 }}>
-        <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-          {loading ? (
-            <List sx={{ p: 0 }}>
-              {[1, 2, 3, 4, 5].map((i) => (
-                <Box key={i}>
-                  <ListItem sx={{ px: 0, py: 1 }}>
-                    <Skeleton variant="circular" width={24} height={24} sx={{ mr: 1.5 }} />
-                    <Box sx={{ flex: 1 }}>
-                      <Skeleton variant="text" width="70%" />
-                      <Skeleton variant="text" width="40%" />
-                    </Box>
-                  </ListItem>
-                </Box>
-              ))}
-            </List>
-          ) : (
-            <List sx={{ p: 0 }}>
-              {filtered.length === 0 ? (
-                <Box sx={{ py: 4, textAlign: 'center' }}>
-                  <ListAlt sx={{ color: 'text.disabled', fontSize: 40, mb: 1 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    {search ? 'No logs match your search' : 'No system logs available'}
-                  </Typography>
-                </Box>
-              ) : (
-                filtered.map((log, i) => (
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
+        <Card sx={{ borderRadius: 2 }}>
+          <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
+            {loading ? (
+              <List sx={{ p: 0 }}>
+                {[1, 2, 3, 4, 5].map((i) => (
                   <Box key={i}>
                     <ListItem sx={{ px: 0, py: 1 }}>
-                      <ListItemIcon sx={{ minWidth: 36 }}>{levelIcons[log.level] || <Info color="primary" />}</ListItemIcon>
-                      <ListItemText
-                        primary={
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Typography variant="body2" sx={{ fontWeight: 500, fontFamily: 'monospace' }}>{log.message}</Typography>
-                            <Chip label={log.level} size="small" color={levelColors[log.level] || 'default'} sx={{ height: 18, fontSize: '0.6rem' }} />
-                          </Box>
-                        }
-                        secondary={
-                          <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
-                            {log.time ? dayjs(log.time).format('DD MMM YYYY HH:mm:ss') : '—'} · {log.source}
-                          </Typography>
-                        }
-                      />
+                      <Skeleton variant="circular" width={24} height={24} sx={{ mr: 1.5 }} />
+                      <Box sx={{ flex: 1 }}>
+                        <Skeleton variant="text" width="70%" />
+                        <Skeleton variant="text" width="40%" />
+                      </Box>
                     </ListItem>
-                    {i < filtered.length - 1 && <Box sx={{ borderBottom: '1px solid', borderColor: 'divider' }} />}
                   </Box>
-                ))
-              )}
-            </List>
-          )}
-        </CardContent>
-      </Card>
+                ))}
+              </List>
+            ) : (
+              <List sx={{ p: 0 }}>
+                {filtered.length === 0 ? (
+                  <Box sx={{ py: 4, textAlign: 'center' }}>
+                    <ListAlt sx={{ color: 'text.disabled', fontSize: 40, mb: 1 }} />
+                    <Typography variant="body2" color="text.secondary">
+                      {search ? 'No logs match your search' : 'No system logs available'}
+                    </Typography>
+                  </Box>
+                ) : (
+                  filtered.map((log, i) => (
+                    <Box key={i}>
+                      <ListItem sx={{ px: 0, py: 1 }}>
+                        <ListItemIcon sx={{ minWidth: 36 }}>{levelIcons[log.level] || <Info color="primary" />}</ListItemIcon>
+                        <ListItemText
+                          primary={
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <Typography variant="body2" sx={{ fontWeight: 500, fontFamily: 'monospace' }}>{log.message}</Typography>
+                              <Chip label={log.level} size="small" color={levelColors[log.level] || 'default'} sx={{ height: 18, fontSize: '0.6rem' }} />
+                            </Box>
+                          }
+                          secondary={
+                            <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+                              {log.time ? dayjs(log.time).format('DD MMM YYYY HH:mm:ss') : '—'} · {log.source}
+                            </Typography>
+                          }
+                        />
+                      </ListItem>
+                      {i < filtered.length - 1 && <Box sx={{ borderBottom: '1px solid', borderColor: 'divider' }} />}
+                    </Box>
+                  ))
+                )}
+              </List>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
     </Box>
   );
 }

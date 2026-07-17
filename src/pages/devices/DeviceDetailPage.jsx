@@ -10,6 +10,7 @@ import {
 import { StatCard, StatusChip, PageHeader, LoadingScreen } from '@/components/common';
 import { deviceService, usageService } from '@/services';
 import { extractList } from '@/utils/response';
+import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { subscribeRealtime, unsubscribeRealtime } from '@/services/firebaseRealtime';
 import toast from 'react-hot-toast';
@@ -100,78 +101,86 @@ export function DeviceDetailPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-        <IconButton onClick={() => navigate(`${basePath}/devices`)}><ArrowBack /></IconButton>
-        <Box sx={{ flex: 1 }}>
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>{device.deviceName}</Typography>
-          <Typography variant="body2" color="text.secondary">
-            {device.serialNumber} · {device.buildingId || 'No building'}
-          </Typography>
-        </Box>
-        <Stack direction="row" spacing={1}>
-          <StatusChip status={telemetry.status || 'OFFLINE'} />
-          <StatusChip status={telemetry.valveStatus === 'OPEN' ? 'OPEN' : 'CLOSED'} />
-          {telemetry.leakDetected && <Chip icon={<Warning />} label="LEAK" color="error" />}
-        </Stack>
-      </Box>
-
-      <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid item xs={6} sm={3}>
-          <StatCard title="Flow Rate" value={`${telemetry.currentFlowRate || 0} L/min`} icon={<Wifi />} color="primary" />
-        </Grid>
-        <Grid item xs={6} sm={3}>
-          <StatCard title="Total Usage" value={`${(telemetry.totalUsage || 0).toLocaleString()} L`} icon={<Wifi />} color="info" />
-        </Grid>
-        <Grid item xs={6} sm={3}>
-          <StatCard title="Signal" value={telemetry.signalStrength ?? '—'} icon={<SignalCellularAlt />} color="warning" />
-        </Grid>
-        <Grid item xs={6} sm={3}>
-          <StatCard title="Last Seen" value={telemetry.lastSeen ? dayjs(telemetry.lastSeen).format('HH:mm') : '—'} icon={<History />} color="text.secondary" />
-        </Grid>
-      </Grid>
-
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" sx={{ mb: 2 }}>Controls</Typography>
-          <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
-            <Button variant="contained" color="success" startIcon={<PlayArrow />}
-              onClick={() => sendCommand('OPEN')} disabled={commandLoading || telemetry.valveStatus === 'OPEN'}>
-              Open Valve
-            </Button>
-            <Button variant="contained" color="error" startIcon={<Stop />}
-              onClick={() => sendCommand('CLOSE')} disabled={commandLoading || telemetry.valveStatus === 'CLOSED'}>
-              Close Valve
-            </Button>
-            <Button variant="outlined" color="warning" startIcon={<Refresh />}
-              onClick={() => sendCommand('RESET_ALERT')} disabled={commandLoading}>
-              Reset Alert
-            </Button>
-            <Button variant="outlined" startIcon={<PlayArrow />}
-              onClick={() => sendCommand('START_SIMULATION')} disabled={commandLoading}>
-              Start Simulator
-            </Button>
-            <Button variant="outlined" color="error" startIcon={<Stop />}
-              onClick={() => sendCommand('STOP_SIMULATION')} disabled={commandLoading}>
-              Stop Simulator
-            </Button>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+          <IconButton onClick={() => navigate(`${basePath}/devices`)}><ArrowBack /></IconButton>
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="h4" sx={{ fontWeight: 700 }}>{device.deviceName}</Typography>
+            <Typography variant="body2" color="text.secondary">
+              {device.serialNumber} · {device.buildingId || 'No building'}
+            </Typography>
+          </Box>
+          <Stack direction="row" spacing={1}>
+            <StatusChip status={telemetry.status || 'OFFLINE'} />
+            <StatusChip status={telemetry.valveStatus === 'OPEN' ? 'OPEN' : 'CLOSED'} />
+            {telemetry.leakDetected && <Chip icon={<Warning />} label="LEAK" color="error" />}
           </Stack>
-        </CardContent>
-      </Card>
+        </Box>
+      </motion.div>
 
-      <Card>
-        <CardContent>
-          <Typography variant="h6" sx={{ mb: 2 }}>Flow Rate History</Typography>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={readings.length > 0 ? readings : fallbackTelemetryHistory}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-              <XAxis dataKey="time" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
-              <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
-              <Tooltip />
-              <Line type="monotone" dataKey="flow" stroke="#2F80ED" strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
+        <Grid container spacing={2.5} sx={{ mb: 3 }}>
+          <Grid item xs={6} sm={3}>
+            <StatCard title="Flow Rate" value={`${telemetry.currentFlowRate || 0} L/min`} icon={<Wifi />} color="primary" />
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <StatCard title="Total Usage" value={`${(telemetry.totalUsage || 0).toLocaleString()} L`} icon={<Wifi />} color="info" />
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <StatCard title="Signal" value={telemetry.signalStrength ?? '—'} icon={<SignalCellularAlt />} color="warning" />
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <StatCard title="Last Seen" value={telemetry.lastSeen ? dayjs(telemetry.lastSeen).format('HH:mm') : '—'} icon={<History />} color="text.secondary" />
+          </Grid>
+        </Grid>
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.15 }}>
+        <Card sx={{ mb: 3 }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ mb: 2 }}>Controls</Typography>
+            <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
+              <Button variant="contained" color="success" startIcon={<PlayArrow />}
+                onClick={() => sendCommand('OPEN')} disabled={commandLoading || telemetry.valveStatus === 'OPEN'}>
+                Open Valve
+              </Button>
+              <Button variant="contained" color="error" startIcon={<Stop />}
+                onClick={() => sendCommand('CLOSE')} disabled={commandLoading || telemetry.valveStatus === 'CLOSED'}>
+                Close Valve
+              </Button>
+              <Button variant="outlined" color="warning" startIcon={<Refresh />}
+                onClick={() => sendCommand('RESET_ALERT')} disabled={commandLoading}>
+                Reset Alert
+              </Button>
+              <Button variant="outlined" startIcon={<PlayArrow />}
+                onClick={() => sendCommand('START_SIMULATION')} disabled={commandLoading}>
+                Start Simulator
+              </Button>
+              <Button variant="outlined" color="error" startIcon={<Stop />}
+                onClick={() => sendCommand('STOP_SIMULATION')} disabled={commandLoading}>
+                Stop Simulator
+              </Button>
+            </Stack>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }}>
+        <Card>
+          <CardContent>
+            <Typography variant="h6" sx={{ mb: 2 }}>Flow Rate History</Typography>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={readings.length > 0 ? readings : fallbackTelemetryHistory}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                <XAxis dataKey="time" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
+                <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
+                <Tooltip />
+                <Line type="monotone" dataKey="flow" stroke="#2F80ED" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </motion.div>
     </Box>
   );
 }

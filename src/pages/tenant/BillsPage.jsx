@@ -76,46 +76,49 @@ export function BillsPage() {
         </Box>
       </motion.div>
 
-      <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={4}>
-          <Card sx={{ borderRadius: 3, background: 'linear-gradient(135deg, #2F80ED 0%, #00B4D8 100%)', color: '#fff' }}>
-            <CardContent sx={{ p: 2.5 }}>
-              <Typography variant="caption" sx={{ opacity: 0.8, fontWeight: 600 }}>CURRENT BILL</Typography>
-              <Typography variant="h3" sx={{ fontWeight: 800, mt: 1 }}>GHS {currentBillAmount.toFixed(2)}</Typography>
-              <Typography variant="caption" sx={{ opacity: 0.8 }}>Current period</Typography>
-              <Box sx={{ mt: 2 }}>
-                <Button variant="contained" fullWidth sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }} endIcon={<PaymentIcon />}>
-                  Pay Now
-                </Button>
-              </Box>
-            </CardContent>
-          </Card>
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
+        <Grid container spacing={2.5} sx={{ mb: 3 }}>
+          <Grid item xs={12} sm={4}>
+            <Card sx={{ borderRadius: 3, background: 'linear-gradient(135deg, #2F80ED 0%, #00B4D8 100%)', color: '#fff' }}>
+              <CardContent sx={{ p: 2.5 }}>
+                <Typography variant="caption" sx={{ opacity: 0.8, fontWeight: 600 }}>CURRENT BILL</Typography>
+                <Typography variant="h3" sx={{ fontWeight: 800, mt: 1 }}>GHS {currentBillAmount.toFixed(2)}</Typography>
+                <Typography variant="caption" sx={{ opacity: 0.8 }}>Current period</Typography>
+                <Box sx={{ mt: 2 }}>
+                  <Button variant="contained" fullWidth sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }} endIcon={<PaymentIcon />}>
+                    Pay Now
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Card sx={{ borderRadius: 3 }}>
+              <CardContent sx={{ p: 2.5 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>LAST PAYMENT</Typography>
+                <Typography variant="h4" sx={{ fontWeight: 800, mt: 1 }}>GHS {totalPaid.toFixed(2)}</Typography>
+                <Typography variant="caption" color="text.secondary">Total paid (YTD)</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Card sx={{ borderRadius: 3 }}>
+              <CardContent sx={{ p: 2.5 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>OUTSTANDING</Typography>
+                <Typography variant="h4" sx={{ fontWeight: 800, mt: 1, color: outstandingBalance > 0 ? 'error.main' : 'success.main' }}>
+                  GHS {outstandingBalance.toFixed(2)}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">{outstandingBalance > 0 ? 'Due for payment' : 'All paid'}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={4}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent sx={{ p: 2.5 }}>
-              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>LAST PAYMENT</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 800, mt: 1 }}>GHS {totalPaid.toFixed(2)}</Typography>
-              <Typography variant="caption" color="text.secondary">Total paid (YTD)</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent sx={{ p: 2.5 }}>
-              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>OUTSTANDING</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 800, mt: 1, color: outstandingBalance > 0 ? 'error.main' : 'success.main' }}>
-                GHS {outstandingBalance.toFixed(2)}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">{outstandingBalance > 0 ? 'Due for payment' : 'All paid'}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+      </motion.div>
 
-      <Card sx={{ borderRadius: 3 }}>
-        <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Bill History</Typography>
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.15 }}>
+        <Card sx={{ borderRadius: 3 }}>
+          <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Bill History</Typography>
           {bills.length > 0 ? (
             <List sx={{ p: 0 }}>
               {bills.map((bill, i) => (
@@ -166,8 +169,9 @@ export function BillsPage() {
               <Typography variant="body2" color="text.secondary">No bills found</Typography>
             </Box>
           )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </motion.div>
     </Box>
   );
 }

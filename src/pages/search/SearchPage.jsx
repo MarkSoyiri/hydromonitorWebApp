@@ -7,6 +7,7 @@ import {
 import { Search, Business, MeetingRoom, DevicesOther, People, Warning } from '@mui/icons-material';
 import { PageHeader, EmptyState } from '@/components/common';
 import { buildingService, roomService, deviceService, tenantService, alertService } from '@/services';
+import { motion } from 'framer-motion';
 import { extractList } from '@/utils/response';
 
 export function SearchPage() {
@@ -102,25 +103,29 @@ export function SearchPage() {
 
   return (
     <Box>
-      <PageHeader title="Search" subtitle="Search buildings, rooms, devices, tenants, and more" />
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <PageHeader title="Search" subtitle="Search buildings, rooms, devices, tenants, and more" />
+      </motion.div>
 
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <TextField
-            fullWidth
-            placeholder="Search anything..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            autoFocus
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start"><Search /></InputAdornment>
-              ),
-            }}
-            sx={{ '& .MuiOutlinedInput-root': { fontSize: '1.1rem' } }}
-          />
-        </CardContent>
-      </Card>
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.3 }}>
+        <Card sx={{ mb: 3 }}>
+          <CardContent>
+            <TextField
+              fullWidth
+              placeholder="Search anything..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              autoFocus
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start"><Search /></InputAdornment>
+                ),
+              }}
+              sx={{ '& .MuiOutlinedInput-root': { fontSize: '1.1rem' } }}
+            />
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {loading && (
         <Card>
@@ -137,24 +142,26 @@ export function SearchPage() {
       )}
 
       {!loading && filtered.length > 0 && (
-        <Card>
-          <List disablePadding>
-            {filtered.map((item, i) => (
-              <Box key={i}>
-                <ListItemButton onClick={() => navigate(item.path)}>
-                  <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
-                  <ListItemText
-                    primary={item.label}
-                    secondary={item.type}
-                    primaryTypographyProps={{ fontWeight: 500 }}
-                  />
-                  <Chip label={item.type} size="small" variant="outlined" />
-                </ListItemButton>
-                {i < filtered.length - 1 && <Divider component="li" />}
-              </Box>
-            ))}
-          </List>
-        </Card>
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.3 }}>
+          <Card>
+            <List disablePadding>
+              {filtered.map((item, i) => (
+                <Box key={i}>
+                  <ListItemButton onClick={() => navigate(item.path)}>
+                    <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
+                    <ListItemText
+                      primary={item.label}
+                      secondary={item.type}
+                      primaryTypographyProps={{ fontWeight: 500 }}
+                    />
+                    <Chip label={item.type} size="small" variant="outlined" />
+                  </ListItemButton>
+                  {i < filtered.length - 1 && <Divider component="li" />}
+                </Box>
+              ))}
+            </List>
+          </Card>
+        </motion.div>
       )}
     </Box>
   );

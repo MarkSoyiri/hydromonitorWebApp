@@ -61,39 +61,42 @@ export function PaymentsPage() {
         </Box>
       </motion.div>
 
-      <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={4}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
-              <CheckCircle sx={{ fontSize: 32, color: 'success.main', mb: 1 }} />
-              <Typography variant="h4" sx={{ fontWeight: 800 }}>{successfulPayments}</Typography>
-              <Typography variant="body2" color="text.secondary">Successful Payments</Typography>
-            </CardContent>
-          </Card>
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
+        <Grid container spacing={2.5} sx={{ mb: 3 }}>
+          <Grid item xs={12} sm={4}>
+            <Card sx={{ borderRadius: 3 }}>
+              <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
+                <CheckCircle sx={{ fontSize: 32, color: 'success.main', mb: 1 }} />
+                <Typography variant="h4" sx={{ fontWeight: 800 }}>{successfulPayments}</Typography>
+                <Typography variant="body2" color="text.secondary">Successful Payments</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Card sx={{ borderRadius: 3 }}>
+              <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
+                <Payment sx={{ fontSize: 32, color: 'primary.main', mb: 1 }} />
+                <Typography variant="h4" sx={{ fontWeight: 800 }}>GHS {totalPaid.toFixed(2)}</Typography>
+                <Typography variant="body2" color="text.secondary">Total Paid (YTD)</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Card sx={{ borderRadius: 3 }}>
+              <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
+                <Schedule sx={{ fontSize: 32, color: 'warning.main', mb: 1 }} />
+                <Typography variant="h4" sx={{ fontWeight: 800 }}>GHS {outstandingBalance.toFixed(2)}</Typography>
+                <Typography variant="body2" color="text.secondary">Pending Payment</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={4}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
-              <Payment sx={{ fontSize: 32, color: 'primary.main', mb: 1 }} />
-              <Typography variant="h4" sx={{ fontWeight: 800 }}>GHS {totalPaid.toFixed(2)}</Typography>
-              <Typography variant="body2" color="text.secondary">Total Paid (YTD)</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
-              <Schedule sx={{ fontSize: 32, color: 'warning.main', mb: 1 }} />
-              <Typography variant="h4" sx={{ fontWeight: 800 }}>GHS {outstandingBalance.toFixed(2)}</Typography>
-              <Typography variant="body2" color="text.secondary">Pending Payment</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+      </motion.div>
 
-      <Card sx={{ borderRadius: 3 }}>
-        <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>All Payments</Typography>
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.15 }}>
+        <Card sx={{ borderRadius: 3 }}>
+          <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>All Payments</Typography>
           {payments.length > 0 ? (
             <List sx={{ p: 0 }}>
               {payments.map((p, i) => (
@@ -128,8 +131,9 @@ export function PaymentsPage() {
               <Typography variant="body2" color="text.secondary">No payments found</Typography>
             </Box>
           )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </motion.div>
     </Box>
   );
 }

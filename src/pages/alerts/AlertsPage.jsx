@@ -6,6 +6,7 @@ import { Warning, CheckCircle, Error as ErrorIcon, Info } from '@mui/icons-mater
 import { PageHeader, StatCard, DataTable, StatusChip } from '@/components/common';
 import { alertService } from '@/services';
 import { extractList } from '@/utils/response';
+import { motion } from 'framer-motion';
 import dayjs from 'dayjs';
 
 const columns = [
@@ -79,35 +80,41 @@ export function AlertsPage() {
 
   return (
     <Box>
-      <PageHeader title="Alerts" subtitle="Real-time alerts and notifications" />
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <PageHeader title="Alerts" subtitle="Real-time alerts and notifications" />
+      </motion.div>
 
-      <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid item xs={6} sm={3}>
-          <StatCard title="Total" value={alerts.length} icon={<Warning />} color="primary" />
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.3 }}>
+        <Grid container spacing={2.5} sx={{ mb: 3 }}>
+          <Grid item xs={6} sm={3}>
+            <StatCard title="Total" value={alerts.length} icon={<Warning />} color="primary" />
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <StatCard title="Active" value={activeAlerts.length} icon={<ErrorIcon />} color="error" />
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <StatCard title="Leaks" value={leakAlerts.length} icon={<Warning />} color="warning" />
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <StatCard title="Critical" value={criticalAlerts.length} icon={<ErrorIcon />} color="error" />
+          </Grid>
         </Grid>
-        <Grid item xs={6} sm={3}>
-          <StatCard title="Active" value={activeAlerts.length} icon={<ErrorIcon />} color="error" />
-        </Grid>
-        <Grid item xs={6} sm={3}>
-          <StatCard title="Leaks" value={leakAlerts.length} icon={<Warning />} color="warning" />
-        </Grid>
-        <Grid item xs={6} sm={3}>
-          <StatCard title="Critical" value={criticalAlerts.length} icon={<ErrorIcon />} color="error" />
-        </Grid>
-      </Grid>
+      </motion.div>
 
-      <Card>
-        <CardContent>
-          <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
-            <Tab label="All" />
-            <Tab label="Active" />
-            <Tab label="Resolved" />
-            <Tab label="Leaks" />
-            <Tab label="Critical" />
-          </Tabs>
-          <DataTable columns={columns} rows={displayAlerts} loading={loading} />
-        </CardContent>
-      </Card>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.3 }}>
+        <Card>
+          <CardContent>
+            <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
+              <Tab label="All" />
+              <Tab label="Active" />
+              <Tab label="Resolved" />
+              <Tab label="Leaks" />
+              <Tab label="Critical" />
+            </Tabs>
+            <DataTable columns={columns} rows={displayAlerts} loading={loading} />
+          </CardContent>
+        </Card>
+      </motion.div>
     </Box>
   );
 }

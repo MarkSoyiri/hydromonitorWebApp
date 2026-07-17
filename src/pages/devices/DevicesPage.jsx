@@ -11,6 +11,7 @@ import { PageHeader, DataTable, StatusChip, ConfirmDialog } from '@/components/c
 import { deviceService, buildingService } from '@/services';
 import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
+import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 const columns = [
@@ -124,16 +125,20 @@ export function DevicesPage() {
 
   return (
     <Box>
-      <PageHeader title="Devices" subtitle="Monitor and manage all IoT devices" action actionLabel="Add Device" onAction={openCreate} />
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <PageHeader title="Devices" subtitle="Monitor and manage all IoT devices" action actionLabel="Add Device" onAction={openCreate} />
+      </motion.div>
 
-      <DataTable
-        columns={columns}
-        rows={devices}
-        loading={loading}
-        onRowClick={(row) => navigate(`${basePath}/devices/${row.deviceId}`)}
-        emptyTitle="No devices registered"
-        emptyAction={isSuperAdmin && <Button variant="contained" startIcon={<Add />} onClick={openCreate}>Add Device</Button>}
-      />
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.3 }}>
+        <DataTable
+          columns={columns}
+          rows={devices}
+          loading={loading}
+          onRowClick={(row) => navigate(`${basePath}/devices/${row.deviceId}`)}
+          emptyTitle="No devices registered"
+          emptyAction={isSuperAdmin && <Button variant="contained" startIcon={<Add />} onClick={openCreate}>Add Device</Button>}
+        />
+      </motion.div>
 
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>{editing ? 'Edit Device' : 'Add Device'}</DialogTitle>

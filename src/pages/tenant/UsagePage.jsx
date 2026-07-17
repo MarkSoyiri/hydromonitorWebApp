@@ -124,114 +124,126 @@ export function UsagePage() {
         </Box>
       </motion.div>
 
-      <Grid container spacing={2.5}>
-        <Grid item xs={12} sm={4}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
-              <WaterDrop sx={{ fontSize: 32, color: 'primary.main', mb: 1 }} />
-              <Typography variant="h4" sx={{ fontWeight: 800 }}>{todayUsage.toLocaleString()} L</Typography>
-              <Typography variant="body2" color="text.secondary">Today's Usage</Typography>
-            </CardContent>
-          </Card>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
+        <Grid container spacing={2.5} sx={{ mb: 3 }}>
+          <Grid item xs={12} sm={4}>
+            <Card sx={{ borderRadius: 3 }}>
+              <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
+                <WaterDrop sx={{ fontSize: 32, color: 'primary.main', mb: 1 }} />
+                <Typography variant="h4" sx={{ fontWeight: 800 }}>{todayUsage.toLocaleString()} L</Typography>
+                <Typography variant="body2" color="text.secondary">Today's Usage</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Card sx={{ borderRadius: 3 }}>
+              <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
+                <TrendingUp sx={{ fontSize: 32, color: 'warning.main', mb: 1 }} />
+                <Typography variant="h4" sx={{ fontWeight: 800 }}>{currentUsage.toLocaleString()} L</Typography>
+                <Typography variant="body2" color="text.secondary">This Month</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Card sx={{ borderRadius: 3 }}>
+              <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
+                <Speed sx={{ fontSize: 32, color: 'success.main', mb: 1 }} />
+                <Typography variant="h4" sx={{ fontWeight: 800 }}>{dailyAvg.toFixed(0)} L</Typography>
+                <Typography variant="body2" color="text.secondary">Daily Average</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={4}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
-              <TrendingUp sx={{ fontSize: 32, color: 'warning.main', mb: 1 }} />
-              <Typography variant="h4" sx={{ fontWeight: 800 }}>{currentUsage.toLocaleString()} L</Typography>
-              <Typography variant="body2" color="text.secondary">This Month</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
-              <Speed sx={{ fontSize: 32, color: 'success.main', mb: 1 }} />
-              <Typography variant="h4" sx={{ fontWeight: 800 }}>{dailyAvg.toFixed(0)} L</Typography>
-              <Typography variant="body2" color="text.secondary">Daily Average</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+      </motion.div>
 
+      <Grid container spacing={2.5}>
         <Grid item xs={12} md={8}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent sx={{ p: 2.5 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Hourly Usage Today</Typography>
-              <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={hourlyData}>
-                  <defs><linearGradient id="hourlyGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#2F80ED" stopOpacity={0.3} /><stop offset="95%" stopColor="#2F80ED" stopOpacity={0} /></linearGradient></defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                  <XAxis dataKey="hour" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
-                  <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Area type="monotone" dataKey="usage" stroke="#2F80ED" fill="url(#hourlyGrad)" strokeWidth={2} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.15 }}>
+            <Card sx={{ borderRadius: 3 }}>
+              <CardContent sx={{ p: 2.5 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Hourly Usage Today</Typography>
+                <ResponsiveContainer width="100%" height={300}>
+                  <AreaChart data={hourlyData}>
+                    <defs><linearGradient id="hourlyGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#2F80ED" stopOpacity={0.3} /><stop offset="95%" stopColor="#2F80ED" stopOpacity={0} /></linearGradient></defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                    <XAxis dataKey="hour" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
+                    <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Area type="monotone" dataKey="usage" stroke="#2F80ED" fill="url(#hourlyGrad)" strokeWidth={2} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </motion.div>
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Card sx={{ borderRadius: 3, height: '100%' }}>
-            <CardContent sx={{ p: 2.5 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Usage Summary</Typography>
-              {readings.length === 0 ? (
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}>
-                  <Typography color="text.secondary">No readings data available</Typography>
-                </Box>
-              ) : (
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={[
-                        { name: 'Today', value: todayUsage },
-                        { name: 'This Month', value: Math.max(0, currentUsage - todayUsage) },
-                      ]}
-                      cx="50%" cy="50%" innerRadius={50} outerRadius={90} paddingAngle={4} dataKey="value"
-                    >
-                      <Cell fill="#2F80ED" />
-                      <Cell fill="#00B4D8" />
-                    </Pie>
-                    <Legend />
-                  </PieChart>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }}>
+            <Card sx={{ borderRadius: 3, height: '100%' }}>
+              <CardContent sx={{ p: 2.5 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Usage Summary</Typography>
+                {readings.length === 0 ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}>
+                    <Typography color="text.secondary">No readings data available</Typography>
+                  </Box>
+                ) : (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: 'Today', value: todayUsage },
+                          { name: 'This Month', value: Math.max(0, currentUsage - todayUsage) },
+                        ]}
+                        cx="50%" cy="50%" innerRadius={50} outerRadius={90} paddingAngle={4} dataKey="value"
+                      >
+                        <Cell fill="#2F80ED" />
+                        <Cell fill="#00B4D8" />
+                      </Pie>
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.25 }}>
+            <Card sx={{ borderRadius: 3 }}>
+              <CardContent sx={{ p: 2.5 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Weekly Usage</Typography>
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={weeklyData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                    <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
+                    <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Bar dataKey="usage" fill="#2F80ED" radius={[6, 6, 0, 0]} maxBarSize={40} />
+                  </BarChart>
                 </ResponsiveContainer>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </motion.div>
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent sx={{ p: 2.5 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Weekly Usage</Typography>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={weeklyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                  <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
-                  <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="usage" fill="#2F80ED" radius={[6, 6, 0, 0]} maxBarSize={40} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent sx={{ p: 2.5 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Monthly Trend</Typography>
-              <ResponsiveContainer width="100%" height={250}>
-                <LineChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
-                  <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Line type="monotone" dataKey="usage" stroke="#2F80ED" strokeWidth={3} dot={{ fill: '#2F80ED', r: 4 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.3 }}>
+            <Card sx={{ borderRadius: 3 }}>
+              <CardContent sx={{ p: 2.5 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Monthly Trend</Typography>
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                    <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
+                    <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Line type="monotone" dataKey="usage" stroke="#2F80ED" strokeWidth={3} dot={{ fill: '#2F80ED', r: 4 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </motion.div>
         </Grid>
       </Grid>
     </Box>

@@ -232,7 +232,7 @@ function TenantTopbar({ onMenuOpen }) {
     <AppBar position="sticky" color="inherit" elevation={0} sx={{
       borderBottom: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.04)',
       background: isDark ? 'rgba(13,27,42,0.8)' : 'rgba(255,255,255,0.8)',
-      backdropFilter: 'blur(20px)',
+      backdropFilter: 'blur(24px) saturate(180%)',
     }}>
       <Toolbar sx={{ minHeight: 64, px: { xs: 1.5, sm: 3 } }}>
         <IconButton edge="start" onClick={onMenuOpen} sx={{ mr: 1, display: { md: 'none' } }}>
@@ -332,7 +332,7 @@ export function TenantLayout() {
           <motion.main
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
             <Outlet />
           </motion.main>

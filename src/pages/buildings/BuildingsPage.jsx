@@ -12,6 +12,7 @@ import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api';
 import { ENDPOINTS, buildPath } from '@/constants';
 import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
+import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 const columns = [
@@ -107,27 +108,31 @@ export function BuildingsPage() {
 
   return (
     <Box>
-      <PageHeader
-        title="Buildings"
-        subtitle="Manage all buildings in the system"
-        action
-        actionLabel="Add Building"
-        onAction={openCreate}
-      />
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <PageHeader
+          title="Buildings"
+          subtitle="Manage all buildings in the system"
+          action
+          actionLabel="Add Building"
+          onAction={openCreate}
+        />
+      </motion.div>
 
-      <DataTable
-        columns={columns}
-        rows={buildings}
-        loading={loading}
-        onRowClick={(row) => navigate(`/super-admin/buildings/${row.buildingId}`)}
-        emptyTitle="No buildings found"
-        emptyDescription="Create your first building to get started."
-        emptyAction={isSuperAdmin && (
-          <Button variant="contained" startIcon={<Add />} onClick={openCreate}>
-            Add Building
-          </Button>
-        )}
-      />
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.3 }}>
+        <DataTable
+          columns={columns}
+          rows={buildings}
+          loading={loading}
+          onRowClick={(row) => navigate(`/super-admin/buildings/${row.buildingId}`)}
+          emptyTitle="No buildings found"
+          emptyDescription="Create your first building to get started."
+          emptyAction={isSuperAdmin && (
+            <Button variant="contained" startIcon={<Add />} onClick={openCreate}>
+              Add Building
+            </Button>
+          )}
+        />
+      </motion.div>
 
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>{editing ? 'Edit Building' : 'Add Building'}</DialogTitle>

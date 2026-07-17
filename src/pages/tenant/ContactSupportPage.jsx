@@ -44,26 +44,28 @@ export function ContactSupportPage() {
         ))}
       </Grid>
 
-      <Card sx={{ borderRadius: 3 }}>
-        <CardContent sx={{ p: 2.5 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Report an Issue</Typography>
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            placeholder="Describe your issue or question..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            variant="outlined"
-            sx={{ mb: 2 }}
-          />
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button variant="contained" endIcon={<Send />} onClick={handleSubmit} disabled={!message.trim()}>
-              Send Message
-            </Button>
-          </Box>
-        </CardContent>
-      </Card>
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.15 }}>
+        <Card sx={{ borderRadius: 3 }}>
+          <CardContent sx={{ p: 2.5 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Report an Issue</Typography>
+            <TextField
+              fullWidth
+              multiline
+              rows={4}
+              placeholder="Describe your issue or question..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              variant="outlined"
+              sx={{ mb: 2 }}
+            />
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button variant="contained" endIcon={<Send />} onClick={handleSubmit} disabled={!message.trim()}>
+                Send Message
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
+      </motion.div>
     </Box>
   );
 }

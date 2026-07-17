@@ -45,10 +45,32 @@ const fallbackYearlyData = [
   { month: 'Dec', usage: 0 },
 ];
 
+const sectionVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.1, duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
+  }),
+};
+
+const SectionHeader = ({ title, subtitle }) => (
+  <Box sx={{ mb: 2 }}>
+    <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em' }}>
+      {title}
+    </Typography>
+    {subtitle && (
+      <Typography variant="caption" color="text.secondary">
+        {subtitle}
+      </Typography>
+    )}
+  </Box>
+);
+
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <Card sx={{ p: 1.5, boxShadow: 4 }}>
+      <Card sx={{ p: 1.5, boxShadow: 4, borderRadius: 2 }}>
         <Typography variant="caption" color="text.secondary">{label}</Typography>
         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
           {payload[0].value.toLocaleString()} L
@@ -110,87 +132,53 @@ export function DashboardPage() {
         subtitle="Here's an overview of your water monitoring system"
       />
 
-      <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Buildings"
-            value={stats?.totalBuildings ?? 0}
-            icon={<Business />}
-            color="primary"
-            loading={loading}
-          />
+      {/* Overview Section */}
+      <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={0}>
+        <SectionHeader title="Overview" subtitle="Key metrics at a glance" />
+        <Grid container spacing={2.5} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatCard title="Total Buildings" value={stats?.totalBuildings ?? 0} icon={<Business />} color="primary" loading={loading} index={0} />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatCard title="Total Rooms" value={stats?.totalRooms ?? 0} icon={<MeetingRoom />} color="info" loading={loading} index={1} />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatCard title="Active Tenants" value={stats?.activeTenants ?? 0} icon={<People />} color="warning" loading={loading} index={2} />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatCard title="Total Devices" value={stats?.totalDevices ?? 0} icon={<DevicesOther />} color="success" loading={loading} index={3} />
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Rooms"
-            value={stats?.totalRooms ?? 0}
-            icon={<MeetingRoom />}
-            color="info"
-            loading={loading}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Devices"
-            value={stats?.totalDevices ?? 0}
-            icon={<DevicesOther />}
-            color="success"
-            loading={loading}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Active Tenants"
-            value={stats?.activeTenants ?? 0}
-            icon={<People />}
-            color="warning"
-            loading={loading}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Today's Usage"
-            value={stats?.totalUsageToday ? `${Number(stats.totalUsageToday).toLocaleString()} L` : '0 L'}
-            icon={<WaterDrop />}
-            color="info"
-            loading={loading}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Occupied Rooms"
-            value={stats?.occupiedRooms ?? 0}
-            icon={<MeetingRoom />}
-            color="primary"
-            loading={loading}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Active Alerts"
-            value={stats?.unresolvedAlerts ?? 0}
-            icon={<Warning />}
-            color="error"
-            loading={loading}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Total Alerts"
-            value={stats?.recentAlerts ?? 0}
-            icon={<TrendingUp />}
-            color="primary"
-            loading={loading}
-          />
-        </Grid>
-      </Grid>
+      </motion.div>
 
-      <Grid container spacing={2.5}>
-        <Grid item xs={12} md={8}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+      <Divider sx={{ mb: 4 }} />
+
+      {/* Live Monitoring Section */}
+      <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={1}>
+        <SectionHeader title="Live Monitoring" subtitle="Real-time system status" />
+        <Grid container spacing={2.5} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={6} md={4}>
+            <StatCard title="Today's Usage" value={stats?.totalUsageToday ? `${Number(stats.totalUsageToday).toLocaleString()} L` : '0 L'} icon={<WaterDrop />} color="info" loading={loading} index={4} />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <StatCard title="Occupied Rooms" value={stats?.occupiedRooms ?? 0} icon={<MeetingRoom />} color="primary" loading={loading} index={5} />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <StatCard title="Active Alerts" value={stats?.unresolvedAlerts ?? 0} icon={<Warning />} color="error" loading={loading} index={6} />
+          </Grid>
+        </Grid>
+      </motion.div>
+
+      <Divider sx={{ mb: 4 }} />
+
+      {/* Charts & Activity Section */}
+      <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={2}>
+        <SectionHeader title="Analytics" subtitle="Usage trends and recent activity" />
+        <Grid container spacing={2.5} sx={{ mb: 4 }}>
+          <Grid item xs={12} md={8}>
             <Card>
               <CardContent>
-                <Typography variant="h6" sx={{ mb: 2 }}>Weekly Water Consumption</Typography>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Weekly Water Consumption</Typography>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={analytics?.weeklyUsage || fallbackWeeklyData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
@@ -202,14 +190,12 @@ export function DashboardPage() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </motion.div>
-        </Grid>
+          </Grid>
 
-        <Grid item xs={12} md={4}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          <Grid item xs={12} md={4}>
             <Card sx={{ height: '100%' }}>
               <CardContent>
-                <Typography variant="h6" sx={{ mb: 2 }}>Recent Activity</Typography>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Recent Activity</Typography>
                 <List dense>
                   {stats?.recentAlerts ? (
                     <ListItem sx={{ px: 0 }}>
@@ -235,14 +221,12 @@ export function DashboardPage() {
                 </List>
               </CardContent>
             </Card>
-          </motion.div>
-        </Grid>
+          </Grid>
 
-        <Grid item xs={12}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+          <Grid item xs={12}>
             <Card>
               <CardContent>
-                <Typography variant="h6" sx={{ mb: 2 }}>Yearly Consumption Trend</Typography>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Yearly Consumption Trend</Typography>
                 <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={analytics?.monthlyTrend || fallbackYearlyData}>
                     <defs>
@@ -260,21 +244,24 @@ export function DashboardPage() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </motion.div>
+          </Grid>
         </Grid>
+      </motion.div>
 
-        {(isAdmin || isSuperAdmin) && (
-          <Grid item xs={12}>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" sx={{ mb: 2 }}>Quick Actions</Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
-                    {quickActions
-                      .filter((action) => action.roles.includes(profile?.role))
-                      .map((action) => (
+      {/* Quick Actions Section */}
+      {(isAdmin || isSuperAdmin) && (
+        <>
+          <Divider sx={{ mb: 4 }} />
+          <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={3}>
+            <SectionHeader title="Quick Actions" subtitle="Common tasks" />
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
+                  {quickActions
+                    .filter((action) => action.roles.includes(profile?.role))
+                    .map((action) => (
+                      <motion.div key={action.label} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                         <Button
-                          key={action.label}
                           variant="outlined"
                           startIcon={action.icon}
                           onClick={() => navigate(action.path)}
@@ -295,14 +282,14 @@ export function DashboardPage() {
                         >
                           {action.label}
                         </Button>
-                      ))}
-                  </Box>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </Grid>
-        )}
-      </Grid>
+                      </motion.div>
+                    ))}
+                </Box>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </>
+      )}
     </Box>
   );
 }

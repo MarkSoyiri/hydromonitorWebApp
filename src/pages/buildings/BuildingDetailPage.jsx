@@ -22,6 +22,7 @@ import { alertService } from '@/services/alertService';
 import { analyticsService } from '@/services/analyticsService';
 import { usageService } from '@/services/usageService';
 import { extractList } from '@/utils/response';
+import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 const PIE_COLORS = ['#4caf50', '#f44336', '#ff9800'];
@@ -273,55 +274,60 @@ export function BuildingDetailPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-        <IconButton onClick={() => navigate('/super-admin/buildings')}><ArrowBack /></IconButton>
-        <Box sx={{ flex: 1 }}>
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>{building.name}</Typography>
-          <Typography variant="body2" color="text.secondary">{building.address}</Typography>
-          {building.description && (
-            <Typography variant="caption" color="text.disabled">{building.description}</Typography>
-          )}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+          <IconButton onClick={() => navigate('/super-admin/buildings')}><ArrowBack /></IconButton>
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="h4" sx={{ fontWeight: 700 }}>{building.name}</Typography>
+            <Typography variant="body2" color="text.secondary">{building.address}</Typography>
+            {building.description && (
+              <Typography variant="caption" color="text.disabled">{building.description}</Typography>
+            )}
+          </Box>
+          <StatusChip status={building.status} />
+          <Button variant="outlined" startIcon={<Edit />} onClick={() => navigate('/super-admin/buildings')}>
+            Edit Building
+          </Button>
         </Box>
-        <StatusChip status={building.status} />
-        <Button variant="outlined" startIcon={<Edit />} onClick={() => navigate('/super-admin/buildings')}>
-          Edit Building
-        </Button>
-      </Box>
+      </motion.div>
 
-      <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid item xs={6} sm={3}>
-          <StatCard title="Total Rooms" value={occupancy.totalRooms ?? 0} icon={<MeetingRoom />} color="primary" />
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
+        <Grid container spacing={2.5} sx={{ mb: 3 }}>
+          <Grid item xs={6} sm={3}>
+            <StatCard title="Total Rooms" value={occupancy.totalRooms ?? 0} icon={<MeetingRoom />} color="primary" />
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <StatCard title="Occupied" value={occupancy.occupiedRooms ?? 0} icon={<People />} color="success" subtitle={`${vacantRooms} vacant`} />
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <StatCard title="Devices" value={devices.length} icon={<DevicesOther />} color="info" subtitle={`${onlineDevices} online`} />
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <StatCard
+              title="Active Alerts"
+              value={unresolvedAlerts}
+              icon={<Warning />}
+              color={unresolvedAlerts > 0 ? 'error' : 'success'}
+              subtitle={unresolvedAlerts === 0 ? 'All clear' : 'Needs attention'}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={6} sm={3}>
-          <StatCard title="Occupied" value={occupancy.occupiedRooms ?? 0} icon={<People />} color="success" subtitle={`${vacantRooms} vacant`} />
-        </Grid>
-        <Grid item xs={6} sm={3}>
-          <StatCard title="Devices" value={devices.length} icon={<DevicesOther />} color="info" subtitle={`${onlineDevices} online`} />
-        </Grid>
-        <Grid item xs={6} sm={3}>
-          <StatCard
-            title="Active Alerts"
-            value={unresolvedAlerts}
-            icon={<Warning />}
-            color={unresolvedAlerts > 0 ? 'error' : 'success'}
-            subtitle={unresolvedAlerts === 0 ? 'All clear' : 'Needs attention'}
-          />
-        </Grid>
-      </Grid>
+      </motion.div>
 
-      <Card sx={{ mb: 3 }}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto">
-            <Tab label="Overview" />
-            <Tab label={`Rooms (${rooms.length})`} />
-            <Tab label={`Devices (${devices.length})`} />
-            <Tab label={`Tenants (${tenants.length})`} />
-            <Tab label="Analytics" />
-            <Tab label={`Alerts (${unresolvedAlerts})`} />
-          </Tabs>
-        </Box>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.15 }}>
+        <Card sx={{ mb: 3 }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto">
+              <Tab label="Overview" />
+              <Tab label={`Rooms (${rooms.length})`} />
+              <Tab label={`Devices (${devices.length})`} />
+              <Tab label={`Tenants (${tenants.length})`} />
+              <Tab label="Analytics" />
+              <Tab label={`Alerts (${unresolvedAlerts})`} />
+            </Tabs>
+          </Box>
 
-        <CardContent sx={{ p: 3 }}>
+          <CardContent sx={{ p: 3 }}>
           {tab === 0 && (
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
@@ -495,6 +501,7 @@ export function BuildingDetailPage() {
           )}
         </CardContent>
       </Card>
+      </motion.div>
 
       <Dialog open={roomDialogOpen} onClose={() => setRoomDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>{editingRoom ? 'Edit Room' : 'Add Room'}</DialogTitle>

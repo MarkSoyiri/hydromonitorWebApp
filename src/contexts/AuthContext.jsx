@@ -81,8 +81,8 @@ export function AuthProvider({ children }) {
     const credential = await signInWithEmailAndPassword(auth, email, password);
     const token = await credential.user.getIdToken();
     await authService.login(token);
-    await fetchProfile();
-    return credential.user;
+    const profileData = await fetchProfile();
+    return profileData;
   };
 
   const logout = async () => {

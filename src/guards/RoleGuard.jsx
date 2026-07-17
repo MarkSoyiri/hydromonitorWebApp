@@ -1,12 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { getDashboardPath } from '@/constants/roles';
 import { Box, Typography } from '@mui/material';
-
-const roleDashboards = {
-  TENANT: '/app/dashboard',
-  ADMIN: '/app/dashboard',
-  SUPER_ADMIN: '/app/dashboard',
-};
 
 export function RoleGuard({ children, allowedRoles, fallback }) {
   const { profile } = useAuth();
@@ -15,7 +10,7 @@ export function RoleGuard({ children, allowedRoles, fallback }) {
 
   if (allowedRoles && !allowedRoles.includes(profile.role)) {
     if (fallback) return fallback;
-    return <Navigate to={roleDashboards[profile.role] || '/app/dashboard'} replace />;
+    return <Navigate to={getDashboardPath(profile.role)} replace />;
   }
 
   return children;

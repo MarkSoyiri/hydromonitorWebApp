@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { getDashboardPath } from '@/constants/roles';
 import { Box, CircularProgress } from '@mui/material';
 
 export function ProtectedRoute({ children, roles }) {
@@ -19,19 +20,14 @@ export function ProtectedRoute({ children, roles }) {
   }
 
   if (roles && profile && !roles.includes(profile.role)) {
-    const redirectMap = {
-      TENANT: '/app/dashboard',
-      ADMIN: '/admin/dashboard',
-      SUPER_ADMIN: '/super-admin/dashboard',
-    };
-    return <Navigate to={redirectMap[profile.role] || '/app/dashboard'} replace />;
+    return <Navigate to={getDashboardPath(profile.role)} replace />;
   }
 
   return children;
 }
 
 export function PublicRoute({ children }) {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -43,7 +39,7 @@ export function PublicRoute({ children }) {
   }
 
   if (user) {
-    const from = location.state?.from?.pathname || '/app/dashboard';
+    const from = location.state?.from?.pathname || getDashboardPath(profile?.role);
     return <Navigate to={from} replace />;
   }
 

@@ -22,3 +22,11 @@ export const ROLE_HIERARCHY = {
   [ROLES.ADMIN]: 2,
   [ROLES.TENANT]: 1,
 };
+
+export const ROLE_DASHBOARDS = {
+  [ROLES.SUPER_ADMIN]: '/super-admin/dashboard',
+  [ROLES.ADMIN]: '/admin/dashboard',
+  [ROLES.TENANT]: '/app/dashboard',
+};
+
+export const getDashboardPath = (role) => ROLE_DASHBOARDS[role] || '/app/dashboard';

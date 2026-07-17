@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff, WaterDrop } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';
+import { getDashboardPath } from '@/constants/roles';
 import { motion } from 'framer-motion';
 
 export function LoginPage() {
@@ -27,8 +28,8 @@ export function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await login(email, password);
-      navigate('/app/dashboard');
+      const profileData = await login(email, password);
+      navigate(getDashboardPath(profileData?.role));
     } catch (err) {
       const msg = err?.code === 'auth/user-not-found' || err?.code === 'auth/wrong-password' || err?.code === 'auth/invalid-credential'
         ? 'Invalid email or password'

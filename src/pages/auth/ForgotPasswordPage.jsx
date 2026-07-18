@@ -62,7 +62,7 @@ export function ForgotPasswordPage() {
         transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
         style={{ width: '100%', maxWidth: 420 }}
       >
-        <Card>
+        <Card sx={{ backdropFilter: 'blur(40px) saturate(200%)', WebkitBackdropFilter: 'blur(40px) saturate(200%)' }}>
           <CardContent sx={{ p: 4 }}>
             <motion.div
               initial={{ opacity: 0, y: -10 }}

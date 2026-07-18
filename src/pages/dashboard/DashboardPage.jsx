@@ -70,7 +70,7 @@ const SectionHeader = ({ title, subtitle }) => (
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <Card sx={{ p: 1.5, boxShadow: 4, borderRadius: 2 }}>
+      <Card sx={{ p: 1.5, boxShadow: 4, borderRadius: 2, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
         <Typography variant="caption" color="text.secondary">{label}</Typography>
         <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
           {payload[0].value.toLocaleString()} L

@@ -1,13 +1,26 @@
 import { Card, CardContent, Typography, Box, Skeleton } from '@mui/material';
+import { useThemeMode } from '@/contexts/ThemeContext';
 import { motion } from 'framer-motion';
 
 const colorGradients = {
-  primary: 'linear-gradient(135deg, rgba(47,128,237,0.08) 0%, rgba(47,128,237,0.03) 100%)',
-  info: 'linear-gradient(135deg, rgba(47,128,237,0.08) 0%, rgba(95,164,255,0.03) 100%)',
-  success: 'linear-gradient(135deg, rgba(76,175,80,0.08) 0%, rgba(129,199,132,0.03) 100%)',
-  warning: 'linear-gradient(135deg, rgba(251,140,0,0.08) 0%, rgba(255,183,77,0.03) 100%)',
-  error: 'linear-gradient(135deg, rgba(229,57,53,0.08) 0%, rgba(239,83,80,0.03) 100%)',
-  secondary: 'linear-gradient(135deg, rgba(66,165,245,0.08) 0%, rgba(128,201,255,0.03) 100%)',
+  primary: (isDark) => isDark
+    ? 'linear-gradient(135deg, rgba(95,164,255,0.1) 0%, rgba(47,128,237,0.04) 100%)'
+    : 'linear-gradient(135deg, rgba(47,128,237,0.08) 0%, rgba(47,128,237,0.02) 100%)',
+  info: (isDark) => isDark
+    ? 'linear-gradient(135deg, rgba(95,164,255,0.1) 0%, rgba(0,180,216,0.04) 100%)'
+    : 'linear-gradient(135deg, rgba(47,128,237,0.08) 0%, rgba(95,164,255,0.02) 100%)',
+  success: (isDark) => isDark
+    ? 'linear-gradient(135deg, rgba(102,187,106,0.1) 0%, rgba(76,175,80,0.04) 100%)'
+    : 'linear-gradient(135deg, rgba(76,175,80,0.08) 0%, rgba(129,199,132,0.02) 100%)',
+  warning: (isDark) => isDark
+    ? 'linear-gradient(135deg, rgba(255,167,38,0.1) 0%, rgba(251,140,0,0.04) 100%)'
+    : 'linear-gradient(135deg, rgba(251,140,0,0.08) 0%, rgba(255,183,77,0.02) 100%)',
+  error: (isDark) => isDark
+    ? 'linear-gradient(135deg, rgba(239,83,80,0.1) 0%, rgba(229,57,53,0.04) 100%)'
+    : 'linear-gradient(135deg, rgba(229,57,53,0.08) 0%, rgba(239,83,80,0.02) 100%)',
+  secondary: (isDark) => isDark
+    ? 'linear-gradient(135deg, rgba(128,201,255,0.1) 0%, rgba(66,165,245,0.04) 100%)'
+    : 'linear-gradient(135deg, rgba(66,165,245,0.08) 0%, rgba(128,201,255,0.02) 100%)',
 };
 
 const iconGradients = {
@@ -19,7 +32,18 @@ const iconGradients = {
   secondary: 'linear-gradient(135deg, #42A5F5, #80C9FF)',
 };
 
+const iconShadows = {
+  primary: 'rgba(47,128,237,0.25)',
+  success: 'rgba(76,175,80,0.25)',
+  warning: 'rgba(251,140,0,0.25)',
+  error: 'rgba(229,57,53,0.25)',
+  info: 'rgba(47,128,237,0.25)',
+  secondary: 'rgba(66,165,245,0.25)',
+};
+
 export function StatCard({ title, value, icon, color = 'primary', subtitle, loading, trend, trendLabel, onClick, index = 0 }) {
+  const { isDark } = useThemeMode();
+
   if (loading) {
     return (
       <Card sx={{ overflow: 'hidden' }}>
@@ -42,7 +66,7 @@ export function StatCard({ title, value, icon, color = 'primary', subtitle, load
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.06, ease: [0.25, 0.46, 0.45, 0.94] }}
-      whileHover={{ y: -3, transition: { duration: 0.2 } }}
+      whileHover={{ y: -4, transition: { duration: 0.25 } }}
       style={{ height: '100%' }}
     >
       <Card
@@ -52,7 +76,13 @@ export function StatCard({ title, value, icon, color = 'primary', subtitle, load
           height: '100%',
           overflow: 'hidden',
           position: 'relative',
-          background: colorGradients[color] || colorGradients.primary,
+          background: (colorGradients[color] || colorGradients.primary)(isDark),
+          backdropFilter: 'blur(16px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+          border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(255,255,255,0.6)',
+          boxShadow: isDark
+            ? '0 4px 24px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.04)'
+            : '0 4px 24px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.6)',
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -61,7 +91,7 @@ export function StatCard({ title, value, icon, color = 'primary', subtitle, load
             right: 0,
             height: 3,
             background: iconGradients[color] || iconGradients.primary,
-            borderRadius: '16px 16px 0 0',
+            borderRadius: '20px 20px 0 0',
           },
         }}
       >
@@ -129,14 +159,7 @@ export function StatCard({ title, value, icon, color = 'primary', subtitle, load
                 justifyContent: 'center',
                 background: iconGradients[color] || iconGradients.primary,
                 color: '#fff',
-                boxShadow: `0 4px 12px ${
-                  color === 'primary' ? 'rgba(47,128,237,0.25)' :
-                  color === 'success' ? 'rgba(76,175,80,0.25)' :
-                  color === 'warning' ? 'rgba(251,140,0,0.25)' :
-                  color === 'error' ? 'rgba(229,57,53,0.25)' :
-                  color === 'info' ? 'rgba(47,128,237,0.25)' :
-                  'rgba(66,165,245,0.25)'
-                }`,
+                boxShadow: `0 4px 12px ${iconShadows[color] || iconShadows.primary}`,
                 flexShrink: 0,
               }}
             >

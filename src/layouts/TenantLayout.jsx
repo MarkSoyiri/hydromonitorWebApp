@@ -53,9 +53,12 @@ function TenantSidebar({ open, onClose }) {
           width: SIDEBAR_WIDTH,
           boxSizing: 'border-box',
           background: isDark
-            ? 'linear-gradient(180deg, #0D1B2A 0%, #1B2838 100%)'
-            : 'linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)',
+            ? 'linear-gradient(180deg, rgba(13,27,42,0.85) 0%, rgba(27,40,56,0.85) 100%)'
+            : 'linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(248,250,252,0.85) 100%)',
+          backdropFilter: 'blur(32px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(32px) saturate(180%)',
           borderRight: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '4px 0 24px rgba(0,0,0,0.1)',
         },
       }}
     >
@@ -103,11 +106,12 @@ function TenantSidebar({ open, onClose }) {
                 mb: 0.5,
                 py: 1.2,
                 '&.Mui-selected': {
-                  background: active
-                    ? 'linear-gradient(135deg, #2F80ED 0%, #00B4D8 100%)'
-                    : 'transparent',
+                  background: 'linear-gradient(135deg, rgba(47,128,237,0.9), rgba(0,180,216,0.9))',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  boxShadow: '0 4px 16px rgba(47,128,237,0.2)',
                   '&:hover': {
-                    background: 'linear-gradient(135deg, #2F80ED 0%, #00B4D8 100%)',
+                    background: 'linear-gradient(135deg, rgba(47,128,237,0.95), rgba(0,180,216,0.95))',
                   },
                 },
               }}
@@ -157,6 +161,7 @@ function TenantSidebar({ open, onClose }) {
 function TenantBottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isDark } = useThemeMode();
 
   const bottomNavItems = [
     { label: 'Home', path: '/app/dashboard', icon: <DashIcon /> },
@@ -179,7 +184,14 @@ function TenantBottomNav() {
   };
 
   return (
-    <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1100, borderRadius: 0 }} elevation={8}>
+    <Paper sx={{
+      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1100, borderRadius: 0,
+      background: isDark ? 'rgba(7,15,26,0.75)' : 'rgba(255,255,255,0.75)',
+      backdropFilter: 'blur(24px) saturate(200%)',
+      WebkitBackdropFilter: 'blur(24px) saturate(200%)',
+      borderTop: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.04)',
+      boxShadow: '0 -2px 16px rgba(0,0,0,0.04)',
+    }} elevation={0}>
       <BottomNavigation
         value={getValue()}
         onChange={(_, newValue) => navigate(bottomNavItems[newValue].path)}
@@ -231,8 +243,9 @@ function TenantTopbar({ onMenuOpen }) {
   return (
     <AppBar position="sticky" color="inherit" elevation={0} sx={{
       borderBottom: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.04)',
-      background: isDark ? 'rgba(13,27,42,0.8)' : 'rgba(255,255,255,0.8)',
-      backdropFilter: 'blur(24px) saturate(180%)',
+      background: isDark ? 'rgba(13,27,42,0.72)' : 'rgba(255,255,255,0.72)',
+      backdropFilter: 'blur(32px) saturate(200%)',
+      WebkitBackdropFilter: 'blur(32px) saturate(200%)',
     }}>
       <Toolbar sx={{ minHeight: 64, px: { xs: 1.5, sm: 3 } }}>
         <IconButton edge="start" onClick={onMenuOpen} sx={{ mr: 1, display: { md: 'none' } }}>
@@ -280,7 +293,14 @@ function TenantTopbar({ onMenuOpen }) {
           onClose={() => setAnchorEl(null)}
           transformOrigin={{ horizontal: 'right', vertical: 'top' }}
           anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-          PaperProps={{ sx: { minWidth: 200, mt: 1, borderRadius: 2 } }}
+          PaperProps={{ sx: {
+            minWidth: 200, mt: 1, borderRadius: 3,
+            backdropFilter: 'blur(32px) saturate(200%)',
+            WebkitBackdropFilter: 'blur(32px) saturate(200%)',
+            background: isDark ? 'rgba(17,25,33,0.85)' : 'rgba(255,255,255,0.85)',
+            border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(255,255,255,0.6)',
+            boxShadow: isDark ? '0 16px 48px rgba(0,0,0,0.3)' : '0 16px 48px rgba(0,0,0,0.08)',
+          } }}
         >
           <Box sx={{ px: 2, py: 1.5 }}>
             <Typography variant="subtitle2" fontWeight={700}>{profile?.fullName || 'User'}</Typography>

@@ -47,7 +47,7 @@ const superAdminNavGroups = [
   },
 ];
 
-function SuperAdminSidebar({ open, onClose, isMobile }) {
+function SuperAdminSidebar({ open, onClose, onToggle, isMobile }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { profile } = useAuth();
@@ -89,9 +89,13 @@ function SuperAdminSidebar({ open, onClose, isMobile }) {
                 justifyContent: expanded ? 'initial' : 'center',
                 px: expanded ? 1.5 : 0.5,
                 mx: expanded ? 0 : 0.5,
+                transition: 'all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                 '&.Mui-selected': {
-                  bgcolor: 'rgba(47,128,237,0.15)',
-                  '&:hover': { bgcolor: 'rgba(47,128,237,0.2)' },
+                  bgcolor: 'rgba(95,164,255,0.12)',
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)',
+                  boxShadow: '0 2px 8px rgba(95,164,255,0.08)',
+                  '&:hover': { bgcolor: 'rgba(95,164,255,0.18)' },
                 },
               }}
             >
@@ -209,6 +213,8 @@ function SuperAdminSidebar({ open, onClose, isMobile }) {
           p: 2, mx: 1.5, mb: 2, borderRadius: 1.5,
           background: 'linear-gradient(135deg, rgba(47,128,237,0.12), rgba(0,180,216,0.08))',
           border: '1px solid rgba(47,128,237,0.15)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
         }}>
           <Chip
             label={ROLE_LABELS[profile?.role] || 'Super Admin'}
@@ -239,8 +245,11 @@ function SuperAdminSidebar({ open, onClose, isMobile }) {
         sx={{
           '& .MuiDrawer-paper': {
             width: SIDEBAR_WIDTH * 0.85,
-            background: isDark ? '#070F1A' : '#0F1923',
-            borderRight: '1px solid rgba(255,255,255,0.04)',
+            background: isDark ? 'rgba(7,15,26,0.85)' : 'rgba(15,25,35,0.85)',
+            backdropFilter: 'blur(32px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(32px) saturate(180%)',
+            borderRight: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.1)',
+            boxShadow: '4px 0 24px rgba(0,0,0,0.15)',
           },
         }}
       >
@@ -262,12 +271,15 @@ function SuperAdminSidebar({ open, onClose, isMobile }) {
           overflowX: 'hidden',
           display: 'flex',
           flexDirection: 'column',
-          background: isDark ? '#070F1A' : '#0F1923',
-          borderRight: '1px solid rgba(255,255,255,0.04)',
+          background: isDark ? 'rgba(7,15,26,0.85)' : 'rgba(15,25,35,0.85)',
+          backdropFilter: 'blur(32px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(32px) saturate(180%)',
+          borderRight: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.1)',
+          boxShadow: '4px 0 24px rgba(0,0,0,0.15)',
         },
       }}
     >
-      {sidebarBody(open, true, onClose)}
+      {sidebarBody(open, true, onToggle)}
     </Drawer>
   );
 }
@@ -294,15 +306,11 @@ function SuperAdminTopbar({ onMenuToggle }) {
   return (
     <AppBar position="sticky" color="inherit" elevation={0} sx={{
       borderBottom: isDark ? '1px solid rgba(255,255,255,0.04)' : '1px solid rgba(0,0,0,0.06)',
-      background: isDark ? 'rgba(7,15,26,0.9)' : 'rgba(255,255,255,0.9)',
-      backdropFilter: 'blur(24px) saturate(180%)',
+      background: isDark ? 'rgba(7,15,26,0.72)' : 'rgba(255,255,255,0.72)',
+      backdropFilter: 'blur(32px) saturate(200%)',
+      WebkitBackdropFilter: 'blur(32px) saturate(200%)',
     }}>
       <Toolbar sx={{ minHeight: 64 }}>
-        <Box sx={{ display: { md: 'none' }, mr: 1 }}>
-          <IconButton onClick={onMenuToggle} size="small">
-            <MenuIcon />
-          </IconButton>
-        </Box>
         <Typography variant="subtitle2" sx={{ fontWeight: 600, flex: 1 }}>
           System Overview
         </Typography>
@@ -326,7 +334,14 @@ function SuperAdminTopbar({ onMenuToggle }) {
           onClose={() => setAnchorEl(null)}
           transformOrigin={{ horizontal: 'right', vertical: 'top' }}
           anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-          PaperProps={{ sx: { minWidth: 200, mt: 1, borderRadius: 2 } }}
+          PaperProps={{ sx: {
+            minWidth: 200, mt: 1, borderRadius: 3,
+            backdropFilter: 'blur(32px) saturate(200%)',
+            WebkitBackdropFilter: 'blur(32px) saturate(200%)',
+            background: isDark ? 'rgba(17,25,33,0.85)' : 'rgba(255,255,255,0.85)',
+            border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(255,255,255,0.6)',
+            boxShadow: isDark ? '0 16px 48px rgba(0,0,0,0.3)' : '0 16px 48px rgba(0,0,0,0.08)',
+          } }}
         >
           <Box sx={{ px: 2, py: 1.5 }}>
             <Typography variant="subtitle2" fontWeight={700}>{profile?.fullName || 'Admin'}</Typography>
@@ -365,6 +380,7 @@ export function SuperAdminLayout() {
       <SuperAdminSidebar
         open={isMobile ? sidebarOpen : effectiveOpen}
         onClose={() => setSidebarOpen(false)}
+        onToggle={() => setSidebarOpen((prev) => !prev)}
         isMobile={isMobile}
       />
       <Box sx={{

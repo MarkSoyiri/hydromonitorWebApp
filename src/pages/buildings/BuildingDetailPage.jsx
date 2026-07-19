@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import {
   ArrowBack, Edit, MeetingRoom, DevicesOther, People,
-  Add, Warning,
+  Add, Warning, CheckCircle,
 } from '@mui/icons-material';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as ReTooltip,
@@ -129,6 +129,21 @@ export function BuildingDetailPage() {
 
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteType, setDeleteType] = useState('');
+  const [enabling, setEnabling] = useState(false);
+
+  const handleEnable = async () => {
+    if (!building) return;
+    setEnabling(true);
+    try {
+      await buildingService.update(building.buildingId, { status: 'ACTIVE' });
+      toast.success('Building enabled');
+      setBuilding({ ...building, status: 'ACTIVE' });
+    } catch (err) {
+      toast.error(err?.message || 'Failed to enable building');
+    } finally {
+      setEnabling(false);
+    }
+  };
 
   const fetchAll = useCallback(async () => {
     try {
@@ -288,6 +303,12 @@ export function BuildingDetailPage() {
             )}
           </Box>
           <StatusChip status={building.status} />
+          {building.status === 'DISABLED' && (
+            <Button variant="contained" color="success" startIcon={<CheckCircle />}
+              onClick={handleEnable} disabled={enabling} sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}>
+              {enabling ? 'Enabling...' : 'Enable'}
+            </Button>
+          )}
           <Button variant="outlined" startIcon={<Edit />} onClick={() => navigate('/super-admin/buildings')}>
             Edit Building
           </Button>

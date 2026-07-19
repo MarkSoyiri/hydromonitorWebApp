@@ -5,7 +5,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions, Stack, Chip, Tooltip,
 } from '@mui/material';
 import {
-  Add, Edit, Delete, Business, MeetingRoom, DevicesOther, People,
+  Add, Edit, Delete, Business, MeetingRoom, DevicesOther, People, CheckCircle,
 } from '@mui/icons-material';
 import { PageHeader, StatCard, DataTable, ConfirmDialog, StatusChip } from '@/components/common';
 import { buildingService } from '@/services';
@@ -24,6 +24,7 @@ export function BuildingsPage() {
   const [editing, setEditing] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [enabling, setEnabling] = useState(null);
   const [form, setForm] = useState({ name: '', address: '', description: '' });
   const [saving, setSaving] = useState(false);
 
@@ -89,6 +90,19 @@ export function BuildingsPage() {
     }
   };
 
+  const handleEnable = async (building) => {
+    setEnabling(building.buildingId);
+    try {
+      await buildingService.update(building.buildingId, { status: 'ACTIVE' });
+      toast.success('Building enabled');
+      fetchBuildings();
+    } catch (err) {
+      toast.error(err?.message || 'Failed to enable building');
+    } finally {
+      setEnabling(null);
+    }
+  };
+
   const columns = [
     { field: 'name', label: 'Name', width: 200 },
     { field: 'address', label: 'Address', width: 250 },
@@ -112,6 +126,15 @@ export function BuildingsPage() {
       field: 'actions', label: 'Actions', width: 100, align: 'center',
       render: (row) => (
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
+          {row.status === 'DISABLED' && (
+            <Tooltip title="Enable">
+              <IconButton size="small" color="success"
+                disabled={enabling === row.buildingId}
+                onClick={(e) => { e.stopPropagation(); handleEnable(row); }}>
+                <CheckCircle fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
           <Tooltip title="Edit">
             <IconButton size="small" onClick={(e) => { e.stopPropagation(); openEdit(row); }}>
               <Edit fontSize="small" />

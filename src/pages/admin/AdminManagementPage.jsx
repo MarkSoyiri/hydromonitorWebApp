@@ -20,7 +20,7 @@ export function AdminManagementPage() {
   const [editing, setEditing] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ fullName: '', email: '', role: 'ADMIN' });
+  const [form, setForm] = useState({ fullName: '', email: '', password: '', phoneNumber: '', role: 'ADMIN' });
 
   const fetchAdmins = useCallback(async () => {
     try {
@@ -39,13 +39,13 @@ export function AdminManagementPage() {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ fullName: '', email: '', role: 'ADMIN' });
+    setForm({ fullName: '', email: '', password: '', phoneNumber: '', role: 'ADMIN' });
     setDialogOpen(true);
   };
 
   const openEdit = (admin) => {
     setEditing(admin);
-    setForm({ fullName: admin.fullName || '', email: admin.email || '', role: admin.role || 'ADMIN' });
+    setForm({ fullName: admin.fullName || '', email: admin.email || '', password: '', phoneNumber: admin.phoneNumber || '', role: admin.role || 'ADMIN' });
     setDialogOpen(true);
   };
 
@@ -54,6 +54,14 @@ export function AdminManagementPage() {
   const handleSave = async () => {
     if (!form.fullName.trim() || !form.email.trim()) {
       toast.error('Name and email are required');
+      return;
+    }
+    if (!editing && (!form.password || form.password.length < 6)) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+    if (!editing && !form.phoneNumber.trim()) {
+      toast.error('Phone number is required');
       return;
     }
     setSaving(true);
@@ -68,7 +76,11 @@ export function AdminManagementPage() {
       setDialogOpen(false);
       fetchAdmins();
     } catch (err) {
-      toast.error(err?.message || `Failed to ${editing ? 'update' : 'create'} admin`);
+      if (err?.errors && Array.isArray(err.errors)) {
+        err.errors.forEach((e) => toast.error(e.message));
+      } else {
+        toast.error(err?.message || `Failed to ${editing ? 'update' : 'create'} admin`);
+      }
     } finally {
       setSaving(false);
     }
@@ -151,6 +163,13 @@ export function AdminManagementPage() {
               onChange={(e) => setForm({ ...form, fullName: e.target.value })} autoFocus />
             <TextField label="Email" fullWidth type="email" value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            {!editing && (
+              <TextField label="Password" fullWidth type="password" value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                helperText="Minimum 6 characters" />
+            )}
+            <TextField label="Phone Number" fullWidth value={form.phoneNumber}
+              onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })} />
             <TextField label="Role" fullWidth select SelectProps={{ native: true }} value={form.role}
               onChange={(e) => setForm({ ...form, role: e.target.value })}>
               <option value="ADMIN">Admin</option>

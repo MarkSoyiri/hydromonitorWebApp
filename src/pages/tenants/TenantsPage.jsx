@@ -23,7 +23,7 @@ export function TenantsPage() {
   const [editing, setEditing] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
-  const [form, setForm] = useState({ fullName: '', email: '', phoneNumber: '', buildingId: '', roomId: '' });
+  const [form, setForm] = useState({ fullName: '', email: '', password: '', phoneNumber: '', buildingId: '', roomId: '' });
   const [saving, setSaving] = useState(false);
 
   const fetchTenants = useCallback(async () => {
@@ -43,13 +43,13 @@ export function TenantsPage() {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ fullName: '', email: '', phoneNumber: '', buildingId: '', roomId: '' });
+    setForm({ fullName: '', email: '', password: '', phoneNumber: '', buildingId: '', roomId: '' });
     setDialogOpen(true);
   };
 
   const openEdit = (tenant) => {
     setEditing(tenant);
-    setForm({ fullName: tenant.fullName || '', email: tenant.email || '', phoneNumber: tenant.phoneNumber || '', buildingId: tenant.buildingId || '', roomId: tenant.roomId || '' });
+    setForm({ fullName: tenant.fullName || '', email: tenant.email || '', password: '', phoneNumber: tenant.phoneNumber || '', buildingId: tenant.buildingId || '', roomId: tenant.roomId || '' });
     setDialogOpen(true);
   };
 
@@ -59,6 +59,24 @@ export function TenantsPage() {
     if (!form.fullName.trim() || !form.email.trim()) {
       toast.error('Name and email are required');
       return;
+    }
+    if (!editing) {
+      if (!form.password || form.password.length < 6) {
+        toast.error('Password must be at least 6 characters');
+        return;
+      }
+      if (!form.phoneNumber.trim()) {
+        toast.error('Phone number is required');
+        return;
+      }
+      if (!form.buildingId.trim()) {
+        toast.error('Building ID is required');
+        return;
+      }
+      if (!form.roomId.trim()) {
+        toast.error('Room ID is required');
+        return;
+      }
     }
     setSaving(true);
     try {
@@ -72,7 +90,11 @@ export function TenantsPage() {
       setDialogOpen(false);
       fetchTenants();
     } catch (err) {
-      toast.error(err?.message || 'Failed to save tenant');
+      if (err?.errors && Array.isArray(err.errors)) {
+        err.errors.forEach((e) => toast.error(e.message));
+      } else {
+        toast.error(err?.message || 'Failed to save tenant');
+      }
     } finally {
       setSaving(false);
     }
@@ -166,6 +188,11 @@ export function TenantsPage() {
               onChange={(e) => setForm({ ...form, fullName: e.target.value })} autoFocus />
             <TextField label="Email" fullWidth type="email" value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            {!editing && (
+              <TextField label="Password" fullWidth type="password" value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                helperText="Minimum 6 characters" />
+            )}
             <TextField label="Phone Number" fullWidth value={form.phoneNumber}
               onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })} />
             <TextField label="Building ID" fullWidth value={form.buildingId}

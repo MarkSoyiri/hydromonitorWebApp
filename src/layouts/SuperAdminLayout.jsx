@@ -311,6 +311,9 @@ function SuperAdminTopbar({ onMenuToggle }) {
       WebkitBackdropFilter: 'blur(32px) saturate(200%)',
     }}>
       <Toolbar sx={{ minHeight: 64 }}>
+        <IconButton onClick={onMenuToggle} size="small" sx={{ mr: 1, display: { md: 'none' } }}>
+          <MenuIcon />
+        </IconButton>
         <Typography variant="subtitle2" sx={{ fontWeight: 600, flex: 1 }}>
           System Overview
         </Typography>

@@ -340,10 +340,20 @@ export function BuildingDetailPage() {
             <StatCard title="Total Rooms" value={occupancy.totalRooms ?? 0} icon={<MeetingRoom />} color="primary" />
           </Grid>
           <Grid item xs={6} sm={3}>
-            <StatCard title="Occupied" value={occupancy.occupiedRooms ?? 0} icon={<People />} color="success" subtitle={`${vacantRooms} vacant`} />
+            <StatCard title="Occupied" value={occupancy.occupiedRooms ?? 0} icon={<People />} color="success" subtitle={
+              <>
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{vacantRooms} vacant</Box>
+                <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>{vacantRooms} vac.</Box>
+              </>
+            } />
           </Grid>
           <Grid item xs={6} sm={3}>
-            <StatCard title="Devices" value={devices.length} icon={<DevicesOther />} color="info" subtitle={`${onlineDevices} online`} />
+            <StatCard title="Devices" value={devices.length} icon={<DevicesOther />} color="info" subtitle={
+              <>
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{onlineDevices} online</Box>
+                <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>{onlineDevices} on</Box>
+              </>
+            } />
           </Grid>
           <Grid item xs={6} sm={3}>
             <StatCard

@@ -3,25 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Stack,
   TextField, Select, MenuItem, FormControl, InputLabel, Typography,
+  IconButton, Tooltip,
 } from '@mui/material';
-import { Add } from '@mui/icons-material';
+import { Add, Edit, Delete } from '@mui/icons-material';
 import { PageHeader, DataTable, StatusChip, ConfirmDialog } from '@/components/common';
 import { roomService, buildingService } from '@/services';
 import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-
-const columns = [
-  { field: 'roomNumber', label: 'Room', width: 100 },
-  { field: 'floor', label: 'Floor', width: 80, align: 'center' },
-  { field: 'buildingId', label: 'Building', width: 200, render: (r) => r.buildingId || '—' },
-  { field: 'status', label: 'Status', width: 100, render: (r) => <StatusChip status={r.status} /> },
-  { field: 'tenantId', label: 'Tenant', width: 150, render: (r) => r.tenantId || 'Vacant' },
-  {
-    field: 'device', label: 'Device', width: 120, render: (r) => r.device ? r.device.deviceName || 'Assigned' : '—',
-  },
-];
 
 export function RoomsPage() {
   const navigate = useNavigate();
@@ -33,6 +23,7 @@ export function RoomsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [form, setForm] = useState({ roomNumber: '', floor: 1, buildingId: '', description: '' });
   const [saving, setSaving] = useState(false);
 
@@ -94,6 +85,7 @@ export function RoomsPage() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
+    setDeleting(true);
     try {
       await roomService.delete(deleteTarget.roomId);
       toast.success('Room deleted');
@@ -101,8 +93,39 @@ export function RoomsPage() {
       fetchData();
     } catch (err) {
       toast.error(err?.message || 'Failed to delete room');
+    } finally {
+      setDeleting(false);
     }
   };
+
+  const columns = [
+    { field: 'roomNumber', label: 'Room', width: 100 },
+    { field: 'floor', label: 'Floor', width: 80, align: 'center' },
+    { field: 'buildingId', label: 'Building', width: 200, render: (r) => r.buildingId || '—' },
+    { field: 'status', label: 'Status', width: 100, render: (r) => <StatusChip status={r.status} /> },
+    { field: 'tenantId', label: 'Tenant', width: 150, render: (r) => r.tenantId || 'Vacant' },
+    {
+      field: 'device', label: 'Device', width: 120, render: (r) => r.device ? r.device.deviceName || 'Assigned' : '—',
+    },
+    {
+      field: 'actions', label: 'Actions', width: 100, align: 'center',
+      render: (row) => (
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
+          <Tooltip title="Edit">
+            <IconButton size="small" onClick={(e) => { e.stopPropagation(); openEdit(row); }}>
+              <Edit fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton size="small" color="error"
+              onClick={(e) => { e.stopPropagation(); setDeleteTarget(row); }}>
+              <Delete fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      ),
+    },
+  ];
 
   return (
     <Box>
@@ -155,9 +178,10 @@ export function RoomsPage() {
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDelete}
         title="Delete Room"
-        message={`Are you sure you want to delete Room ${deleteTarget?.roomNumber}?`}
+        message={`Are you sure you want to delete Room ${deleteTarget?.roomNumber}? This action cannot be undone.`}
         color="error"
         confirmLabel="Delete"
+        loading={deleting}
       />
     </Box>
   );

@@ -8,33 +8,11 @@ import {
   Add, Edit, Delete, Business, MeetingRoom, DevicesOther, People,
 } from '@mui/icons-material';
 import { PageHeader, StatCard, DataTable, ConfirmDialog, StatusChip } from '@/components/common';
-import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api';
-import { ENDPOINTS, buildPath } from '@/constants';
+import { buildingService } from '@/services';
 import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-
-const columns = [
-  { field: 'name', label: 'Name', width: 200 },
-  { field: 'address', label: 'Address', width: 250 },
-  {
-    field: 'status', label: 'Status', width: 100,
-    render: (row) => <StatusChip status={row.status} />,
-  },
-  {
-    field: 'occupancy', label: 'Rooms', width: 80, align: 'center',
-    render: (row) => row.occupancy?.totalRooms ?? 0,
-  },
-  {
-    field: 'occupancy', label: 'Occupied', width: 80, align: 'center',
-    render: (row) => row.occupancy?.occupiedRooms ?? 0,
-  },
-  {
-    field: 'occupancy', label: 'Tenants', width: 80, align: 'center',
-    render: (row) => row.occupancy?.totalTenants ?? 0,
-  },
-];
 
 export function BuildingsPage() {
   const navigate = useNavigate();
@@ -44,12 +22,13 @@ export function BuildingsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [form, setForm] = useState({ name: '', address: '', description: '' });
   const [saving, setSaving] = useState(false);
 
   const fetchBuildings = useCallback(async () => {
     try {
-      const { data } = await apiGet(ENDPOINTS.BUILDINGS);
+      const { data } = await buildingService.getAll();
       if (data?.success) {
         setBuildings(extractList(data.data));
       }
@@ -79,10 +58,10 @@ export function BuildingsPage() {
     setSaving(true);
     try {
       if (editing) {
-        await apiPut(buildPath(editing.buildingId), form);
+        await buildingService.update(editing.buildingId, form);
         toast.success('Building updated');
       } else {
-        await apiPost(ENDPOINTS.BUILDINGS, form);
+        await buildingService.create(form);
         toast.success('Building created');
       }
       setDialogOpen(false);
@@ -96,15 +75,57 @@ export function BuildingsPage() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
+    setDeleting(true);
     try {
-      await apiDelete(buildPath(deleteTarget.buildingId));
+      await buildingService.delete(deleteTarget.buildingId);
       toast.success('Building deleted');
       setDeleteTarget(null);
       fetchBuildings();
     } catch (err) {
       toast.error(err?.message || 'Failed to delete building');
+    } finally {
+      setDeleting(false);
     }
   };
+
+  const columns = [
+    { field: 'name', label: 'Name', width: 200 },
+    { field: 'address', label: 'Address', width: 250 },
+    {
+      field: 'status', label: 'Status', width: 100,
+      render: (row) => <StatusChip status={row.status} />,
+    },
+    {
+      field: 'occupancy', label: 'Rooms', width: 80, align: 'center',
+      render: (row) => row.occupancy?.totalRooms ?? 0,
+    },
+    {
+      field: 'occupancy', label: 'Occupied', width: 80, align: 'center',
+      render: (row) => row.occupancy?.occupiedRooms ?? 0,
+    },
+    {
+      field: 'occupancy', label: 'Tenants', width: 80, align: 'center',
+      render: (row) => row.occupancy?.totalTenants ?? 0,
+    },
+    {
+      field: 'actions', label: 'Actions', width: 100, align: 'center',
+      render: (row) => (
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
+          <Tooltip title="Edit">
+            <IconButton size="small" onClick={(e) => { e.stopPropagation(); openEdit(row); }}>
+              <Edit fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton size="small" color="error"
+              onClick={(e) => { e.stopPropagation(); setDeleteTarget(row); }}>
+              <Delete fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      ),
+    },
+  ];
 
   return (
     <Box>
@@ -162,6 +183,7 @@ export function BuildingsPage() {
         message={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
         color="error"
         confirmLabel="Delete"
+        loading={deleting}
       />
     </Box>
   );

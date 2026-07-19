@@ -5,7 +5,7 @@ import {
   TextField, Typography, IconButton, Chip, Tooltip,
 } from '@mui/material';
 import {
-  Add, SignalCellularAlt,
+  Add, Delete, SignalCellularAlt,
 } from '@mui/icons-material';
 import { PageHeader, DataTable, StatusChip, ConfirmDialog } from '@/components/common';
 import { deviceService, buildingService } from '@/services';
@@ -13,40 +13,6 @@ import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-
-const columns = [
-  { field: 'deviceName', label: 'Device', width: 160 },
-  { field: 'serialNumber', label: 'Serial', width: 140 },
-  { field: 'buildingId', label: 'Building', width: 160 },
-  { field: 'roomId', label: 'Room', width: 100, render: (r) => r.roomId || '—' },
-  {
-    field: 'telemetry', label: 'Status', width: 90,
-    render: (r) => <StatusChip status={r.telemetry?.status || 'OFFLINE'} />,
-  },
-  {
-    field: 'telemetry', label: 'Valve', width: 80,
-    render: (r) => <StatusChip status={r.telemetry?.valveStatus === 'OPEN' ? 'OPEN' : 'CLOSED'} />,
-  },
-  {
-    field: 'telemetry', label: 'Flow', width: 80,
-    render: (r) => `${r.telemetry?.currentFlowRate || 0} L/min`,
-  },
-  {
-    field: 'telemetry', label: 'Leak', width: 70,
-    render: (r) => r.telemetry?.leakDetected
-      ? <Chip label="LEAK" color="error" size="small" />
-      : <Chip label="OK" color="success" size="small" />,
-  },
-  {
-    field: 'telemetry', label: 'Signal', width: 70,
-    render: (r) => {
-      const sig = r.telemetry?.signalStrength;
-      return sig !== null && sig !== undefined
-        ? <Chip icon={<SignalCellularAlt />} label={sig} size="small" variant="outlined" />
-        : '—';
-    },
-  },
-];
 
 export function DevicesPage() {
   const navigate = useNavigate();
@@ -58,6 +24,7 @@ export function DevicesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [form, setForm] = useState({ deviceName: '', serialNumber: '', buildingId: '', roomId: '' });
   const [saving, setSaving] = useState(false);
 
@@ -113,6 +80,7 @@ export function DevicesPage() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
+    setDeleting(true);
     try {
       await deviceService.delete(deleteTarget.deviceId);
       toast.success('Device deleted');
@@ -120,8 +88,57 @@ export function DevicesPage() {
       fetchData();
     } catch (err) {
       toast.error(err?.message || 'Failed to delete device');
+    } finally {
+      setDeleting(false);
     }
   };
+
+  const columns = [
+    { field: 'deviceName', label: 'Device', width: 160 },
+    { field: 'serialNumber', label: 'Serial', width: 140 },
+    { field: 'buildingId', label: 'Building', width: 160 },
+    { field: 'roomId', label: 'Room', width: 100, render: (r) => r.roomId || '—' },
+    {
+      field: 'telemetry', label: 'Status', width: 90,
+      render: (r) => <StatusChip status={r.telemetry?.status || 'OFFLINE'} />,
+    },
+    {
+      field: 'telemetry', label: 'Valve', width: 80,
+      render: (r) => <StatusChip status={r.telemetry?.valveStatus === 'OPEN' ? 'OPEN' : 'CLOSED'} />,
+    },
+    {
+      field: 'telemetry', label: 'Flow', width: 80,
+      render: (r) => `${r.telemetry?.currentFlowRate || 0} L/min`,
+    },
+    {
+      field: 'telemetry', label: 'Leak', width: 70,
+      render: (r) => r.telemetry?.leakDetected
+        ? <Chip label="LEAK" color="error" size="small" />
+        : <Chip label="OK" color="success" size="small" />,
+    },
+    {
+      field: 'telemetry', label: 'Signal', width: 70,
+      render: (r) => {
+        const sig = r.telemetry?.signalStrength;
+        return sig !== null && sig !== undefined
+          ? <Chip icon={<SignalCellularAlt />} label={sig} size="small" variant="outlined" />
+          : '—';
+      },
+    },
+    {
+      field: 'actions', label: 'Actions', width: 80, align: 'center',
+      render: (row) => (
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
+          <Tooltip title="Delete">
+            <IconButton size="small" color="error"
+              onClick={(e) => { e.stopPropagation(); setDeleteTarget(row); }}>
+              <Delete fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      ),
+    },
+  ];
 
   return (
     <Box>
@@ -164,8 +181,8 @@ export function DevicesPage() {
 
       <ConfirmDialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}
         onConfirm={handleDelete} title="Delete Device"
-        message={`Are you sure you want to delete "${deleteTarget?.deviceName}"?`}
-        color="error" confirmLabel="Delete" />
+        message={`Are you sure you want to delete "${deleteTarget?.deviceName}"? This action cannot be undone.`}
+        color="error" confirmLabel="Delete" loading={deleting} />
     </Box>
   );
 }

@@ -4,7 +4,7 @@ import {
   Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Stack,
   TextField, Typography, IconButton, Tooltip,
 } from '@mui/material';
-import { Add, Edit, Block } from '@mui/icons-material';
+import { Add, Edit, Block, Delete } from '@mui/icons-material';
 import { PageHeader, DataTable, StatusChip, ConfirmDialog } from '@/components/common';
 import { tenantService } from '@/services';
 import { extractList } from '@/utils/response';
@@ -21,6 +21,7 @@ export function TenantsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [form, setForm] = useState({ fullName: '', email: '', phoneNumber: '', buildingId: '', roomId: '' });
   const [saving, setSaving] = useState(false);
 
@@ -78,6 +79,7 @@ export function TenantsPage() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
+    setDeleting(true);
     try {
       await tenantService.delete(getTenantId(deleteTarget));
       toast.success('Tenant deleted');
@@ -85,6 +87,8 @@ export function TenantsPage() {
       fetchTenants();
     } catch (err) {
       toast.error(err?.message || 'Failed to delete tenant');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -111,7 +115,7 @@ export function TenantsPage() {
       render: (r) => `${(r.usage?.totalUsageMonth || 0).toLocaleString()} L`,
     },
     {
-      field: 'actions', label: 'Actions', width: 100, align: 'center',
+      field: 'actions', label: 'Actions', width: 120, align: 'center',
       render: (row) => (
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
           <Tooltip title="Edit">
@@ -123,6 +127,12 @@ export function TenantsPage() {
             <IconButton size="small" color={row.status === 'DISABLED' ? 'success' : 'error'}
               onClick={(e) => { e.stopPropagation(); handleDisable(row); }}>
               <Block fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton size="small" color="error"
+              onClick={(e) => { e.stopPropagation(); setDeleteTarget(row); }}>
+              <Delete fontSize="small" />
             </IconButton>
           </Tooltip>
         </Box>
@@ -173,8 +183,8 @@ export function TenantsPage() {
 
       <ConfirmDialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}
         onConfirm={handleDelete} title="Delete Tenant"
-        message={`Are you sure you want to delete "${deleteTarget?.fullName}"?`}
-        color="error" confirmLabel="Delete" />
+        message={`Are you sure you want to delete "${deleteTarget?.fullName}"? This action cannot be undone.`}
+        color="error" confirmLabel="Delete" loading={deleting} />
     </Box>
   );
 }

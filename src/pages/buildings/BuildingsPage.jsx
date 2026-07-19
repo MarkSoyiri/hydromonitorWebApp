@@ -128,9 +128,23 @@ export function BuildingsPage() {
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
           {row.status === 'DISABLED' && (
             <Tooltip title="Enable">
-              <IconButton size="small" color="success"
+              <IconButton
+                size="small"
                 disabled={enabling === row.buildingId}
-                onClick={(e) => { e.stopPropagation(); handleEnable(row); }}>
+                onClick={(e) => { e.stopPropagation(); handleEnable(row); }}
+                sx={{
+                  background: 'linear-gradient(135deg, rgba(67,160,71,0.1), rgba(102,187,106,0.05))',
+                  color: 'success.main',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, rgba(67,160,71,0.2), rgba(102,187,106,0.1))',
+                    boxShadow: '0 2px 8px rgba(67,160,71,0.2)',
+                  },
+                  '&.Mui-disabled': {
+                    background: 'action.disabledBackground',
+                    color: 'action.disabled',
+                  },
+                }}
+              >
                 <CheckCircle fontSize="small" />
               </IconButton>
             </Tooltip>

@@ -304,8 +304,27 @@ export function BuildingDetailPage() {
           </Box>
           <StatusChip status={building.status} />
           {building.status === 'DISABLED' && (
-            <Button variant="contained" color="success" startIcon={<CheckCircle />}
-              onClick={handleEnable} disabled={enabling} sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}>
+            <Button
+              variant="contained"
+              startIcon={<CheckCircle />}
+              onClick={handleEnable}
+              disabled={enabling}
+              sx={{
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                background: 'linear-gradient(135deg, #43a047, #66BB6A)',
+                boxShadow: '0 4px 16px rgba(67,160,71,0.25), inset 0 1px 0 rgba(255,255,255,0.2)',
+                px: 2.5,
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #388E3C, #4CAF50)',
+                  boxShadow: '0 6px 24px rgba(67,160,71,0.35), inset 0 1px 0 rgba(255,255,255,0.3)',
+                  transform: 'translateY(-1px)',
+                },
+                '&:active': { transform: 'translateY(0)' },
+                transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+              }}
+            >
               {enabling ? 'Enabling...' : 'Enable'}
             </Button>
           )}

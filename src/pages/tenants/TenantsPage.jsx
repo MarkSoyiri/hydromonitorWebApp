@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Stack,
   TextField, Typography, IconButton, Tooltip,
@@ -14,6 +14,7 @@ import toast from 'react-hot-toast';
 
 export function TenantsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isSuperAdmin } = useAuth();
   const basePath = isSuperAdmin ? '/super-admin' : '/admin';
   const [tenants, setTenants] = useState([]);
@@ -151,7 +152,7 @@ export function TenantsPage() {
           columns={columns}
           rows={tenants}
           loading={loading}
-          onRowClick={(row) => navigate(`${basePath}/tenants/${getTenantId(row)}`)}
+          onRowClick={(row) => navigate(`${basePath}/tenants/${getTenantId(row)}`, { state: { from: location.pathname } })}
           emptyTitle="No tenants found"
           emptyAction={isSuperAdmin && <Button variant="contained" startIcon={<Add />} onClick={openCreate}>Add Tenant</Button>}
         />

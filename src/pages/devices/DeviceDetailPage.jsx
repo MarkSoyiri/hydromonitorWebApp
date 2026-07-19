@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Grid, Card, CardContent, Typography, IconButton, Button, Stack, Chip, Divider,
 } from '@mui/material';
@@ -12,6 +12,7 @@ import { deviceService, usageService } from '@/services';
 import { extractList } from '@/utils/response';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBackNavigation } from '@/hooks/useBackNavigation';
 import { subscribeRealtime, unsubscribeRealtime } from '@/services/firebaseRealtime';
 import toast from 'react-hot-toast';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -25,8 +26,10 @@ const fallbackTelemetryHistory = Array.from({ length: 24 }, (_, i) => ({
 export function DeviceDetailPage() {
   const { deviceId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isSuperAdmin } = useAuth();
   const basePath = isSuperAdmin ? '/super-admin' : '/admin';
+  const goBack = useBackNavigation(`${basePath}/devices`);
   const [device, setDevice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [commandLoading, setCommandLoading] = useState(false);
@@ -103,7 +106,7 @@ export function DeviceDetailPage() {
     <Box>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-          <IconButton onClick={() => navigate(`${basePath}/devices`)}><ArrowBack /></IconButton>
+          <IconButton onClick={goBack}><ArrowBack /></IconButton>
           <Box sx={{ flex: 1 }}>
             <Typography variant="h4" sx={{ fontWeight: 700 }}>{device.deviceName}</Typography>
             <Typography variant="body2" color="text.secondary">

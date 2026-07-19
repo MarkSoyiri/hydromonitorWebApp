@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Stack,
   TextField, Select, MenuItem, FormControl, InputLabel, Typography,
@@ -15,6 +15,7 @@ import toast from 'react-hot-toast';
 
 export function RoomsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isSuperAdmin } = useAuth();
   const basePath = isSuperAdmin ? '/super-admin' : '/admin';
   const [rooms, setRooms] = useState([]);
@@ -138,7 +139,7 @@ export function RoomsPage() {
           columns={columns}
           rows={rooms}
           loading={loading}
-          onRowClick={(row) => navigate(`${basePath}/rooms/${row.roomId}`)}
+          onRowClick={(row) => navigate(`${basePath}/rooms/${row.roomId}`, { state: { from: location.pathname } })}
           emptyTitle="No rooms found"
           emptyAction={isSuperAdmin && <Button variant="contained" startIcon={<Add />} onClick={openCreate}>Add Room</Button>}
         />

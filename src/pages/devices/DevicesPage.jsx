@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Stack,
   TextField, Typography, IconButton, Chip, Tooltip,
@@ -16,6 +16,7 @@ import toast from 'react-hot-toast';
 
 export function DevicesPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isSuperAdmin } = useAuth();
   const basePath = isSuperAdmin ? '/super-admin' : '/admin';
   const [devices, setDevices] = useState([]);
@@ -151,7 +152,7 @@ export function DevicesPage() {
           columns={columns}
           rows={devices}
           loading={loading}
-          onRowClick={(row) => navigate(`${basePath}/devices/${row.deviceId}`)}
+          onRowClick={(row) => navigate(`${basePath}/devices/${row.deviceId}`, { state: { from: location.pathname } })}
           emptyTitle="No devices registered"
           emptyAction={isSuperAdmin && <Button variant="contained" startIcon={<Add />} onClick={openCreate}>Add Device</Button>}
         />

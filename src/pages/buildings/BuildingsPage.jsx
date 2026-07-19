@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Grid, Card, CardContent, Typography, Button, IconButton, TextField,
   Dialog, DialogTitle, DialogContent, DialogActions, Stack, Chip, Tooltip,
@@ -16,6 +16,7 @@ import toast from 'react-hot-toast';
 
 export function BuildingsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isSuperAdmin } = useAuth();
   const [buildings, setBuildings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -144,7 +145,7 @@ export function BuildingsPage() {
           columns={columns}
           rows={buildings}
           loading={loading}
-          onRowClick={(row) => navigate(`/super-admin/buildings/${row.buildingId}`)}
+          onRowClick={(row) => navigate(`/super-admin/buildings/${row.buildingId}`, { state: { from: location.pathname } })}
           emptyTitle="No buildings found"
           emptyDescription="Create your first building to get started."
           emptyAction={isSuperAdmin && (

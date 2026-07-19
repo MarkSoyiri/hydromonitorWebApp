@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Grid, Card, CardContent, Typography, Button, IconButton, Tabs, Tab,
   TextField, Stack, Dialog, DialogTitle, DialogContent, DialogActions,
@@ -24,6 +24,7 @@ import { usageService } from '@/services/usageService';
 import { extractList } from '@/utils/response';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { useBackNavigation } from '@/hooks/useBackNavigation';
 
 const PIE_COLORS = ['#4caf50', '#f44336', '#ff9800'];
 
@@ -108,6 +109,8 @@ const alertColumns = [
 export function BuildingDetailPage() {
   const { buildingId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const goBack = useBackNavigation('/super-admin/buildings');
 
   const [building, setBuilding] = useState(null);
   const [rooms, setRooms] = useState([]);
@@ -265,7 +268,7 @@ export function BuildingDetailPage() {
     return (
       <Box>
         <PageHeader title="Building not found" />
-        <Button startIcon={<ArrowBack />} onClick={() => navigate('/super-admin/buildings')}>
+        <Button startIcon={<ArrowBack />} onClick={goBack}>
           Back to Buildings
         </Button>
       </Box>
@@ -276,7 +279,7 @@ export function BuildingDetailPage() {
     <Box>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-          <IconButton onClick={() => navigate('/super-admin/buildings')}><ArrowBack /></IconButton>
+          <IconButton onClick={goBack}><ArrowBack /></IconButton>
           <Box sx={{ flex: 1 }}>
             <Typography variant="h4" sx={{ fontWeight: 700 }}>{building.name}</Typography>
             <Typography variant="body2" color="text.secondary">{building.address}</Typography>
@@ -410,7 +413,7 @@ export function BuildingDetailPage() {
                     : c
                 )}
                 rows={rooms}
-                onRowClick={(row) => navigate(`/super-admin/rooms/${row.roomId}`)}
+                onRowClick={(row) => navigate(`/super-admin/rooms/${row.roomId}`, { state: { from: location.pathname } })}
                 emptyTitle="No rooms"
                 emptyDescription="Add a room to this building."
                 emptyAction={<Button variant="contained" startIcon={<Add />} onClick={openAddRoom}>Add Room</Button>}
@@ -422,7 +425,7 @@ export function BuildingDetailPage() {
             <DataTable
               columns={deviceColumns}
               rows={devices}
-              onRowClick={(row) => navigate(`/super-admin/devices/${row.deviceId}`)}
+              onRowClick={(row) => navigate(`/super-admin/devices/${row.deviceId}`, { state: { from: location.pathname } })}
               emptyTitle="No devices"
               emptyDescription="No devices are assigned to this building."
             />
@@ -432,7 +435,7 @@ export function BuildingDetailPage() {
             <DataTable
               columns={tenantColumns}
               rows={tenants}
-              onRowClick={(row) => navigate(`/super-admin/tenants/${row.tenantId}`)}
+              onRowClick={(row) => navigate(`/super-admin/tenants/${row.tenantId}`, { state: { from: location.pathname } })}
               emptyTitle="No tenants"
               emptyDescription="No tenants are assigned to this building."
             />

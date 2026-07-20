@@ -342,15 +342,18 @@ export function BuildingDetailPage() {
     }
   };
 
-  const occupancy = building?.occupancy || {};
-  const vacantRooms = (occupancy.totalRooms ?? rooms.length) - (occupancy.occupiedRooms ?? rooms.filter((r) => r.status === 'OCCUPIED').length);
+  const totalRooms = rooms.length;
+  const occupiedRooms = rooms.filter((r) => r.status === 'OCCUPIED').length;
+  const vacantRooms = Math.max(0, totalRooms - occupiedRooms);
+  const totalTenants = tenants.length;
+  const totalDevices = devices.length;
   const onlineDevices = devices.filter((d) => d.online).length;
   const unresolvedAlerts = alerts.filter((a) => !a.resolved).length;
   const monthlyUsage = building?.usage?.totalUsageMonth ?? analytics?.usage?.totalUsageMonth ?? 0;
 
   const occupancyPieData = [
-    { name: 'Occupied', value: occupancy.occupiedRooms ?? rooms.filter((r) => r.status === 'OCCUPIED').length },
-    { name: 'Vacant', value: Math.max(0, vacantRooms) },
+    { name: 'Occupied', value: occupiedRooms },
+    { name: 'Vacant', value: vacantRooms },
     { name: 'Maintenance', value: rooms.filter((r) => r.status === 'MAINTENANCE').length },
   ];
 
@@ -429,13 +432,13 @@ export function BuildingDetailPage() {
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
         <Grid container spacing={2.5} sx={{ mb: 3 }}>
           <Grid item xs={6} sm={3}>
-            <StatCard title="Total Rooms" value={occupancy.totalRooms ?? rooms.length} icon={<MeetingRoom />} color="primary" subtitle={`${Math.max(0, vacantRooms)} vacant`} />
+            <StatCard title="Total Rooms" value={totalRooms} icon={<MeetingRoom />} color="primary" subtitle={`${vacantRooms} vacant`} />
           </Grid>
           <Grid item xs={6} sm={3}>
-            <StatCard title="Occupied" value={occupancy.occupiedRooms ?? rooms.filter((r) => r.status === 'OCCUPIED').length} icon={<People />} color="success" subtitle={`${occupancy.totalTenants ?? tenants.length} tenants`} />
+            <StatCard title="Occupied" value={occupiedRooms} icon={<People />} color="success" subtitle={`${totalTenants} tenants`} />
           </Grid>
           <Grid item xs={6} sm={3}>
-            <StatCard title="Devices" value={devices.length} icon={<DevicesOther />} color="info" subtitle={`${onlineDevices} online`} />
+            <StatCard title="Devices" value={totalDevices} icon={<DevicesOther />} color="info" subtitle={`${onlineDevices} online`} />
           </Grid>
           <Grid item xs={6} sm={3}>
             <StatCard
@@ -520,9 +523,9 @@ export function BuildingDetailPage() {
                         { label: 'Address', value: building.address },
                         { label: 'Status', value: building.status },
                         { label: 'Water Rate', value: building.billing?.waterRate ? `${building.billing.waterRate} ${building.billing.currency || 'GHS'}/L` : '—' },
-                        { label: 'Total Tenants', value: occupancy.totalTenants ?? tenants.length },
-                        { label: 'Total Devices', value: occupancy.totalDevices ?? devices.length },
-                        { label: 'Total Rooms', value: occupancy.totalRooms ?? rooms.length },
+                        { label: 'Total Tenants', value: totalTenants },
+                        { label: 'Total Devices', value: totalDevices },
+                        { label: 'Total Rooms', value: totalRooms },
                         { label: 'Online Devices', value: onlineDevices },
                       ].map((item) => (
                         <Grid item xs={6} sm={4} key={item.label}>

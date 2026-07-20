@@ -60,8 +60,8 @@ export function AdminManagementPage() {
       toast.error('Password must be at least 6 characters');
       return;
     }
-    if (!editing && !form.phoneNumber.trim()) {
-      toast.error('Phone number is required');
+    if (!editing && !/^\+[1-9]\d{6,14}$/.test(form.phoneNumber.trim())) {
+      toast.error('Phone number must be in E.164 format (e.g. +233501234567)');
       return;
     }
     setSaving(true);
@@ -169,7 +169,9 @@ export function AdminManagementPage() {
                 helperText="Minimum 6 characters" />
             )}
             <TextField label="Phone Number" fullWidth value={form.phoneNumber}
-              onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })} />
+              onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
+              placeholder="+233501234567"
+              helperText="E.164 format with country code (e.g. +233501234567)" />
             <TextField label="Role" fullWidth select SelectProps={{ native: true }} value={form.role}
               onChange={(e) => setForm({ ...form, role: e.target.value })}>
               <option value="ADMIN">Admin</option>

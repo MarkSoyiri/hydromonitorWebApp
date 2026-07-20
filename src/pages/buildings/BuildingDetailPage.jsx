@@ -1,13 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, useMatch } from 'react-router-dom';
 import {
   Box, Grid, Card, CardContent, Typography, Button, IconButton, Tabs, Tab,
   TextField, Stack, Dialog, DialogTitle, DialogContent, DialogActions,
   Tooltip, Select, MenuItem, FormControl, InputLabel, Avatar, Autocomplete,
+  Divider,
 } from '@mui/material';
 import {
   ArrowBack, Edit, MeetingRoom, DevicesOther, People,
   Add, Warning, CheckCircle, Shield, PersonRemove, Business,
+  WaterDrop, DoorFront, OnlinePrediction,
 } from '@mui/icons-material';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as ReTooltip,
@@ -37,12 +39,17 @@ const roomColumns = [
   { field: 'status', label: 'Status', width: 110, render: (r) => <StatusChip status={r.status} /> },
   { field: 'tenantId', label: 'Tenant', width: 160, render: (r) => r.tenantId || '—' },
   {
-    field: '_actions', label: '', width: 60, align: 'center',
+    field: '_actions', label: '', width: 120, align: 'center',
     render: (r, _i, { onEdit, onDelete }) => (
       <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
         <Tooltip title="Edit">
           <IconButton size="small" onClick={(e) => { e.stopPropagation(); onEdit?.(r); }}>
             <Edit fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Delete">
+          <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); onDelete?.(r); }}>
+            <DoorFront fontSize="small" />
           </IconButton>
         </Tooltip>
       </Box>
@@ -91,7 +98,7 @@ const alertColumns = [
     render: (a) => (
       <Typography variant="caption" sx={{
         fontWeight: 600,
-        color: a.severity === 'CRITICAL' ? 'error.main' : a.severity === 'WARNING' ? 'warning.main' : 'info.main',
+        color: a.severity === 'CRITICAL' ? 'error.main' : a.severity === 'HIGH' ? 'warning.main' : 'info.main',
       }}>
         {a.severity || '—'}
       </Typography>
@@ -100,8 +107,8 @@ const alertColumns = [
   { field: 'type', label: 'Type', width: 140 },
   { field: 'message', label: 'Message', minWidth: 200 },
   {
-    field: 'status', label: 'Status', width: 110,
-    render: (a) => <StatusChip status={a.status} />,
+    field: 'resolved', label: 'Status', width: 110,
+    render: (a) => <StatusChip status={a.resolved ? 'RESOLVED' : 'ACTIVE'} />,
   },
   {
     field: 'createdAt', label: 'Time', width: 160,
@@ -113,8 +120,9 @@ export function BuildingDetailPage() {
   const { buildingId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const goBack = useBackNavigation('/super-admin/buildings');
-  const { isSuperAdmin } = useAuth();
+  const { isSuperAdmin, isAdmin } = useAuth();
+  const basePath = isSuperAdmin ? '/super-admin' : '/admin';
+  const goBack = useBackNavigation(`${basePath}/buildings`);
 
   const [building, setBuilding] = useState(null);
   const [rooms, setRooms] = useState([]);
@@ -128,7 +136,7 @@ export function BuildingDetailPage() {
 
   const [roomDialogOpen, setRoomDialogOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
-  const [roomForm, setRoomForm] = useState({ roomNumber: '', floor: '' });
+  const [roomForm, setRoomForm] = useState({ roomNumber: '', floor: '', roomType: '', capacity: '', status: 'VACANT' });
   const [roomSaving, setRoomSaving] = useState(false);
 
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -258,20 +266,26 @@ export function BuildingDetailPage() {
   }, [tab, devices, usageData.length]);
 
   useEffect(() => {
-    if (tab === 6 && allAdmins.length === 0) {
+    if (tab === 6 && allAdmins.length === 0 && isSuperAdmin) {
       fetchAllAdmins();
     }
-  }, [tab, allAdmins.length, fetchAllAdmins]);
+  }, [tab, allAdmins.length, fetchAllAdmins, isSuperAdmin]);
 
   const openAddRoom = () => {
     setEditingRoom(null);
-    setRoomForm({ roomNumber: '', floor: '' });
+    setRoomForm({ roomNumber: '', floor: '', roomType: '', capacity: '', status: 'VACANT' });
     setRoomDialogOpen(true);
   };
 
   const openEditRoom = (room) => {
     setEditingRoom(room);
-    setRoomForm({ roomNumber: room.roomNumber || '', floor: room.floor ?? '' });
+    setRoomForm({
+      roomNumber: room.roomNumber || '',
+      floor: room.floor ?? '',
+      roomType: room.roomType || '',
+      capacity: room.capacity ?? '',
+      status: room.status || 'VACANT',
+    });
     setRoomDialogOpen(true);
   };
 
@@ -279,11 +293,20 @@ export function BuildingDetailPage() {
     if (!roomForm.roomNumber.trim()) { toast.error('Room number is required'); return; }
     setRoomSaving(true);
     try {
+      const payload = {
+        roomNumber: roomForm.roomNumber,
+        buildingId,
+      };
+      if (roomForm.floor) payload.floor = parseInt(roomForm.floor) || 0;
+      if (roomForm.roomType) payload.roomType = roomForm.roomType;
+      if (roomForm.capacity) payload.capacity = parseInt(roomForm.capacity) || 0;
+      if (roomForm.status) payload.status = roomForm.status;
+
       if (editingRoom) {
-        await roomService.update(editingRoom.roomId, roomForm);
+        await roomService.update(editingRoom.roomId, payload);
         toast.success('Room updated');
       } else {
-        await roomService.create({ ...roomForm, buildingId });
+        await roomService.create(payload);
         toast.success('Room added');
       }
       setRoomDialogOpen(false);
@@ -320,13 +343,15 @@ export function BuildingDetailPage() {
   };
 
   const occupancy = building?.occupancy || {};
-  const vacantRooms = (occupancy.totalRooms || 0) - (occupancy.occupiedRooms || 0);
+  const vacantRooms = (occupancy.totalRooms ?? rooms.length) - (occupancy.occupiedRooms ?? rooms.filter((r) => r.status === 'OCCUPIED').length);
   const onlineDevices = devices.filter((d) => d.online).length;
-  const unresolvedAlerts = alerts.filter((a) => a.status !== 'RESOLVED').length;
+  const unresolvedAlerts = alerts.filter((a) => !a.resolved).length;
+  const monthlyUsage = building?.usage?.totalUsageMonth ?? analytics?.usage?.totalUsageMonth ?? 0;
 
   const occupancyPieData = [
-    { name: 'Occupied', value: occupancy.occupiedRooms || 0 },
+    { name: 'Occupied', value: occupancy.occupiedRooms ?? rooms.filter((r) => r.status === 'OCCUPIED').length },
     { name: 'Vacant', value: Math.max(0, vacantRooms) },
+    { name: 'Maintenance', value: rooms.filter((r) => r.status === 'MAINTENANCE').length },
   ];
 
   const usageChartData = usageData.slice(-12).map((r) => ({
@@ -398,19 +423,16 @@ export function BuildingDetailPage() {
               {enabling ? 'Enabling...' : 'Enable'}
             </Button>
           )}
-          <Button variant="outlined" startIcon={<Edit />} onClick={() => navigate('/super-admin/buildings')}>
-            Edit Building
-          </Button>
         </Box>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
         <Grid container spacing={2.5} sx={{ mb: 3 }}>
           <Grid item xs={6} sm={3}>
-            <StatCard title="Total Rooms" value={occupancy.totalRooms ?? 0} icon={<MeetingRoom />} color="primary" />
+            <StatCard title="Total Rooms" value={occupancy.totalRooms ?? rooms.length} icon={<MeetingRoom />} color="primary" subtitle={`${Math.max(0, vacantRooms)} vacant`} />
           </Grid>
           <Grid item xs={6} sm={3}>
-            <StatCard title="Occupied" value={occupancy.occupiedRooms ?? 0} icon={<People />} color="success" subtitle={`${vacantRooms} vacant`} />
+            <StatCard title="Occupied" value={occupancy.occupiedRooms ?? rooms.filter((r) => r.status === 'OCCUPIED').length} icon={<People />} color="success" subtitle={`${occupancy.totalTenants ?? tenants.length} tenants`} />
           </Grid>
           <Grid item xs={6} sm={3}>
             <StatCard title="Devices" value={devices.length} icon={<DevicesOther />} color="info" subtitle={`${onlineDevices} online`} />
@@ -423,6 +445,9 @@ export function BuildingDetailPage() {
               color={unresolvedAlerts > 0 ? 'error' : 'success'}
               subtitle={unresolvedAlerts === 0 ? 'All clear' : 'Needs attention'}
             />
+          </Grid>
+          <Grid item xs={6} sm={3}>
+            <StatCard title="Monthly Usage" value={`${monthlyUsage.toLocaleString()} L`} icon={<WaterDrop />} color="secondary" subtitle="This month" />
           </Grid>
         </Grid>
       </motion.div>
@@ -437,7 +462,7 @@ export function BuildingDetailPage() {
               <Tab label={`Tenants (${tenants.length})`} />
               <Tab label="Analytics" />
               <Tab label={`Alerts (${unresolvedAlerts})`} />
-              <Tab label={`Admins (${buildingAdmins.length})`} />
+              {isSuperAdmin && <Tab label={`Admins (${buildingAdmins.length})`} />}
             </Tabs>
           </Box>
 
@@ -497,6 +522,8 @@ export function BuildingDetailPage() {
                         { label: 'Water Rate', value: building.billing?.waterRate ? `${building.billing.waterRate} ${building.billing.currency || 'GHS'}/L` : '—' },
                         { label: 'Total Tenants', value: occupancy.totalTenants ?? tenants.length },
                         { label: 'Total Devices', value: occupancy.totalDevices ?? devices.length },
+                        { label: 'Total Rooms', value: occupancy.totalRooms ?? rooms.length },
+                        { label: 'Online Devices', value: onlineDevices },
                       ].map((item) => (
                         <Grid item xs={6} sm={4} key={item.label}>
                           <Typography variant="caption" color="text.secondary">{item.label}</Typography>
@@ -524,7 +551,7 @@ export function BuildingDetailPage() {
                     : c
                 )}
                 rows={rooms}
-                onRowClick={(row) => navigate(`/super-admin/rooms/${row.roomId}`, { state: { from: location.pathname } })}
+                onRowClick={(row) => navigate(`${basePath}/rooms/${row.roomId}`, { state: { from: location.pathname } })}
                 emptyTitle="No rooms"
                 emptyDescription="Add a room to this building."
                 emptyAction={<Button variant="contained" startIcon={<Add />} onClick={openAddRoom}>Add Room</Button>}
@@ -536,7 +563,7 @@ export function BuildingDetailPage() {
             <DataTable
               columns={deviceColumns}
               rows={devices}
-              onRowClick={(row) => navigate(`/super-admin/devices/${row.deviceId}`, { state: { from: location.pathname } })}
+              onRowClick={(row) => navigate(`${basePath}/devices/${row.deviceId}`, { state: { from: location.pathname } })}
               emptyTitle="No devices"
               emptyDescription="No devices are assigned to this building."
             />
@@ -546,7 +573,7 @@ export function BuildingDetailPage() {
             <DataTable
               columns={tenantColumns}
               rows={tenants}
-              onRowClick={(row) => navigate(`/super-admin/tenants/${row.tenantId}`, { state: { from: location.pathname } })}
+              onRowClick={(row) => navigate(`${basePath}/tenants/${row.tenantId}`, { state: { from: location.pathname } })}
               emptyTitle="No tenants"
               emptyDescription="No tenants are assigned to this building."
             />
@@ -604,7 +631,7 @@ export function BuildingDetailPage() {
               columns={alertColumns}
               rows={alerts}
               onRowClick={(row) => {
-                if (row.status !== 'RESOLVED') {
+                if (!row.resolved) {
                   setDeleteTarget(row);
                   setDeleteType('alert');
                 }
@@ -614,15 +641,13 @@ export function BuildingDetailPage() {
             />
           )}
 
-          {tab === 6 && (
+          {tab === 6 && isSuperAdmin && (
             <Box>
-              {isSuperAdmin && (
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                  <Button variant="contained" startIcon={<Add />} onClick={() => { fetchAllAdmins(); setAdminDialogOpen(true); }}>
-                    Assign Admin
-                  </Button>
-                </Box>
-              )}
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                <Button variant="contained" startIcon={<Add />} onClick={() => { fetchAllAdmins(); setAdminDialogOpen(true); }}>
+                  Assign Admin
+                </Button>
+              </Box>
               <Stack spacing={2}>
                 {buildingAdmins.map((admin) => (
                   <Box key={admin.uid || admin.id} sx={{
@@ -641,20 +666,18 @@ export function BuildingDetailPage() {
                       </Typography>
                     </Box>
                     <StatusChip status={admin.status || 'ACTIVE'} />
-                    {isSuperAdmin && (
-                      <Tooltip title="Remove from building">
-                        <IconButton size="small" color="error" onClick={() => handleUnassignAdmin(admin)}>
-                          <PersonRemove fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
+                    <Tooltip title="Remove from building">
+                      <IconButton size="small" color="error" onClick={() => handleUnassignAdmin(admin)}>
+                        <PersonRemove fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                   </Box>
                 ))}
                 {buildingAdmins.length === 0 && (
                   <EmptyState
                     title="No admins assigned"
                     description="No administrators are assigned to this building."
-                    action={isSuperAdmin ? <Button variant="contained" startIcon={<Add />} onClick={() => { fetchAllAdmins(); setAdminDialogOpen(true); }}>Assign Admin</Button> : null}
+                    action={<Button variant="contained" startIcon={<Add />} onClick={() => { fetchAllAdmins(); setAdminDialogOpen(true); }}>Assign Admin</Button>}
                   />
                 )}
               </Stack>
@@ -674,6 +697,7 @@ export function BuildingDetailPage() {
               value={roomForm.roomNumber}
               onChange={(e) => setRoomForm({ ...roomForm, roomNumber: e.target.value })}
               autoFocus
+              required
             />
             <TextField
               label="Floor"
@@ -681,7 +705,44 @@ export function BuildingDetailPage() {
               type="number"
               value={roomForm.floor}
               onChange={(e) => setRoomForm({ ...roomForm, floor: e.target.value })}
+              placeholder="e.g. 1"
             />
+            <FormControl fullWidth>
+              <InputLabel>Room Type</InputLabel>
+              <Select
+                value={roomForm.roomType}
+                label="Room Type"
+                onChange={(e) => setRoomForm({ ...roomForm, roomType: e.target.value })}
+              >
+                <MenuItem value="">None</MenuItem>
+                <MenuItem value="SINGLE">Single</MenuItem>
+                <MenuItem value="DOUBLE">Double</MenuItem>
+                <MenuItem value="SUITE">Suite</MenuItem>
+                <MenuItem value="DORMITORY">Dormitory</MenuItem>
+                <MenuItem value="STUDIO">Studio</MenuItem>
+                <MenuItem value="OTHER">Other</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              label="Capacity"
+              fullWidth
+              type="number"
+              value={roomForm.capacity}
+              onChange={(e) => setRoomForm({ ...roomForm, capacity: e.target.value })}
+              placeholder="Max occupants"
+            />
+            <FormControl fullWidth>
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={roomForm.status}
+                label="Status"
+                onChange={(e) => setRoomForm({ ...roomForm, status: e.target.value })}
+              >
+                <MenuItem value="VACANT">Vacant</MenuItem>
+                <MenuItem value="OCCUPIED">Occupied</MenuItem>
+                <MenuItem value="MAINTENANCE">Maintenance</MenuItem>
+              </Select>
+            </FormControl>
           </Stack>
         </DialogContent>
         <DialogActions>
@@ -706,30 +767,32 @@ export function BuildingDetailPage() {
         confirmLabel={deleteType === 'alert' ? 'Resolve' : 'Delete'}
       />
 
-      <Dialog open={adminDialogOpen} onClose={() => setAdminDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Assign Admin to {building?.name}</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <Autocomplete
-              options={allAdmins.filter((a) => !buildingAdmins.some((ba) => (ba.uid || ba.id) === (a.uid || a.id)))}
-              getOptionLabel={(option) => `${option.fullName || option.name} (${option.email})`}
-              isOptionEqualToValue={(option, value) => (option.uid || option.id) === (value.uid || value.id)}
-              value={selectedAdmin}
-              onChange={(_, newValue) => setSelectedAdmin(newValue)}
-              renderInput={(params) => (
-                <TextField {...params} label="Select Admin" placeholder="Search admins..." />
-              )}
-              fullWidth
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setAdminDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleAssignAdmin} variant="contained" disabled={adminSaving || !selectedAdmin}>
-            {adminSaving ? 'Assigning...' : 'Assign'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {isSuperAdmin && (
+        <Dialog open={adminDialogOpen} onClose={() => setAdminDialogOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>Assign Admin to {building?.name}</DialogTitle>
+          <DialogContent>
+            <Stack spacing={2} sx={{ mt: 1 }}>
+              <Autocomplete
+                options={allAdmins.filter((a) => !buildingAdmins.some((ba) => (ba.uid || ba.id) === (a.uid || a.id)))}
+                getOptionLabel={(option) => `${option.fullName || option.name} (${option.email})`}
+                isOptionEqualToValue={(option, value) => (option.uid || option.id) === (value.uid || value.id)}
+                value={selectedAdmin}
+                onChange={(_, newValue) => setSelectedAdmin(newValue)}
+                renderInput={(params) => (
+                  <TextField {...params} label="Select Admin" placeholder="Search admins..." />
+                )}
+                fullWidth
+              />
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setAdminDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleAssignAdmin} variant="contained" disabled={adminSaving || !selectedAdmin}>
+              {adminSaving ? 'Assigning...' : 'Assign'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </Box>
   );
 }

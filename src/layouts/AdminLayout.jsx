@@ -19,6 +19,7 @@ import { motion } from 'framer-motion';
 
 const adminNavItems = [
   { label: 'Dashboard', path: '/admin/dashboard', icon: <DashIcon /> },
+  { label: 'Buildings', path: '/admin/buildings', icon: <Business /> },
   { label: 'Rooms', path: '/admin/rooms', icon: <MeetingRoom /> },
   { label: 'Devices', path: '/admin/devices', icon: <DevicesOther /> },
   { label: 'Tenants', path: '/admin/tenants', icon: <People /> },

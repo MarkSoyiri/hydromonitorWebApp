@@ -85,6 +85,7 @@ const quickActions = [
   { label: 'Rooms', path: '/admin/rooms', icon: <MeetingRoom />, color: 'primary', roles: ['ADMIN', 'SUPER_ADMIN'] },
   { label: 'Devices', path: '/admin/devices', icon: <DevicesOther />, color: 'info', roles: ['ADMIN', 'SUPER_ADMIN'] },
   { label: 'Tenants', path: '/admin/tenants', icon: <People />, color: 'success', roles: ['ADMIN', 'SUPER_ADMIN'] },
+  { label: 'Buildings', path: '/admin/buildings', icon: <Business />, color: 'primary', roles: ['ADMIN'] },
   { label: 'Billing', path: '/admin/billing', icon: <Receipt />, color: 'warning', roles: ['ADMIN', 'SUPER_ADMIN'] },
   { label: 'Reports', path: '/admin/reports', icon: <Assessment />, color: 'secondary', roles: ['ADMIN', 'SUPER_ADMIN'] },
   { label: 'Alerts', path: '/admin/alerts', icon: <NotificationsActive />, color: 'error', roles: ['ADMIN', 'SUPER_ADMIN'] },

@@ -7,7 +7,7 @@ import {
 import {
   Add, Delete, SignalCellularAlt,
 } from '@mui/icons-material';
-import { PageHeader, DataTable, StatusChip, ConfirmDialog } from '@/components/common';
+import { PageHeader, DataTable, StatusChip, ConfirmDialog, IdBadge } from '@/components/common';
 import { deviceService, buildingService } from '@/services';
 import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
@@ -97,8 +97,8 @@ export function DevicesPage() {
   const columns = [
     { field: 'deviceName', label: 'Device', width: 160 },
     { field: 'serialNumber', label: 'Serial', width: 140 },
-    { field: 'buildingId', label: 'Building', width: 160 },
-    { field: 'roomId', label: 'Room', width: 100, render: (r) => r.roomId || '—' },
+    { field: 'buildingId', label: 'Building', width: 200, render: (r) => <IdBadge id={r.buildingId} entity="building" /> },
+    { field: 'roomId', label: 'Room', width: 160, render: (r) => <IdBadge id={r.roomId} entity="room" /> },
     {
       field: 'telemetry', label: 'Status', width: 90,
       render: (r) => <StatusChip status={r.telemetry?.status || 'OFFLINE'} />,

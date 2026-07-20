@@ -15,7 +15,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as ReTooltip,
   ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell,
 } from 'recharts';
-import { StatCard, PageHeader, StatusChip, DataTable, ConfirmDialog, EmptyState } from '@/components/common';
+import { StatCard, PageHeader, StatusChip, DataTable, ConfirmDialog, EmptyState, IdBadge } from '@/components/common';
 import { buildingService } from '@/services/buildingService';
 import { roomService } from '@/services/roomService';
 import { deviceService } from '@/services/deviceService';
@@ -37,7 +37,7 @@ const roomColumns = [
   { field: 'roomNumber', label: 'Room', width: 120 },
   { field: 'floor', label: 'Floor', width: 80, align: 'center' },
   { field: 'status', label: 'Status', width: 110, render: (r) => <StatusChip status={r.status} /> },
-  { field: 'tenantId', label: 'Tenant', width: 160, render: (r) => r.tenantId || '—' },
+  { field: 'tenantId', label: 'Tenant', width: 200, render: (r) => r.tenantId ? <IdBadge id={r.tenantId} entity="tenant" /> : '—' },
   {
     field: '_actions', label: '', width: 120, align: 'center',
     render: (r, _i, { onEdit, onDelete }) => (
@@ -81,14 +81,14 @@ const deviceColumns = [
       </Typography>
     ),
   },
-  { field: 'roomId', label: 'Room', width: 120, render: (d) => d.roomId || '—' },
+  { field: 'roomId', label: 'Room', width: 200, render: (d) => <IdBadge id={d.roomId} entity="room" /> },
 ];
 
 const tenantColumns = [
   { field: 'fullName', label: 'Name', width: 180 },
   { field: 'email', label: 'Email', width: 200 },
   { field: 'phoneNumber', label: 'Phone', width: 140 },
-  { field: 'roomId', label: 'Room', width: 120, render: (t) => t.roomId || '—' },
+  { field: 'roomId', label: 'Room', width: 200, render: (t) => <IdBadge id={t.roomId} entity="room" /> },
   { field: 'status', label: 'Status', width: 110, render: (t) => <StatusChip status={t.status} /> },
 ];
 
@@ -477,16 +477,28 @@ export function BuildingDetailPage() {
                   <CardContent>
                     <Typography variant="h6" sx={{ mb: 2 }}>Occupancy</Typography>
                     {occupancyPieData.some((d) => d.value > 0) ? (
-                      <ResponsiveContainer width="100%" height={220}>
-                        <PieChart>
-                          <Pie data={occupancyPieData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
-                            {occupancyPieData.map((_, i) => (
-                              <Cell key={i} fill={PIE_COLORS[i]} />
-                            ))}
-                          </Pie>
-                          <ReTooltip />
-                        </PieChart>
-                      </ResponsiveContainer>
+                      <Box>
+                        <ResponsiveContainer width="100%" height={200}>
+                          <PieChart>
+                            <Pie data={occupancyPieData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} dataKey="value" stroke="none">
+                              {occupancyPieData.map((_, i) => (
+                                <Cell key={i} fill={PIE_COLORS[i]} />
+                              ))}
+                            </Pie>
+                            <ReTooltip formatter={(value, name) => [`${value} rooms`, name]} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, mt: 1, flexWrap: 'wrap' }}>
+                          {occupancyPieData.map((entry, i) => (
+                            <Box key={entry.name} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box sx={{ width: 12, height: 12, borderRadius: '3px', background: PIE_COLORS[i], flexShrink: 0 }} />
+                              <Typography variant="body2" sx={{ fontSize: 13 }}>
+                                {entry.name}: <strong>{entry.value}</strong>
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Box>
+                      </Box>
                     ) : (
                       <Typography color="text.secondary">No occupancy data</Typography>
                     )}

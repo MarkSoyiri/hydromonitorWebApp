@@ -7,3 +7,4 @@ export { ConfirmDialog } from './ConfirmDialog';
 export { DataTable } from './DataTable';
 export { BuildingSelector } from './BuildingSelector';
 export { RoomSelector } from './RoomSelector';
+export { IdBadge } from './IdBadge';

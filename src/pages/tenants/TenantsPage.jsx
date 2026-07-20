@@ -5,7 +5,7 @@ import {
   TextField, Typography, IconButton, Tooltip,
 } from '@mui/material';
 import { Add, Edit, Block, Delete } from '@mui/icons-material';
-import { PageHeader, DataTable, StatusChip, ConfirmDialog, BuildingSelector, RoomSelector } from '@/components/common';
+import { PageHeader, DataTable, StatusChip, ConfirmDialog, BuildingSelector, RoomSelector, IdBadge } from '@/components/common';
 import { tenantService } from '@/services';
 import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
@@ -139,8 +139,8 @@ export function TenantsPage() {
     { field: 'fullName', label: 'Name', width: 180 },
     { field: 'email', label: 'Email', width: 220 },
     { field: 'phoneNumber', label: 'Phone', width: 140 },
-    { field: 'buildingId', label: 'Building', width: 150 },
-    { field: 'roomId', label: 'Room', width: 80 },
+    { field: 'buildingId', label: 'Building', width: 200, render: (r) => <IdBadge id={r.buildingId} entity="building" /> },
+    { field: 'roomId', label: 'Room', width: 200, render: (r) => <IdBadge id={r.roomId} entity="room" /> },
     { field: 'status', label: 'Status', width: 100, render: (r) => <StatusChip status={r.status} /> },
     {
       field: 'usage', label: 'Usage', width: 100,

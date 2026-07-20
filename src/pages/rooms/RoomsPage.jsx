@@ -6,7 +6,7 @@ import {
   IconButton, Tooltip,
 } from '@mui/material';
 import { Add, Edit, Delete } from '@mui/icons-material';
-import { PageHeader, DataTable, StatusChip, ConfirmDialog } from '@/components/common';
+import { PageHeader, DataTable, StatusChip, ConfirmDialog, IdBadge } from '@/components/common';
 import { roomService, buildingService } from '@/services';
 import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
@@ -102,9 +102,9 @@ export function RoomsPage() {
   const columns = [
     { field: 'roomNumber', label: 'Room', width: 100 },
     { field: 'floor', label: 'Floor', width: 80, align: 'center' },
-    { field: 'buildingId', label: 'Building', width: 200, render: (r) => r.buildingId || '—' },
+    { field: 'buildingId', label: 'Building', width: 200, render: (r) => <IdBadge id={r.buildingId} entity="building" /> },
     { field: 'status', label: 'Status', width: 100, render: (r) => <StatusChip status={r.status} /> },
-    { field: 'tenantId', label: 'Tenant', width: 150, render: (r) => r.tenantId || 'Vacant' },
+    { field: 'tenantId', label: 'Tenant', width: 180, render: (r) => r.tenantId ? <IdBadge id={r.tenantId} entity="tenant" /> : 'Vacant' },
     {
       field: 'device', label: 'Device', width: 120, render: (r) => r.device ? r.device.deviceName || 'Assigned' : '—',
     },

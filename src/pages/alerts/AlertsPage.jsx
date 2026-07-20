@@ -3,7 +3,7 @@ import {
   Box, Grid, Card, CardContent, Typography, Chip, Tabs, Tab, Alert as MuiAlert,
 } from '@mui/material';
 import { Warning, CheckCircle, Error as ErrorIcon, Info } from '@mui/icons-material';
-import { PageHeader, StatCard, DataTable, StatusChip } from '@/components/common';
+import { PageHeader, StatCard, DataTable, StatusChip, IdBadge } from '@/components/common';
 import { alertService } from '@/services';
 import { extractList } from '@/utils/response';
 import { motion } from 'framer-motion';
@@ -21,8 +21,8 @@ const columns = [
       />
     ),
   },
-  { field: 'deviceId', label: 'Device', width: 140 },
-  { field: 'roomId', label: 'Room', width: 100, render: (r) => r.roomId || '—' },
+  { field: 'deviceId', label: 'Device', width: 180, render: (r) => <IdBadge id={r.deviceId} entity="device" /> },
+  { field: 'roomId', label: 'Room', width: 160, render: (r) => <IdBadge id={r.roomId} entity="room" /> },
   { field: 'message', label: 'Message', width: 300 },
   { field: 'status', label: 'Status', width: 100, render: (r) => <StatusChip status={r.status || 'PENDING'} /> },
   { field: 'createdAt', label: 'Time', width: 160, render: (r) => r.createdAt ? dayjs(r.createdAt).format('MMM D, YYYY HH:mm') : r.timestamp ? dayjs(r.timestamp).format('MMM D, YYYY HH:mm') : '—' },

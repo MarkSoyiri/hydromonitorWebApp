@@ -65,7 +65,7 @@ export function TenantsPage() {
         toast.error('Password must be at least 6 characters');
         return;
       }
-      if (!/^\+[1-9]\d{6,14}$/.test(form.phoneNumber.trim())) {
+      if (!/^\+[1-9]\d{7,14}$/.test(form.phoneNumber.trim())) {
         toast.error('Phone number must be in E.164 format (e.g. +233501234567)');
         return;
       }
@@ -196,6 +196,7 @@ export function TenantsPage() {
             <TextField label="Phone Number" fullWidth value={form.phoneNumber}
               onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
               placeholder="+233501234567"
+              inputProps={{ maxLength: 16 }}
               helperText="E.164 format with country code (e.g. +233501234567)" />
             <TextField label="Building ID" fullWidth value={form.buildingId}
               onChange={(e) => setForm({ ...form, buildingId: e.target.value })} />

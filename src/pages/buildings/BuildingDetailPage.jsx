@@ -3,11 +3,11 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Grid, Card, CardContent, Typography, Button, IconButton, Tabs, Tab,
   TextField, Stack, Dialog, DialogTitle, DialogContent, DialogActions,
-  Tooltip, Select, MenuItem, FormControl, InputLabel,
+  Tooltip, Select, MenuItem, FormControl, InputLabel, Avatar, Autocomplete,
 } from '@mui/material';
 import {
   ArrowBack, Edit, MeetingRoom, DevicesOther, People,
-  Add, Warning, CheckCircle,
+  Add, Warning, CheckCircle, Shield, PersonRemove, Business,
 } from '@mui/icons-material';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as ReTooltip,
@@ -21,7 +21,10 @@ import { tenantService } from '@/services/tenantService';
 import { alertService } from '@/services/alertService';
 import { analyticsService } from '@/services/analyticsService';
 import { usageService } from '@/services/usageService';
+import { apiGet } from '@/services/api';
+import { ENDPOINTS } from '@/constants';
 import { extractList } from '@/utils/response';
+import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useBackNavigation } from '@/hooks/useBackNavigation';
@@ -111,6 +114,7 @@ export function BuildingDetailPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const goBack = useBackNavigation('/super-admin/buildings');
+  const { isSuperAdmin } = useAuth();
 
   const [building, setBuilding] = useState(null);
   const [rooms, setRooms] = useState([]);
@@ -131,6 +135,12 @@ export function BuildingDetailPage() {
   const [deleteType, setDeleteType] = useState('');
   const [enabling, setEnabling] = useState(false);
 
+  const [buildingAdmins, setBuildingAdmins] = useState([]);
+  const [allAdmins, setAllAdmins] = useState([]);
+  const [adminDialogOpen, setAdminDialogOpen] = useState(false);
+  const [selectedAdmin, setSelectedAdmin] = useState(null);
+  const [adminSaving, setAdminSaving] = useState(false);
+
   const handleEnable = async () => {
     if (!building) return;
     setEnabling(true);
@@ -142,6 +152,58 @@ export function BuildingDetailPage() {
       toast.error(err?.message || 'Failed to enable building');
     } finally {
       setEnabling(false);
+    }
+  };
+
+  const fetchBuildingAdmins = useCallback(async () => {
+    try {
+      const { data } = await buildingService.getAdmins(buildingId);
+      if (data?.success) {
+        const adminList = extractList(data.data);
+        setBuildingAdmins(adminList);
+      }
+    } catch {
+      // silently fail
+    }
+  }, [buildingId]);
+
+  const fetchAllAdmins = useCallback(async () => {
+    try {
+      const { data } = await apiGet(ENDPOINTS.USERS);
+      if (data?.success) {
+        const admins = extractList(data.data).filter((u) => u.role === 'ADMIN');
+        setAllAdmins(admins);
+      }
+    } catch {
+      // silently fail
+    }
+  }, []);
+
+  const handleAssignAdmin = async () => {
+    if (!selectedAdmin) { toast.error('Please select an admin'); return; }
+    const adminId = selectedAdmin.uid || selectedAdmin.id;
+    setAdminSaving(true);
+    try {
+      await buildingService.assignAdmin(buildingId, adminId);
+      toast.success('Admin assigned to building');
+      setAdminDialogOpen(false);
+      setSelectedAdmin(null);
+      fetchBuildingAdmins();
+    } catch (err) {
+      toast.error(err?.message || 'Failed to assign admin');
+    } finally {
+      setAdminSaving(false);
+    }
+  };
+
+  const handleUnassignAdmin = async (admin) => {
+    const adminId = admin.uid || admin.id;
+    try {
+      await buildingService.unassignAdmin(buildingId, adminId);
+      toast.success('Admin removed from building');
+      fetchBuildingAdmins();
+    } catch (err) {
+      toast.error(err?.message || 'Failed to remove admin');
     }
   };
 
@@ -173,12 +235,14 @@ export function BuildingDetailPage() {
       } catch {
         /* analytics may not exist yet */
       }
+
+      fetchBuildingAdmins();
     } catch {
       toast.error('Failed to load building details');
     } finally {
       setLoading(false);
     }
-  }, [buildingId]);
+  }, [buildingId, fetchBuildingAdmins]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
@@ -192,6 +256,12 @@ export function BuildingDetailPage() {
         .catch(() => {});
     }
   }, [tab, devices, usageData.length]);
+
+  useEffect(() => {
+    if (tab === 6 && allAdmins.length === 0) {
+      fetchAllAdmins();
+    }
+  }, [tab, allAdmins.length, fetchAllAdmins]);
 
   const openAddRoom = () => {
     setEditingRoom(null);
@@ -367,6 +437,7 @@ export function BuildingDetailPage() {
               <Tab label={`Tenants (${tenants.length})`} />
               <Tab label="Analytics" />
               <Tab label={`Alerts (${unresolvedAlerts})`} />
+              <Tab label={`Admins (${buildingAdmins.length})`} />
             </Tabs>
           </Box>
 
@@ -542,6 +613,53 @@ export function BuildingDetailPage() {
               emptyDescription="No alerts for this building."
             />
           )}
+
+          {tab === 6 && (
+            <Box>
+              {isSuperAdmin && (
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                  <Button variant="contained" startIcon={<Add />} onClick={() => { fetchAllAdmins(); setAdminDialogOpen(true); }}>
+                    Assign Admin
+                  </Button>
+                </Box>
+              )}
+              <Stack spacing={2}>
+                {buildingAdmins.map((admin) => (
+                  <Box key={admin.uid || admin.id} sx={{
+                    p: 2, borderRadius: 2, border: 1, borderColor: 'divider',
+                    display: 'flex', alignItems: 'center', gap: 1.5,
+                  }}>
+                    <Avatar sx={{ bgcolor: 'primary.main' }}>
+                      <Shield />
+                    </Avatar>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                        {admin.fullName || admin.name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {admin.email}
+                      </Typography>
+                    </Box>
+                    <StatusChip status={admin.status || 'ACTIVE'} />
+                    {isSuperAdmin && (
+                      <Tooltip title="Remove from building">
+                        <IconButton size="small" color="error" onClick={() => handleUnassignAdmin(admin)}>
+                          <PersonRemove fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Box>
+                ))}
+                {buildingAdmins.length === 0 && (
+                  <EmptyState
+                    title="No admins assigned"
+                    description="No administrators are assigned to this building."
+                    action={isSuperAdmin ? <Button variant="contained" startIcon={<Add />} onClick={() => { fetchAllAdmins(); setAdminDialogOpen(true); }}>Assign Admin</Button> : null}
+                  />
+                )}
+              </Stack>
+            </Box>
+          )}
         </CardContent>
       </Card>
       </motion.div>
@@ -587,6 +705,31 @@ export function BuildingDetailPage() {
         color={deleteType === 'alert' ? 'warning' : 'error'}
         confirmLabel={deleteType === 'alert' ? 'Resolve' : 'Delete'}
       />
+
+      <Dialog open={adminDialogOpen} onClose={() => setAdminDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Assign Admin to {building?.name}</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <Autocomplete
+              options={allAdmins.filter((a) => !buildingAdmins.some((ba) => (ba.uid || ba.id) === (a.uid || a.id)))}
+              getOptionLabel={(option) => `${option.fullName || option.name} (${option.email})`}
+              isOptionEqualToValue={(option, value) => (option.uid || option.id) === (value.uid || value.id)}
+              value={selectedAdmin}
+              onChange={(_, newValue) => setSelectedAdmin(newValue)}
+              renderInput={(params) => (
+                <TextField {...params} label="Select Admin" placeholder="Search admins..." />
+              )}
+              fullWidth
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAdminDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleAssignAdmin} variant="contained" disabled={adminSaving || !selectedAdmin}>
+            {adminSaving ? 'Assigning...' : 'Assign'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

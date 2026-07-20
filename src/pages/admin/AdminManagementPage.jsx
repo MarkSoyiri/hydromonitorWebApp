@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Box, Card, CardContent, Typography, Button, Stack, Avatar,
-  Chip,
+  Chip, Autocomplete, TextField as MuiTextField,
   Dialog, DialogTitle, DialogContent, DialogActions, TextField,
   IconButton, Tooltip,
 } from '@mui/material';
-import { Add, AdminPanelSettings, Shield, Edit, Delete } from '@mui/icons-material';
+import { Add, AdminPanelSettings, Shield, Edit, Delete, Business } from '@mui/icons-material';
 import { PageHeader, StatCard, StatusChip, ConfirmDialog } from '@/components/common';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api';
+import { buildingService } from '@/services/buildingService';
 import { ENDPOINTS } from '@/constants';
 import { extractList } from '@/utils/response';
 import { motion } from 'framer-motion';
@@ -15,11 +16,13 @@ import toast from 'react-hot-toast';
 
 export function AdminManagementPage() {
   const [admins, setAdmins] = useState([]);
+  const [buildings, setBuildings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [selectedBuildings, setSelectedBuildings] = useState([]);
   const [form, setForm] = useState({ fullName: '', email: '', password: '', phoneNumber: '', role: 'ADMIN' });
 
   const fetchAdmins = useCallback(async () => {
@@ -35,17 +38,47 @@ export function AdminManagementPage() {
     }
   }, []);
 
-  useEffect(() => { fetchAdmins(); }, [fetchAdmins]);
+  const fetchBuildings = useCallback(async () => {
+    try {
+      const { data } = await buildingService.getAll();
+      if (data?.success) {
+        setBuildings(extractList(data.data));
+      }
+    } catch {
+      // silently fail
+    }
+  }, []);
+
+  useEffect(() => { fetchAdmins(); fetchBuildings(); }, [fetchAdmins, fetchBuildings]);
+
+  const getAdminBuildingIds = (admin) => {
+    if (admin.buildingIds && typeof admin.buildingIds === 'object') {
+      return Object.keys(admin.buildingIds);
+    }
+    return [];
+  };
+
+  const getAdminBuildingNames = (admin) => {
+    const ids = getAdminBuildingIds(admin);
+    return ids.map((id) => {
+      const b = buildings.find((bld) => bld.buildingId === id || bld.id === id);
+      return b?.name || id;
+    });
+  };
 
   const openCreate = () => {
     setEditing(null);
     setForm({ fullName: '', email: '', password: '', phoneNumber: '', role: 'ADMIN' });
+    setSelectedBuildings([]);
     setDialogOpen(true);
   };
 
   const openEdit = (admin) => {
     setEditing(admin);
     setForm({ fullName: admin.fullName || '', email: admin.email || '', password: '', phoneNumber: admin.phoneNumber || '', role: admin.role || 'ADMIN' });
+    const buildingIds = getAdminBuildingIds(admin);
+    const matchedBuildings = buildings.filter((b) => buildingIds.includes(b.buildingId) || buildingIds.includes(b.id));
+    setSelectedBuildings(matchedBuildings);
     setDialogOpen(true);
   };
 
@@ -60,7 +93,7 @@ export function AdminManagementPage() {
       toast.error('Password must be at least 6 characters');
       return;
     }
-      if (!editing && !/^\+[1-9]\d{7,14}$/.test(form.phoneNumber.trim())) {
+    if (!editing && !/^\+[1-9]\d{7,14}$/.test(form.phoneNumber.trim())) {
       toast.error('Phone number must be in E.164 format (e.g. +233501234567)');
       return;
     }
@@ -70,7 +103,11 @@ export function AdminManagementPage() {
         await apiPut(`${ENDPOINTS.USERS}/${getUserId(editing)}`, form);
         toast.success('Admin updated');
       } else {
-        await apiPost(ENDPOINTS.USERS, form);
+        const buildingIds = {};
+        selectedBuildings.forEach((b) => {
+          buildingIds[b.buildingId || b.id] = true;
+        });
+        await apiPost(ENDPOINTS.USERS, { ...form, buildingIds });
         toast.success('Admin created');
       }
       setDialogOpen(false);
@@ -136,6 +173,15 @@ export function AdminManagementPage() {
                     <Chip label={admin.role} size="small"
                       color={admin.role === 'SUPER_ADMIN' ? 'error' : 'primary'} variant="outlined" />
                     <StatusChip status={admin.status || 'ACTIVE'} />
+                    {admin.role === 'ADMIN' && getAdminBuildingNames(admin).length > 0 && (
+                      <Chip
+                        icon={<Business sx={{ fontSize: 14 }} />}
+                        label={getAdminBuildingNames(admin).join(', ')}
+                        size="small"
+                        variant="outlined"
+                        color="info"
+                      />
+                    )}
                     <Box sx={{ flex: 1 }} />
                     <Tooltip title="Edit">
                       <IconButton size="small" onClick={() => openEdit(admin)}>
@@ -178,6 +224,36 @@ export function AdminManagementPage() {
               <option value="ADMIN">Admin</option>
               <option value="SUPER_ADMIN">Super Admin</option>
             </TextField>
+            {form.role === 'ADMIN' && !editing && (
+              <Autocomplete
+                multiple
+                options={buildings}
+                getOptionLabel={(option) => option.name || option.buildingId}
+                isOptionEqualToValue={(option, value) => (option.buildingId || option.id) === (value.buildingId || value.id)}
+                value={selectedBuildings}
+                onChange={(_, newValue) => setSelectedBuildings(newValue)}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip
+                      variant="outlined"
+                      label={option.name || option.buildingId}
+                      size="small"
+                      {...getTagProps({ index })}
+                      key={option.buildingId || option.id}
+                    />
+                  ))
+                }
+                renderInput={(params) => (
+                  <MuiTextField
+                    {...params}
+                    label="Assign Buildings"
+                    placeholder="Search buildings..."
+                    helperText="Select one or more buildings for this admin"
+                  />
+                )}
+                fullWidth
+              />
+            )}
           </Stack>
         </DialogContent>
         <DialogActions>

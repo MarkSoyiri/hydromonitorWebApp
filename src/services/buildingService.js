@@ -16,4 +16,13 @@ export const buildingService = {
 
   delete: (buildingId) =>
     apiDelete(`${ENDPOINTS.BUILDINGS}/${buildingId}`),
+
+  getAdmins: (buildingId) =>
+    apiGet(`${ENDPOINTS.BUILDINGS}/${buildingId}/admins`),
+
+  assignAdmin: (buildingId, adminId) =>
+    apiPost(`${ENDPOINTS.BUILDINGS}/${buildingId}/admins`, { adminId }),
+
+  unassignAdmin: (buildingId, adminId) =>
+    apiDelete(`${ENDPOINTS.BUILDINGS}/${buildingId}/admins/${adminId}`),
 };

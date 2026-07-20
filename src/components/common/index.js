@@ -5,3 +5,5 @@ export { StatusChip } from './StatusChip';
 export { EmptyState } from './EmptyState';
 export { ConfirmDialog } from './ConfirmDialog';
 export { DataTable } from './DataTable';
+export { BuildingSelector } from './BuildingSelector';
+export { RoomSelector } from './RoomSelector';

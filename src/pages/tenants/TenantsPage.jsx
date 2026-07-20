@@ -5,7 +5,7 @@ import {
   TextField, Typography, IconButton, Tooltip,
 } from '@mui/material';
 import { Add, Edit, Block, Delete } from '@mui/icons-material';
-import { PageHeader, DataTable, StatusChip, ConfirmDialog } from '@/components/common';
+import { PageHeader, DataTable, StatusChip, ConfirmDialog, BuildingSelector, RoomSelector } from '@/components/common';
 import { tenantService } from '@/services';
 import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,6 +25,7 @@ export function TenantsPage() {
   const [deleting, setDeleting] = useState(false);
   const [form, setForm] = useState({ fullName: '', email: '', password: '', phoneNumber: '', buildingId: '', roomId: '' });
   const [saving, setSaving] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
 
   const fetchTenants = useCallback(async () => {
     try {
@@ -44,40 +45,48 @@ export function TenantsPage() {
   const openCreate = () => {
     setEditing(null);
     setForm({ fullName: '', email: '', password: '', phoneNumber: '', buildingId: '', roomId: '' });
+    setFormErrors({});
     setDialogOpen(true);
   };
 
   const openEdit = (tenant) => {
     setEditing(tenant);
     setForm({ fullName: tenant.fullName || '', email: tenant.email || '', password: '', phoneNumber: tenant.phoneNumber || '', buildingId: tenant.buildingId || '', roomId: tenant.roomId || '' });
+    setFormErrors({});
     setDialogOpen(true);
   };
 
   const getTenantId = (t) => t.tenantId || t.uid || t.id;
 
+  const handleBuildingChange = (buildingId) => {
+    setForm((prev) => ({ ...prev, buildingId, roomId: '' }));
+    setFormErrors((prev) => ({ ...prev, buildingId: '', roomId: '' }));
+  };
+
+  const handleRoomChange = (roomId) => {
+    setForm((prev) => ({ ...prev, roomId }));
+    setFormErrors((prev) => ({ ...prev, roomId: '' }));
+  };
+
   const handleSave = async () => {
-    if (!form.fullName.trim() || !form.email.trim()) {
-      toast.error('Name and email are required');
+    const errors = {};
+    if (!form.fullName.trim()) errors.fullName = 'Name is required';
+    if (!form.email.trim()) errors.email = 'Email is required';
+
+    if (!editing) {
+      if (!form.password || form.password.length < 6) errors.password = 'Password must be at least 6 characters';
+      if (!/^\+[1-9]\d{7,14}$/.test(form.phoneNumber.trim())) errors.phoneNumber = 'Phone must be in E.164 format (e.g. +233501234567)';
+      if (!form.buildingId) errors.buildingId = 'Please select a building';
+      if (!form.roomId) errors.roomId = 'Please select a room';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      const firstError = Object.values(errors)[0];
+      toast.error(firstError);
       return;
     }
-    if (!editing) {
-      if (!form.password || form.password.length < 6) {
-        toast.error('Password must be at least 6 characters');
-        return;
-      }
-      if (!/^\+[1-9]\d{7,14}$/.test(form.phoneNumber.trim())) {
-        toast.error('Phone number must be in E.164 format (e.g. +233501234567)');
-        return;
-      }
-      if (!form.buildingId.trim()) {
-        toast.error('Building ID is required');
-        return;
-      }
-      if (!form.roomId.trim()) {
-        toast.error('Room ID is required');
-        return;
-      }
-    }
+
     setSaving(true);
     try {
       if (editing) {
@@ -185,23 +194,46 @@ export function TenantsPage() {
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             <TextField label="Full Name" fullWidth value={form.fullName}
-              onChange={(e) => setForm({ ...form, fullName: e.target.value })} autoFocus />
+              onChange={(e) => { setForm({ ...form, fullName: e.target.value }); setFormErrors((prev) => ({ ...prev, fullName: '' })); }}
+              error={!!formErrors.fullName} helperText={formErrors.fullName} autoFocus />
             <TextField label="Email" fullWidth type="email" value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              onChange={(e) => { setForm({ ...form, email: e.target.value }); setFormErrors((prev) => ({ ...prev, email: '' })); }}
+              error={!!formErrors.email} helperText={formErrors.email} />
             {!editing && (
               <TextField label="Password" fullWidth type="password" value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                helperText="Minimum 6 characters" />
+                onChange={(e) => { setForm({ ...form, password: e.target.value }); setFormErrors((prev) => ({ ...prev, password: '' })); }}
+                error={!!formErrors.password} helperText={formErrors.password || 'Minimum 6 characters'} />
             )}
             <TextField label="Phone Number" fullWidth value={form.phoneNumber}
-              onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
+              onChange={(e) => { setForm({ ...form, phoneNumber: e.target.value }); setFormErrors((prev) => ({ ...prev, phoneNumber: '' })); }}
               placeholder="+233501234567"
               inputProps={{ maxLength: 16 }}
-              helperText="E.164 format with country code (e.g. +233501234567)" />
-            <TextField label="Building ID" fullWidth value={form.buildingId}
-              onChange={(e) => setForm({ ...form, buildingId: e.target.value })} />
-            <TextField label="Room ID" fullWidth value={form.roomId}
-              onChange={(e) => setForm({ ...form, roomId: e.target.value })} />
+              error={!!formErrors.phoneNumber} helperText={formErrors.phoneNumber || 'E.164 format with country code (e.g. +233501234567)'} />
+            {!editing ? (
+              <>
+                <BuildingSelector
+                  value={form.buildingId}
+                  onChange={handleBuildingChange}
+                  required
+                  error={!!formErrors.buildingId}
+                  helperText={formErrors.buildingId}
+                />
+                <RoomSelector
+                  buildingId={form.buildingId}
+                  value={form.roomId}
+                  onChange={handleRoomChange}
+                  required
+                  disabled={!form.buildingId}
+                  error={!!formErrors.roomId}
+                  helperText={formErrors.roomId}
+                />
+              </>
+            ) : (
+              <>
+                <BuildingSelector value={form.buildingId} onChange={handleBuildingChange} disabled />
+                <RoomSelector buildingId={form.buildingId} value={form.roomId} onChange={handleRoomChange} disabled />
+              </>
+            )}
           </Stack>
         </DialogContent>
         <DialogActions>

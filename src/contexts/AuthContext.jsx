@@ -18,6 +18,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [building, setBuilding] = useState(null);
+  const [assignedBuildings, setAssignedBuildings] = useState([]);
   const [room, setRoom] = useState(null);
   const [device, setDevice] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -32,12 +33,29 @@ export function AuthProvider({ children }) {
         setProfileError(null);
         const p = data.data;
 
-        if (p.buildingId) {
+        if (p.role === ROLES.TENANT && p.buildingId) {
           buildingService.getById(p.buildingId)
             .then((res) => {
               if (res.data?.success) setBuilding(res.data.data);
             })
             .catch(() => {});
+        }
+
+        if (p.role === ROLES.ADMIN && p.buildingIds) {
+          const buildingIds = Object.keys(p.buildingIds);
+          if (buildingIds.length > 0) {
+            Promise.all(buildingIds.map((id) => buildingService.getById(id)))
+              .then((results) => {
+                const buildings = results
+                  .filter((res) => res.data?.success)
+                  .map((res) => res.data.data);
+                setAssignedBuildings(buildings);
+                if (buildings.length > 0 && !building) {
+                  setBuilding(buildings[0]);
+                }
+              })
+              .catch(() => {});
+          }
         }
 
         if (p.roomId) {
@@ -90,6 +108,7 @@ export function AuthProvider({ children }) {
     setUser(null);
     setProfile(null);
     setBuilding(null);
+    setAssignedBuildings([]);
     setRoom(null);
     setDevice(null);
     setProfileError(null);
@@ -123,6 +142,7 @@ export function AuthProvider({ children }) {
     user,
     profile,
     building,
+    assignedBuildings,
     room,
     device,
     loading,

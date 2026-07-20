@@ -10,7 +10,7 @@ import {
   MeetingRoom, DevicesOther, People,
   Receipt, Assessment, NotificationsActive, Person,
   Logout, DarkModeOutlined, LightModeOutlined, Menu as MenuIcon,
-  ChevronLeft, WaterDrop,
+  ChevronLeft, WaterDrop, Business,
 } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';
 import { useThemeMode } from '@/contexts/ThemeContext';
@@ -190,6 +190,14 @@ function AdminSidebar({ open, onClose, onToggle, isMobile }) {
           <Typography variant="body2" sx={{ color: '#fff', fontWeight: 600, mt: 0.3 }}>
             {profile?.fullName || 'Admin'}
           </Typography>
+          {profile?.role === 'ADMIN' && profile?.buildingIds && Object.keys(profile.buildingIds).length > 0 && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+              <Business sx={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }} />
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.6rem' }}>
+                {Object.keys(profile.buildingIds).length} building{Object.keys(profile.buildingIds).length > 1 ? 's' : ''} assigned
+              </Typography>
+            </Box>
+          )}
         </Box>
       )}
     </>

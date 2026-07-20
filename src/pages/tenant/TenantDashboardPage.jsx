@@ -413,9 +413,9 @@ export function TenantDashboardPage() {
           <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={8}>
             <Card sx={{ borderRadius: 3 }}>
               <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
                   <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>WEEKLY USAGE COMPARISON</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       <Box sx={{ width: 12, height: 3, borderRadius: 1, bgcolor: '#2F80ED' }} />
                       <Typography variant="caption" color="text.secondary">This Week</Typography>

@@ -147,7 +147,7 @@ export function SuperAdminDashboardPage() {
             { icon: <People />, label: 'Tenants', value: totalTenants, color: 'warning.main' },
             { icon: <AttachMoney />, label: 'Revenue (GHS)', value: totalRevenue.toLocaleString(), color: 'error.main' },
           ].map((item, idx) => (
-            <Grid item xs={12} sm={6} md={2.4} key={idx}>
+            <Grid item xs={6} sm={4} md={2.4} key={idx}>
               <Card>
                 <CardContent sx={{ p: 2, textAlign: 'center' }}>
                   <Box sx={{ color: item.color, fontSize: 28, mb: 0.5 }}>{item.icon}</Box>

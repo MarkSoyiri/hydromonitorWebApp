@@ -414,27 +414,27 @@ export function TenantDetailPage() {
 
       {/* Summary Stat Cards */}
       <motion.div custom={1} variants={sectionVariants} initial="hidden" animate="visible">
-        <Grid container spacing={2.5} sx={{ mb: 3 }}>
-          <Grid item xs={6} sm={4} md={2.4}>
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          <Grid item xs={6} sm={4} lg>
             <StatCard title="Total Consumed" value={`${Math.round(usageStats.monthUsage).toLocaleString()} L`} icon={<WaterDrop />} color="primary" subtitle="This month" index={0} />
           </Grid>
-          <Grid item xs={6} sm={4} md={2.4}>
+          <Grid item xs={6} sm={4} lg>
             <StatCard title="Today's Usage" value={`${Math.round(usageStats.todayUsage).toLocaleString()} L`} icon={<TrendingUp />} color="info" index={1} />
           </Grid>
-          <Grid item xs={6} sm={4} md={2.4}>
+          <Grid item xs={6} sm={4} lg>
             <StatCard title="This Week" value={`${Math.round(usageStats.weekUsage).toLocaleString()} L`} icon={<CalendarMonth />} color="secondary" index={2} />
           </Grid>
-          <Grid item xs={6} sm={4} md={2.4}>
+          <Grid item xs={6} sm={4} lg>
             <StatCard title="Daily Average" value={`${Math.round(usageStats.dailyAvg)} L`} icon={<Speed />} color="success" index={3} />
           </Grid>
-          <Grid item xs={6} sm={4} md={2.4}>
+          <Grid item xs={6} sm={4} lg>
             <StatCard title="Current Bill" value={`GHS ${usageStats.currentBill.toLocaleString()}`} icon={<MonetizationOn />} color="warning" index={4} />
           </Grid>
         </Grid>
       </motion.div>
 
       {/* Main Content Grid */}
-      <Grid container spacing={2.5}>
+      <Grid container spacing={{ xs: 2, sm: 2.5 }}>
         {/* Left Column */}
         <Grid item xs={12} md={4}>
           <Stack spacing={2.5}>

@@ -64,17 +64,17 @@ export function RoomDetailPage() {
     <Box>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-          <IconButton onClick={goBack}><ArrowBack /></IconButton>
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="h4" sx={{ fontWeight: 700 }}>Room {room.roomNumber}</Typography>
-            <Typography variant="body2" color="text.secondary">
+          <IconButton onClick={goBack} size="small"><ArrowBack /></IconButton>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>Room {room.roomNumber}</Typography>
+            <Typography variant="body2" color="text.secondary" noWrap>
               Floor {room.floor} · {room.buildingId || 'Unknown Building'}
             </Typography>
           </Box>
-          <Stack direction="row" spacing={1}>
+          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
             <StatusChip status={room.status} />
             {room.device && <StatusChip status={room.device.telemetry?.valveStatus === 'OPEN' ? 'OPEN' : 'CLOSED'} />}
-          </Stack>
+          </Box>
         </Box>
       </motion.div>
 
@@ -98,7 +98,7 @@ export function RoomDetailPage() {
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.15 }}>
         <Card>
-          <CardContent>
+          <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
             <Typography variant="h6" sx={{ mb: 2 }}>Flow Rate (Today)</Typography>
             {readings.length > 0 ? (
               <ResponsiveContainer width="100%" height={250}>

@@ -106,18 +106,18 @@ export function DeviceDetailPage() {
     <Box>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-          <IconButton onClick={goBack}><ArrowBack /></IconButton>
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="h4" sx={{ fontWeight: 700 }}>{device.deviceName}</Typography>
-            <Typography variant="body2" color="text.secondary">
+          <IconButton onClick={goBack} size="small"><ArrowBack /></IconButton>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>{device.deviceName}</Typography>
+            <Typography variant="body2" color="text.secondary" noWrap>
               {device.serialNumber} · {device.buildingId || 'No building'}
             </Typography>
           </Box>
-          <Stack direction="row" spacing={1}>
+          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
             <StatusChip status={telemetry.status || 'OFFLINE'} />
             <StatusChip status={telemetry.valveStatus === 'OPEN' ? 'OPEN' : 'CLOSED'} />
-            {telemetry.leakDetected && <Chip icon={<Warning />} label="LEAK" color="error" />}
-          </Stack>
+            {telemetry.leakDetected && <Chip icon={<Warning />} label="LEAK" color="error" size="small" />}
+          </Box>
         </Box>
       </motion.div>
 
@@ -140,26 +140,36 @@ export function DeviceDetailPage() {
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.15 }}>
         <Card sx={{ mb: 3 }}>
-          <CardContent>
+          <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
             <Typography variant="h6" sx={{ mb: 2 }}>Controls</Typography>
-            <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} useFlexGap>
               <Button variant="contained" color="success" startIcon={<PlayArrow />}
+                fullWidth
+                size="small"
                 onClick={() => sendCommand('OPEN')} disabled={commandLoading || telemetry.valveStatus === 'OPEN'}>
                 Open Valve
               </Button>
               <Button variant="contained" color="error" startIcon={<Stop />}
+                fullWidth
+                size="small"
                 onClick={() => sendCommand('CLOSE')} disabled={commandLoading || telemetry.valveStatus === 'CLOSED'}>
                 Close Valve
               </Button>
               <Button variant="outlined" color="warning" startIcon={<Refresh />}
+                fullWidth
+                size="small"
                 onClick={() => sendCommand('RESET_ALERT')} disabled={commandLoading}>
                 Reset Alert
               </Button>
               <Button variant="outlined" startIcon={<PlayArrow />}
+                fullWidth
+                size="small"
                 onClick={() => sendCommand('START_SIMULATION')} disabled={commandLoading}>
                 Start Simulator
               </Button>
               <Button variant="outlined" color="error" startIcon={<Stop />}
+                fullWidth
+                size="small"
                 onClick={() => sendCommand('STOP_SIMULATION')} disabled={commandLoading}>
                 Stop Simulator
               </Button>
@@ -170,7 +180,7 @@ export function DeviceDetailPage() {
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }}>
         <Card>
-          <CardContent>
+          <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
             <Typography variant="h6" sx={{ mb: 2 }}>Flow Rate History</Typography>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={readings.length > 0 ? readings : fallbackTelemetryHistory}>

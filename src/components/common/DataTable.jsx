@@ -1,6 +1,7 @@
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Paper, TablePagination, Typography, Box, LinearProgress, Skeleton,
+  useMediaQuery, useTheme,
 } from '@mui/material';
 import { EmptyState } from './EmptyState';
 
@@ -20,16 +21,19 @@ export function DataTable({
   stickyHeader,
 }) {
   const displayRows = rows || [];
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const cellSx = isMobile ? { py: 0.75, px: 1 } : {};
 
   if (loading && displayRows.length === 0) {
     return (
       <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
         <LinearProgress />
-        <Table>
+        <Table size={isMobile ? 'small' : 'medium'}>
           <TableHead>
             <TableRow>
               {(columns || []).map((col) => (
-                <TableCell key={col.key || col.field} style={col.style}>
+                <TableCell key={col.key || col.field} style={col.style} sx={cellSx}>
                   {col.label}
                 </TableCell>
               ))}
@@ -39,7 +43,7 @@ export function DataTable({
             {[...Array(5)].map((_, i) => (
               <TableRow key={i}>
                 {(columns || []).map((col) => (
-                  <TableCell key={col.key || col.field}>
+                  <TableCell key={col.key || col.field} sx={cellSx}>
                     <Skeleton variant="text" width={col.width || 100} />
                   </TableCell>
                 ))}
@@ -66,17 +70,18 @@ export function DataTable({
   return (
     <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
       {loading && <LinearProgress />}
-      <Table stickyHeader={stickyHeader}>
+      <Table stickyHeader={stickyHeader} size={isMobile ? 'small' : 'medium'}>
         <TableHead>
           <TableRow>
             {columns.map((col) => (
               <TableCell
                 key={col.key || col.field}
                 align={col.align || 'left'}
-                style={{
-                  ...col.style,
+                sx={{
+                  ...cellSx,
                   width: col.width,
                   minWidth: col.minWidth,
+                  ...col.style,
                 }}
               >
                 {col.label}
@@ -93,7 +98,7 @@ export function DataTable({
               sx={{ cursor: onRowClick ? 'pointer' : 'default' }}
             >
               {columns.map((col) => (
-                <TableCell key={col.key || col.field} align={col.align || 'left'}>
+                <TableCell key={col.key || col.field} align={col.align || 'left'} sx={cellSx}>
                   {col.render
                     ? col.render(row, index)
                     : row[col.field || col.key] ?? '—'}

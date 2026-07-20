@@ -392,16 +392,17 @@ export function BuildingDetailPage() {
     <Box>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-          <IconButton onClick={goBack}><ArrowBack /></IconButton>
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="h4" sx={{ fontWeight: 700 }}>{building.name}</Typography>
-            <Typography variant="body2" color="text.secondary">{building.address}</Typography>
+          <IconButton onClick={goBack} size="small"><ArrowBack /></IconButton>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>{building.name}</Typography>
+            <Typography variant="body2" color="text.secondary" noWrap>{building.address}</Typography>
             {building.description && (
-              <Typography variant="caption" color="text.disabled">{building.description}</Typography>
+              <Typography variant="caption" color="text.disabled" noWrap>{building.description}</Typography>
             )}
           </Box>
-          <StatusChip status={building.status} />
-          {building.status === 'DISABLED' && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+            <StatusChip status={building.status} />
+            {building.status === 'DISABLED' && (
             <Button
               variant="contained"
               startIcon={<CheckCircle />}
@@ -425,7 +426,8 @@ export function BuildingDetailPage() {
             >
               {enabling ? 'Enabling...' : 'Enable'}
             </Button>
-          )}
+            )}
+          </Box>
         </Box>
       </motion.div>
 
@@ -469,7 +471,7 @@ export function BuildingDetailPage() {
             </Tabs>
           </Box>
 
-          <CardContent sx={{ p: 3 }}>
+          <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
           {tab === 0 && (
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>

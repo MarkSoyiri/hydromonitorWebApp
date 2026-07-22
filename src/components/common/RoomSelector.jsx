@@ -36,6 +36,12 @@ export function RoomSelector({
               (r.status === 'VACANT' || r.status === 'ACTIVE') &&
               (!r.tenantId || r.tenantId === '')
           );
+          if (value) {
+            const currentRoom = allRooms.find((r) => r.roomId === value);
+            if (currentRoom && !available.find((r) => r.roomId === value)) {
+              available.push(currentRoom);
+            }
+          }
           setRooms(available);
         }
       })

@@ -48,7 +48,7 @@ export function Navbar() {
         }}
       >
         <Container maxWidth="lg">
-          <Toolbar disableGutters sx={{ height: 72, minHeight: '72px !important' }}>
+          <Toolbar disableGutters sx={{ height: { xs: 56, md: 72 }, minHeight: { xs: '56px !important', md: '72px !important' } }}>
             <Box
               component={motion.div}
               initial={{ opacity: 0, x: -20 }}
@@ -56,7 +56,7 @@ export function Navbar() {
               sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             >
-              <WaterDrop sx={{ fontSize: 32, color: '#5FA4FF' }} />
+              <WaterDrop sx={{ fontSize: { xs: 24, md: 32 }, color: '#5FA4FF' }} />
               <Typography
                 variant="h6"
                 sx={{
@@ -151,7 +151,7 @@ export function Navbar() {
 
             <IconButton
               onClick={() => setMobileOpen(true)}
-              sx={{ display: { md: 'none' }, color: '#fff' }}
+              sx={{ display: { md: 'none' }, color: '#fff', p: 1, '& .MuiSvgIcon-root': { fontSize: { xs: 24, md: 28 } } }}
             >
               <Menu />
             </IconButton>

@@ -31,8 +31,8 @@ const sectionVariants = {
 };
 
 const SectionHeader = ({ title, subtitle }) => (
-  <Box sx={{ mb: 2 }}>
-    <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem' }}>{title}</Typography>
+  <Box sx={{ mb: { xs: 1.5, sm: 2 } }}>
+    <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: '0.9rem', sm: '1rem' } }}>{title}</Typography>
     {subtitle && <Typography variant="caption" color="text.secondary">{subtitle}</Typography>}
   </Box>
 );
@@ -114,7 +114,7 @@ export function SuperAdminDashboardPage() {
         <Grid container spacing={2}>
           {[1, 2, 3, 4, 5].map((i) => (
             <Grid item xs={12} sm={6} md={2.4} key={i}>
-              <Card><CardContent sx={{ p: 2, textAlign: 'center' }}>
+              <Card><CardContent sx={{ p: { xs: 1.5, sm: 2 }, textAlign: 'center' }}>
                 <Skeleton variant="circular" width={28} height={28} sx={{ mx: 'auto', mb: 0.5 }} />
                 <Skeleton variant="text" width="40%" sx={{ mx: 'auto' }} />
               </CardContent></Card>
@@ -126,9 +126,9 @@ export function SuperAdminDashboardPage() {
   }
 
   return (
-    <Box>
+    <Box sx={{ minWidth: 0, wordBreak: 'break-word' }}>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: { xs: 2, sm: 3 } }}>
           <Typography variant="h5" sx={{ fontWeight: 700 }}>
             Welcome{profile?.fullName ? `, ${profile.fullName.split(' ')[0]}` : ''}
           </Typography>
@@ -139,7 +139,7 @@ export function SuperAdminDashboardPage() {
       {/* Overview Section */}
       <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={0}>
         <SectionHeader title="Overview" subtitle="System-wide metrics" />
-        <Grid container spacing={2} sx={{ mb: 4 }}>
+        <Grid container spacing={{ xs: 1.5, sm: 2 }} sx={{ mb: { xs: 3, sm: 4 } }}>
           {[
             { icon: <Business />, label: 'Buildings', value: totalBuildings, color: 'primary.main' },
             { icon: <MeetingRoom />, label: 'Rooms', value: totalRooms, color: 'info.main' },
@@ -149,8 +149,8 @@ export function SuperAdminDashboardPage() {
           ].map((item, idx) => (
             <Grid item xs={6} sm={4} md={2.4} key={idx}>
               <Card>
-                <CardContent sx={{ p: 2, textAlign: 'center' }}>
-                  <Box sx={{ color: item.color, fontSize: 28, mb: 0.5 }}>{item.icon}</Box>
+                <CardContent sx={{ p: { xs: 1.5, sm: 2 }, textAlign: 'center' }}>
+                  <Box sx={{ color: item.color, fontSize: { xs: 22, sm: 28 }, mb: 0.5 }}>{item.icon}</Box>
                   <Typography variant="h5" sx={{ fontWeight: 800 }}>{item.value}</Typography>
                   <Typography variant="caption" color="text.secondary">{item.label}</Typography>
                 </CardContent>
@@ -165,12 +165,13 @@ export function SuperAdminDashboardPage() {
       {/* Revenue & System Health Section */}
       <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={1}>
         <SectionHeader title="Revenue & System Health" subtitle="Financial performance and infrastructure status" />
-        <Grid container spacing={2.5} sx={{ mb: 4 }}>
+        <Grid container spacing={{ xs: 1.5, sm: 2.5 }} sx={{ mb: { xs: 3, sm: 4 } }}>
           <Grid item xs={12} md={8}>
             <Card>
-              <CardContent sx={{ p: 2.5 }}>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 } }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Monthly Revenue (GHS)</Typography>
-                <ResponsiveContainer width="100%" height={300}>
+                <Box sx={{ width: '100%', overflow: 'hidden' }}>
+                  <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={analytics?.monthlyTrend || fallbackMonthlyRevenue}>
                     <defs><linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#2F80ED" stopOpacity={0.3} /><stop offset="95%" stopColor="#2F80ED" stopOpacity={0} /></linearGradient></defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
@@ -180,20 +181,21 @@ export function SuperAdminDashboardPage() {
                     <Area type="monotone" dataKey="revenue" stroke="#2F80ED" fill="url(#revGrad)" strokeWidth={3} />
                   </AreaChart>
                 </ResponsiveContainer>
+                </Box>
               </CardContent>
             </Card>
           </Grid>
 
           <Grid item xs={12} md={4}>
             <Card sx={{ height: '100%' }}>
-              <CardContent sx={{ p: 2.5 }}>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 } }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>System Health</Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1.5, sm: 2 } }}>
                   {defaultHealth.map((item) => (
                     <Box key={item.label}>
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Box sx={{ color: item.status === 'healthy' ? 'success.main' : 'warning.main', fontSize: 20 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 } }}>
+                          <Box sx={{ color: item.status === 'healthy' ? 'success.main' : 'warning.main', fontSize: { xs: 16, sm: 20 } }}>
                             {item.icon}
                           </Box>
                           <Typography variant="body2" sx={{ fontWeight: 500 }}>{item.label}</Typography>
@@ -213,16 +215,16 @@ export function SuperAdminDashboardPage() {
       {/* Buildings Overview */}
       {buildingData.length > 0 && (
         <>
-          <Divider sx={{ mb: 4 }} />
+      <Divider sx={{ mb: { xs: 2, sm: 4 } }} />
           <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={2}>
             <SectionHeader title="Buildings Overview" subtitle="Individual building performance" />
-            <Grid container spacing={2}>
+            <Grid container spacing={{ xs: 1.5, sm: 2 }}>
               {buildingData.map((b, i) => (
                 <Grid item xs={12} md={4} key={i}>
                   <Card>
-                    <CardContent sx={{ p: 2.5 }}>
+                    <CardContent sx={{ p: { xs: 1.5, sm: 2.5 } }}>
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5 }}>{b.name}</Typography>
-                      <Box sx={{ display: 'flex', gap: 3 }}>
+                      <Box sx={{ display: 'flex', gap: { xs: 1.5, sm: 3 }, flexWrap: 'wrap' }}>
                         <Box>
                           <Typography variant="caption" color="text.secondary">Usage</Typography>
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>{(b.usage).toLocaleString()} L</Typography>

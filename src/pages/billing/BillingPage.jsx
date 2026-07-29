@@ -72,7 +72,7 @@ export function BillingPage() {
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.3 }}>
-        <Grid container spacing={2.5} sx={{ mb: 3 }}>
+        <Grid container spacing={{ xs: 1.5, sm: 2.5 }} sx={{ mb: { xs: 2, sm: 3 } }}>
           <Grid item xs={6} sm={3}>
             <StatCard title="Total Revenue" value={`GHS ${stats.total.toLocaleString()}`} icon={<Description />} color="primary" loading={loading} />
           </Grid>
@@ -90,10 +90,10 @@ export function BillingPage() {
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.3 }}>
         {currentBill && (
-          <Card sx={{ mb: 2.5 }}>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 1 }}>Current Bill</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700 }}>
+          <Card sx={{ mb: { xs: 2, sm: 2.5 } }}>
+            <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+              <Typography variant="h6" sx={{ mb: 1, fontSize: { xs: '0.95rem', sm: '1.1rem' } }}>Current Bill</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.5rem', sm: '2rem' } }}>
                 GHS {(currentBill.amount || currentBill.totalAmount || 0).toLocaleString()}
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -106,14 +106,14 @@ export function BillingPage() {
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.3 }}>
         <Card>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-              <Typography variant="h6">Billing History</Typography>
+          <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+              <Typography variant="h6" sx={{ fontSize: { xs: '0.95rem', sm: '1.1rem' } }}>Billing History</Typography>
               <Stack direction="row" spacing={1}>
-                <Button size="small" startIcon={<Description />}>Export CSV</Button>
+                <Button size="small" startIcon={<Description />} fullWidth={true}>Export CSV</Button>
               </Stack>
             </Box>
-            <TableContainer>
+            <TableContainer sx={{ overflowX: 'auto' }}>
               <Table>
                 <TableHead>
                   <TableRow>

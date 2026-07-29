@@ -40,7 +40,7 @@ export function ForgotPasswordPage() {
         alignItems: 'center',
         justifyContent: 'center',
         bgcolor: 'background.default',
-        p: 2,
+        p: { xs: 1.5, sm: 2 },
         position: 'relative',
         overflow: 'hidden',
         '&::before': {
@@ -63,7 +63,7 @@ export function ForgotPasswordPage() {
         style={{ width: '100%', maxWidth: 420 }}
       >
         <Card sx={{ backdropFilter: 'blur(40px) saturate(200%)', WebkitBackdropFilter: 'blur(40px) saturate(200%)' }}>
-          <CardContent sx={{ p: 4 }}>
+          <CardContent sx={{ p: { xs: 2.5, sm: 4 } }}>
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -72,8 +72,8 @@ export function ForgotPasswordPage() {
               <Box sx={{ textAlign: 'center', mb: 3 }}>
                 <Box
                   sx={{
-                    width: 56,
-                    height: 56,
+                    width: { xs: 48, sm: 56 },
+                    height: { xs: 48, sm: 56 },
                     borderRadius: 2.5,
                     background: 'linear-gradient(135deg, #2F80ED 0%, #00B4D8 100%)',
                     display: 'inline-flex',
@@ -83,7 +83,7 @@ export function ForgotPasswordPage() {
                     boxShadow: '0 8px 24px rgba(47,128,237,0.25)',
                   }}
                 >
-                  <WaterDrop sx={{ color: '#fff', fontSize: 28 }} />
+                  <WaterDrop sx={{ color: '#fff', fontSize: { xs: 24, sm: 28 } }} />
                 </Box>
                 <Typography variant="h5" sx={{ fontWeight: 800 }}>
                   Reset Password

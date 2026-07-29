@@ -4,6 +4,7 @@ import {
   Box, Drawer, List, ListItemButton, ListItemIcon, ListItemText,
   Typography, IconButton, Avatar, Menu, MenuItem, ListItemIcon as LI,
   Divider, Tooltip, Badge, AppBar, Toolbar, useMediaQuery, useTheme, Chip,
+  BottomNavigation, BottomNavigationAction, Paper,
 } from '@mui/material';
 import {
   Dashboard as DashIcon,
@@ -342,6 +343,74 @@ function AdminTopbar({ onMenuToggle, sidebarOpen }) {
   );
 }
 
+function AdminBottomNav() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isDark } = useThemeMode();
+
+  const bottomNavItems = [
+    { label: 'Dashboard', path: '/admin/dashboard', icon: <DashIcon /> },
+    { label: 'Buildings', path: '/admin/buildings', icon: <Business /> },
+    { label: 'Rooms', path: '/admin/rooms', icon: <MeetingRoom /> },
+    { label: 'Devices', path: '/admin/devices', icon: <DevicesOther /> },
+    { label: 'Tenants', path: '/admin/tenants', icon: <People /> },
+    { label: 'Billing', path: '/admin/billing', icon: <Receipt /> },
+    { label: 'Reports', path: '/admin/reports', icon: <Assessment /> },
+    { label: 'Alerts', path: '/admin/alerts', icon: <NotificationsActive /> },
+  ];
+
+  const getValue = () => {
+    const idx = bottomNavItems.findIndex((item) => {
+      if (item.path === '/admin/dashboard') return location.pathname === '/admin/dashboard';
+      return location.pathname.startsWith(item.path);
+    });
+    return idx >= 0 ? idx : 0;
+  };
+
+  return (
+    <Paper sx={{
+      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1100, borderRadius: 0,
+      background: isDark ? 'rgba(7,15,26,0.85)' : 'rgba(255,255,255,0.85)',
+      backdropFilter: 'blur(24px) saturate(200%)',
+      WebkitBackdropFilter: 'blur(24px) saturate(200%)',
+      borderTop: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.04)',
+      boxShadow: '0 -2px 16px rgba(0,0,0,0.04)',
+      pb: 'env(safe-area-inset-bottom, 0px)',
+    }} elevation={0}>
+      <BottomNavigation
+        value={getValue()}
+        onChange={(_, newValue) => navigate(bottomNavItems[newValue].path)}
+        sx={{ height: 72, '& .MuiBottomNavigationAction-root': { minWidth: 0, py: 0.5 } }}
+        showLabels
+      >
+        {bottomNavItems.map((item) => (
+          <BottomNavigationAction
+            key={item.path}
+            label={item.label}
+            icon={item.icon}
+            sx={{
+              '& .MuiBottomNavigationAction-label': {
+                fontSize: '0.55rem',
+                fontWeight: 500,
+                mt: 0.15,
+              },
+              '&.Mui-selected': {
+                '& .MuiBottomNavigationAction-label': {
+                  fontSize: '0.6rem',
+                  fontWeight: 700,
+                },
+              },
+              '& .MuiSvgIcon-root': {
+                fontSize: '1.2rem',
+              },
+            }}
+          />
+        ))}
+      </BottomNavigation>
+    </Paper>
+  );
+}
+
 export function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const theme = useTheme();
@@ -350,7 +419,7 @@ export function AdminLayout() {
   const effectiveOpen = isMobile ? false : sidebarOpen;
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', pb: isMobile ? 'calc(72px + env(safe-area-inset-bottom, 0px))' : 0 }}>
       <AdminSidebar
         open={isMobile ? sidebarOpen : effectiveOpen}
         onClose={() => setSidebarOpen(false)}
@@ -370,7 +439,7 @@ export function AdminLayout() {
           component="main"
           sx={{
             flex: 1,
-            p: { xs: 2, sm: 3 },
+            p: { xs: 1.5, sm: 3 },
             overflow: 'auto',
             bgcolor: 'background.default',
           }}
@@ -384,6 +453,7 @@ export function AdminLayout() {
           </motion.div>
         </Box>
       </Box>
+      {isMobile && <AdminBottomNav />}
     </Box>
   );
 }

@@ -95,9 +95,9 @@ export function StatCard({ title, value, icon, color = 'primary', subtitle, load
           },
         }}
       >
-        <CardContent sx={{ p: 3, '&:last-child': { pb: 3 } }}>
+        <CardContent sx={{ p: { xs: 2, sm: 3 }, '&:last-child': { pb: { xs: 2, sm: 3 } } }}>
           <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography
                 variant="caption"
                 sx={{
@@ -105,7 +105,7 @@ export function StatCard({ title, value, icon, color = 'primary', subtitle, load
                   letterSpacing: '0.06em',
                   textTransform: 'uppercase',
                   color: 'text.secondary',
-                  fontSize: '0.65rem',
+                  fontSize: { xs: '0.6rem', sm: '0.65rem' },
                 }}
               >
                 {title}
@@ -115,15 +115,16 @@ export function StatCard({ title, value, icon, color = 'primary', subtitle, load
                 sx={{
                   mt: 1,
                   fontWeight: 800,
-                  fontSize: { xs: '1.5rem', sm: '1.75rem' },
+                  fontSize: { xs: '1.35rem', sm: '1.75rem' },
                   lineHeight: 1.2,
                   color: 'text.primary',
+                  wordBreak: 'break-word',
                 }}
               >
                 {value ?? '—'}
               </Typography>
               {(subtitle || trend) && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1, flexWrap: 'wrap' }}>
                   {trend && (
                     <Typography
                       variant="caption"
@@ -151,8 +152,8 @@ export function StatCard({ title, value, icon, color = 'primary', subtitle, load
             </Box>
             <Box
               sx={{
-                width: 48,
-                height: 48,
+                width: { xs: 40, sm: 48 },
+                height: { xs: 40, sm: 48 },
                 borderRadius: 2.5,
                 display: 'flex',
                 alignItems: 'center',
@@ -161,6 +162,7 @@ export function StatCard({ title, value, icon, color = 'primary', subtitle, load
                 color: '#fff',
                 boxShadow: `0 4px 12px ${iconShadows[color] || iconShadows.primary}`,
                 flexShrink: 0,
+                ml: 1.5,
               }}
             >
               {icon}

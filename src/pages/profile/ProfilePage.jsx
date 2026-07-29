@@ -31,10 +31,10 @@ const sectionVariants = {
 };
 
 const InfoRow = ({ label, value, icon }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1 }}>
+  <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 }, py: { xs: 0.75, sm: 1 } }}>
     {icon && (
       <Box sx={{
-        width: 32, height: 32, borderRadius: 1.5,
+        width: { xs: 28, sm: 32 }, height: { xs: 28, sm: 32 }, borderRadius: 1.5,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         bgcolor: 'action.hover', color: 'text.secondary', flexShrink: 0,
       }}>
@@ -55,11 +55,11 @@ const InfoRow = ({ label, value, icon }) => (
 const SectionCard = ({ title, icon, children, delay = 0, isDark = false }) => (
   <motion.div custom={delay} variants={sectionVariants} initial="hidden" animate="visible">
     <Card sx={{ height: '100%', overflow: 'hidden', ...glassSx(isDark), borderRadius: 3 }}>
-      <CardContent sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
+      <CardContent sx={{ p: { xs: 1.5, sm: 3 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: { xs: 1.5, sm: 2.5 } }}>
           {icon && (
             <Box sx={{
-              width: 36, height: 36, borderRadius: 2, display: 'flex',
+              width: { xs: 30, sm: 36 }, height: { xs: 30, sm: 36 }, borderRadius: 2, display: 'flex',
               alignItems: 'center', justifyContent: 'center',
               background: 'linear-gradient(135deg, #2F80ED, #5FA4FF)',
               color: '#fff', boxShadow: '0 4px 12px rgba(47,128,237,0.25)',
@@ -67,7 +67,7 @@ const SectionCard = ({ title, icon, children, delay = 0, isDark = false }) => (
               {icon}
             </Box>
           )}
-          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '0.95rem' }}>{title}</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: '0.85rem', sm: '0.95rem' } }}>{title}</Typography>
         </Box>
         {children}
       </CardContent>
@@ -79,7 +79,7 @@ const AlertRow = ({ alert }) => {
   const severityColor = alert.severity === 'CRITICAL' ? 'error' : alert.severity === 'WARNING' ? 'warning' : 'info';
   return (
     <Box sx={{
-      display: 'flex', alignItems: 'center', gap: 1.5, py: 1.5,
+      display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 }, py: { xs: 1, sm: 1.5 },
       borderBottom: '1px solid', borderColor: 'divider',
       '&:last-child': { borderBottom: 'none' },
     }}>
@@ -112,7 +112,7 @@ const AlertRow = ({ alert }) => {
 };
 
 const ActivityItem = ({ item, isLast }) => (
-  <Box sx={{ display: 'flex', gap: 1.5, pb: isLast ? 0 : 2 }}>
+  <Box sx={{ display: 'flex', gap: { xs: 1, sm: 1.5 }, pb: isLast ? 0 : { xs: 1.5, sm: 2 } }}>
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Box sx={{
         width: 8, height: 8, borderRadius: '50%', flexShrink: 0, mt: 0.7,
@@ -146,7 +146,7 @@ const QuickActionCard = ({ icon, label, onClick, color = 'primary', delay = 0, i
     >
       <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
         <Box sx={{
-          width: 44, height: 44, borderRadius: 2.5, mx: 'auto', mb: 1,
+          width: { xs: 40, sm: 44 }, height: { xs: 40, sm: 44 }, borderRadius: 2.5, mx: 'auto', mb: 1,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           background: `linear-gradient(135deg, ${color === 'primary' ? '#2F80ED, #5FA4FF' : color === 'success' ? '#4CAF50, #66BB6A' : color === 'warning' ? '#FB8C00, #FFB74D' : color === 'info' ? '#2F80ED, #00B4D8' : '#E53935, #EF5350'})`,
           color: '#fff', boxShadow: `0 4px 12px rgba(47,128,237,0.25)`,
@@ -359,11 +359,11 @@ export function ProfilePage() {
   if (!profile) return null;
 
   return (
-    <Box>
+    <Box sx={{ minWidth: 0, wordBreak: 'break-word' }}>
       {/* Profile Header */}
       <motion.div custom={0} variants={sectionVariants} initial="hidden" animate="visible">
         <Card sx={{
-          mb: 3, overflow: 'hidden', position: 'relative', borderRadius: 3,
+          mb: { xs: 2, sm: 3 }, overflow: 'hidden', position: 'relative', borderRadius: 3,
           background: isDark
             ? 'linear-gradient(135deg, rgba(7,15,26,0.7) 0%, rgba(17,25,33,0.5) 50%, rgba(7,15,26,0.7) 100%)'
             : 'linear-gradient(135deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.45) 50%, rgba(255,255,255,0.65) 100%)',
@@ -421,10 +421,10 @@ export function ProfilePage() {
         </Card>
       </motion.div>
 
-      <Grid container spacing={2.5}>
+      <Grid container spacing={{ xs: 1.5, sm: 2.5 }}>
         {/* Left Column */}
         <Grid item xs={12} md={4}>
-          <Stack spacing={2.5}>
+          <Stack spacing={{ xs: 1.5, sm: 2.5 }}>
             {/* Account Information */}
             <SectionCard title="Account Information" icon={<Person />} delay={1} isDark={isDark}>
               <Stack spacing={0.5}>
@@ -479,8 +479,8 @@ export function ProfilePage() {
                   ))}
                 </Box>
               ) : (
-                <Box sx={{ textAlign: 'center', py: 3 }}>
-                  <CheckCircle sx={{ fontSize: 36, color: 'success.main', mb: 0.5, opacity: 0.6 }} />
+                <Box sx={{ textAlign: 'center', py: { xs: 2, sm: 3 } }}>
+                  <CheckCircle sx={{ fontSize: { xs: 28, sm: 36 }, color: 'success.main', mb: 0.5, opacity: 0.6 }} />
                   <Typography variant="body2" color="text.secondary">No alerts</Typography>
                 </Box>
               )}
@@ -490,11 +490,11 @@ export function ProfilePage() {
 
         {/* Right Column */}
         <Grid item xs={12} md={8}>
-          <Stack spacing={2.5}>
+          <Stack spacing={{ xs: 1.5, sm: 2.5 }}>
             {/* Statistics */}
             <SectionCard title="Statistics" icon={<Analytics />} delay={1} isDark={isDark}>
               {isSuperAdmin && (
-                <Grid container spacing={2.5}>
+                <Grid container spacing={{ xs: 1.5, sm: 2.5 }}>
                   <Grid item xs={6} sm={4}>
                     <StatCard title="Buildings" value={buildings.length} icon={<Business />} color="primary" index={0} />
                   </Grid>
@@ -521,7 +521,7 @@ export function ProfilePage() {
               )}
 
               {isAdmin && (
-                <Grid container spacing={2.5}>
+                <Grid container spacing={{ xs: 1.5, sm: 2.5 }}>
                   <Grid item xs={6} sm={3}>
                     <StatCard title="Rooms" value={rooms.length} icon={<MeetingRoom />} color="primary" index={0} />
                   </Grid>
@@ -538,7 +538,7 @@ export function ProfilePage() {
               )}
 
               {isTenant && (
-                <Grid container spacing={2.5}>
+                <Grid container spacing={{ xs: 1.5, sm: 2.5 }}>
                   <Grid item xs={6} sm={3}>
                     <StatCard title="Total Consumed" value={`${Math.round(usageStats?.monthUsage || 0).toLocaleString()} L`} icon={<WaterDrop />} color="primary" subtitle="This month" index={0} />
                   </Grid>
@@ -564,8 +564,8 @@ export function ProfilePage() {
                   ))}
                 </Box>
               ) : (
-                <Box sx={{ textAlign: 'center', py: 4 }}>
-                  <Timeline sx={{ fontSize: 48, color: 'text.disabled', mb: 1, opacity: 0.4 }} />
+                <Box sx={{ textAlign: 'center', py: { xs: 3, sm: 4 } }}>
+                  <Timeline sx={{ fontSize: { xs: 36, sm: 48 }, color: 'text.disabled', mb: 1, opacity: 0.4 }} />
                   <Typography variant="body2" color="text.secondary">No recent activity</Typography>
                 </Box>
               )}
@@ -573,7 +573,7 @@ export function ProfilePage() {
 
             {/* Quick Actions */}
             <SectionCard title="Quick Actions" icon={<ArrowForward />} delay={3} isDark={isDark}>
-              <Grid container spacing={2}>
+              <Grid container spacing={{ xs: 1.5, sm: 2 }}>
                 {quickActions.map((action, idx) => (
                   <Grid item xs={6} sm={3} key={idx}>
                     <QuickActionCard
@@ -591,7 +591,7 @@ export function ProfilePage() {
 
             {/* Profile Settings */}
             <SectionCard title="Profile Settings" icon={<Settings />} delay={4} isDark={isDark}>
-              <Grid container spacing={2.5}>
+              <Grid container spacing={{ xs: 1.5, sm: 2.5 }}>
                 <Grid item xs={12} sm={6}>
                   <TextField label="Full Name" fullWidth value={name}
                     onChange={(e) => setName(e.target.value)} size="small"
@@ -611,11 +611,12 @@ export function ProfilePage() {
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }} />
                 </Grid>
                 <Grid item xs={12}>
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5, mt: 1 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: { xs: 1, sm: 1.5 }, mt: 1 }}>
                     <Button variant="contained" onClick={handleSave} disabled={saving}
                       startIcon={<Edit />}
                       sx={{
                         borderRadius: 2, textTransform: 'none', fontWeight: 600, px: 3,
+                        width: { xs: '100%', sm: 'auto' },
                         background: 'linear-gradient(135deg, #2F80ED, #5FA4FF)',
                         boxShadow: '0 4px 16px rgba(47,128,237,0.25), inset 0 1px 0 rgba(255,255,255,0.2)',
                         '&:hover': {

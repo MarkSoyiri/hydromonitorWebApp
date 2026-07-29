@@ -88,21 +88,22 @@ export function AnalyticsPage() {
   const leakTrend = analytics?.leakTrend || fallbackLeakTrend;
 
   return (
-    <Box>
+    <Box sx={{ minWidth: 0, wordBreak: 'break-word' }}>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <PageHeader title="Analytics" subtitle="Water usage analytics and insights" />
       </motion.div>
 
       {error && <Alert severity="warning" sx={{ mb: 2 }}>{error} - Showing default data.</Alert>}
 
-      <Grid container spacing={2.5}>
+      <Grid container spacing={{ xs: 1.5, sm: 2.5 }}>
         <Grid item xs={12} md={8}>
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.3 }}>
-            <Card>
+            <Card sx={{ overflow: 'hidden' }}>
               <CardHeader title="Weekly Consumption vs Average" />
-              <CardContent>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
                 {loading ? <ChartSkeleton /> : (
-                  <ResponsiveContainer width="100%" height={300}>
+                  <Box sx={{ width: '100%', overflow: 'hidden' }}>
+                    <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={weeklyUsage}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                       <XAxis dataKey="day" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
@@ -112,6 +113,7 @@ export function AnalyticsPage() {
                       <Bar dataKey="avg" fill="#A0AEC0" radius={[4, 4, 0, 0]} name="Average" />
                     </BarChart>
                   </ResponsiveContainer>
+                  </Box>
                 )}
               </CardContent>
             </Card>
@@ -120,11 +122,12 @@ export function AnalyticsPage() {
 
         <Grid item xs={12} md={4}>
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.3 }}>
-            <Card sx={{ height: '100%' }}>
+            <Card sx={{ height: '100%', overflow: 'hidden' }}>
               <CardHeader title="Building Comparison" />
-              <CardContent>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
                 {loading ? <ChartSkeleton /> : buildingComparison.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={300}>
+                  <Box sx={{ width: '100%', overflow: 'hidden' }}>
+                    <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie data={buildingComparison} cx="50%" cy="50%" innerRadius={60} outerRadius={100}
                         dataKey="usage" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
@@ -135,6 +138,7 @@ export function AnalyticsPage() {
                       <Tooltip />
                     </PieChart>
                   </ResponsiveContainer>
+                  </Box>
                 ) : (
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}>
                     <Typography color="text.secondary">No building data available</Typography>
@@ -147,11 +151,12 @@ export function AnalyticsPage() {
 
         <Grid item xs={12} md={6}>
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.3 }}>
-            <Card>
+            <Card sx={{ overflow: 'hidden' }}>
               <CardHeader title="Usage Trend" />
-              <CardContent>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
                 {loading ? <ChartSkeleton /> : (
-                  <ResponsiveContainer width="100%" height={300}>
+                  <Box sx={{ width: '100%', overflow: 'hidden' }}>
+                    <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={monthlyTrend}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                       <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
@@ -163,6 +168,7 @@ export function AnalyticsPage() {
                       )}
                     </LineChart>
                   </ResponsiveContainer>
+                  </Box>
                 )}
               </CardContent>
             </Card>
@@ -171,11 +177,12 @@ export function AnalyticsPage() {
 
         <Grid item xs={12} md={6}>
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.3 }}>
-            <Card>
+            <Card sx={{ overflow: 'hidden' }}>
               <CardHeader title="Leak Detection Trend" />
-              <CardContent>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
                 {loading ? <ChartSkeleton /> : (
-                  <ResponsiveContainer width="100%" height={300}>
+                  <Box sx={{ width: '100%', overflow: 'hidden' }}>
+                    <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={leakTrend}>
                       <defs>
                         <linearGradient id="leakGrad" x1="0" y1="0" x2="0" y2="1">
@@ -190,6 +197,7 @@ export function AnalyticsPage() {
                       <Area type="monotone" dataKey="leaks" stroke="#E53935" fill="url(#leakGrad)" strokeWidth={2} name="Leaks" />
                     </AreaChart>
                   </ResponsiveContainer>
+                  </Box>
                 )}
               </CardContent>
             </Card>

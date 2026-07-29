@@ -7,6 +7,7 @@ import {
 } from '@mui/icons-material';
 
 function FloatingIcon({ icon: Icon, x, y, size = 40, delay = 0, duration = 6 }) {
+  const s = typeof size === 'object' ? size : { xs: size, md: size };
   return (
     <motion.div
       style={{
@@ -28,8 +29,8 @@ function FloatingIcon({ icon: Icon, x, y, size = 40, delay = 0, duration = 6 }) 
     >
       <Box
         sx={{
-          width: size + 16,
-          height: size + 16,
+          width: s.xs + 16,
+          height: s.xs + 16,
           borderRadius: '50%',
           background: 'rgba(95, 164, 255, 0.1)',
           backdropFilter: 'blur(8px)',
@@ -38,6 +39,7 @@ function FloatingIcon({ icon: Icon, x, y, size = 40, delay = 0, duration = 6 }) 
           justifyContent: 'center',
           border: '1px solid rgba(95, 164, 255, 0.15)',
           boxShadow: '0 8px 32px rgba(47, 128, 237, 0.15)',
+          ...(s.md && { '@media (min-width:900px)': { width: s.md + 16, height: s.md + 16 } }),
         }}
       >
         <Icon sx={{ fontSize: size, color: 'rgba(95, 164, 255, 0.7)' }} />
@@ -191,12 +193,12 @@ export function HeroSection() {
       <AnimatedWave index={1} />
       <ParticleField />
 
-      <FloatingIcon icon={WaterDrop} x={8} y={30} size={32} delay={0} />
-      <FloatingIcon icon={Opacity} x={85} y={25} size={36} delay={1.5} />
-      <FloatingIcon icon={Sensors} x={92} y={65} size={28} delay={0.8} />
-      <FloatingIcon icon={Biotech} x={5} y={70} size={30} delay={2.2} />
-      <FloatingIcon icon={TrendingUp} x={75} y={20} size={26} delay={1} />
-      <FloatingIcon icon={Bolt} x={15} y={75} size={24} delay={3} />
+      <FloatingIcon icon={WaterDrop} x={8} y={30} size={{ xs: 24, md: 32 }} delay={0} />
+      <FloatingIcon icon={Opacity} x={85} y={25} size={{ xs: 28, md: 36 }} delay={1.5} />
+      <FloatingIcon icon={Sensors} x={92} y={65} size={{ xs: 22, md: 28 }} delay={0.8} />
+      <FloatingIcon icon={Biotech} x={5} y={70} size={{ xs: 24, md: 30 }} delay={2.2} />
+      <FloatingIcon icon={TrendingUp} x={75} y={20} size={{ xs: 20, md: 26 }} delay={1} />
+      <FloatingIcon icon={Bolt} x={15} y={75} size={{ xs: 18, md: 24 }} delay={3} />
 
       <Box
         component={motion.div}
@@ -308,7 +310,7 @@ export function HeroSection() {
 
             <motion.div
               variants={itemVariants}
-              style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: { xs: 'center', lg: 'flex-start' } }}
+              style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center' }}
             >
               <Button
                 onClick={() => navigate('/login')}
@@ -318,8 +320,8 @@ export function HeroSection() {
                   background: 'linear-gradient(135deg, #2F80ED 0%, #00B4D8 100%)',
                   color: '#fff',
                   fontWeight: 700,
-                  fontSize: '1rem',
-                  px: 4,
+                  fontSize: { xs: '0.9rem', sm: '1rem' },
+                  px: { xs: 2, sm: 4 },
                   py: 1.5,
                   borderRadius: 2.5,
                   boxShadow: '0 8px 32px rgba(47, 128, 237, 0.35)',
@@ -342,6 +344,7 @@ export function HeroSection() {
                     transition: 'left 0.5s',
                   },
                   '&:hover::after': { left: '100%' },
+                  width: { xs: '100%', sm: 'auto' },
                 }}
               >
                 Sign In
@@ -354,8 +357,8 @@ export function HeroSection() {
                   borderWidth: 2,
                   color: '#fff',
                   fontWeight: 600,
-                  fontSize: '1rem',
-                  px: 3.5,
+                  fontSize: { xs: '0.9rem', sm: '1rem' },
+                  px: { xs: 2, sm: 3.5 },
                   py: 1.5,
                   borderRadius: 2.5,
                   '&:hover': {
@@ -364,6 +367,7 @@ export function HeroSection() {
                     transform: 'translateY(-2px)',
                   },
                   transition: 'all 0.3s',
+                  width: { xs: '100%', sm: 'auto' },
                 }}
               >
                 Get Started
@@ -375,11 +379,12 @@ export function HeroSection() {
                 sx={{
                   color: 'rgba(255,255,255,0.6)',
                   fontWeight: 500,
-                  fontSize: '1rem',
-                  px: 2.5,
+                  fontSize: { xs: '0.9rem', sm: '1rem' },
+                  px: { xs: 2, sm: 2.5 },
                   py: 1.5,
                   borderRadius: 2.5,
                   '&:hover': { color: '#fff', bgcolor: 'rgba(255,255,255,0.05)' },
+                  width: { xs: '100%', sm: 'auto' },
                 }}
               >
                 Learn More
@@ -390,9 +395,10 @@ export function HeroSection() {
               variants={itemVariants}
               style={{
                 display: 'flex',
+                flexWrap: 'wrap',
                 gap: 40,
                 marginTop: 48,
-                justifyContent: { xs: 'center', lg: 'flex-start' },
+                justifyContent: 'center',
               }}
             >
               {[

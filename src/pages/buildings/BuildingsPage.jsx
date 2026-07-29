@@ -62,9 +62,9 @@ function AdminBuildingCard({ building, stats, index, onClick }) {
           },
         }}
       >
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 }, minWidth: 0 }}>
               <Avatar
                 sx={{
                   width: 44,
@@ -91,7 +91,7 @@ function AdminBuildingCard({ building, stats, index, onClick }) {
             </Box>
           </Box>
 
-          <Grid container spacing={1.5} sx={{ mb: 2 }}>
+          <Grid container spacing={{ xs: 1, sm: 1.5 }} sx={{ mb: { xs: 1.5, sm: 2 } }}>
             {[
               { label: 'Rooms', value: totalRooms, icon: <MeetingRoom sx={{ fontSize: 14 }} />, color: '#2F80ED' },
               { label: 'Tenants', value: totalTenants, icon: <People sx={{ fontSize: 14 }} />, color: '#4CAF50' },
@@ -127,7 +127,7 @@ function AdminBuildingCard({ building, stats, index, onClick }) {
             ))}
           </Grid>
 
-          <Divider sx={{ my: 1.5 }} />
+          <Divider sx={{ my: { xs: 1, sm: 1.5 } }} />
 
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             <Chip
@@ -153,11 +153,11 @@ function AdminBuildingCard({ building, stats, index, onClick }) {
             endIcon={<ChevronRight />}
             onClick={(e) => { e.stopPropagation(); onClick(); }}
             sx={{
-              mt: 2,
+              mt: { xs: 1.5, sm: 2 },
               borderRadius: 2,
               textTransform: 'none',
               fontWeight: 600,
-              py: 1,
+              py: { xs: 0.75, sm: 1 },
               background: 'linear-gradient(135deg, #2F80ED, #00B4D8)',
               boxShadow: '0 4px 12px rgba(47,128,237,0.25)',
               '&:hover': {
@@ -391,12 +391,12 @@ export function BuildingsPage() {
           />
         </motion.div>
 
-        {loading ? (
-          <Grid container spacing={2.5}>
+          {loading ? (
+          <Grid container spacing={{ xs: 1.5, sm: 2.5 }}>
             {[1, 2, 3].map((i) => (
               <Grid item xs={12} sm={6} md={4} key={i}>
                 <Card sx={{ height: 320 }}>
-                  <CardContent sx={{ p: 3 }}>
+                  <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
                       <Box sx={{ width: 44, height: 44, borderRadius: 2, bgcolor: 'action.hover' }} />
                       <Box sx={{ flex: 1 }}>
@@ -416,7 +416,7 @@ export function BuildingsPage() {
             icon={<Business sx={{ fontSize: 56 }} />}
           />
         ) : (
-          <Grid container spacing={2.5}>
+          <Grid container spacing={{ xs: 1.5, sm: 2.5 }}>
             {buildings.map((building, index) => (
               <Grid item xs={12} sm={6} md={4} key={building.buildingId}>
                 <AdminBuildingCard
@@ -442,9 +442,9 @@ export function BuildingsPage() {
                 onChange={(e) => setForm({ ...form, description: e.target.value })} />
             </Stack>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave} variant="contained" disabled={saving}>
+          <DialogActions sx={{ flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 1, sm: 0 } }}>
+            <Button onClick={() => setDialogOpen(false)} fullWidth={true}>Cancel</Button>
+            <Button onClick={handleSave} variant="contained" disabled={saving} fullWidth={true}>
               {saving ? 'Saving...' : (editing ? 'Update' : 'Create')}
             </Button>
           </DialogActions>
@@ -504,9 +504,9 @@ export function BuildingsPage() {
               onChange={(e) => setForm({ ...form, description: e.target.value })} />
           </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleSave} variant="contained" disabled={saving}>
+        <DialogActions sx={{ flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 1, sm: 0 } }}>
+          <Button onClick={() => setDialogOpen(false)} fullWidth={true}>Cancel</Button>
+          <Button onClick={handleSave} variant="contained" disabled={saving} fullWidth={true}>
             {saving ? 'Saving...' : (editing ? 'Update' : 'Create')}
           </Button>
         </DialogActions>

@@ -18,7 +18,7 @@ export function WaterFlowIndicator({ flowRate = 0, isFlowing = false }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
       <Box sx={{
-        width: 44, height: 44, borderRadius: '50%',
+        width: { xs: 40, sm: 44 }, height: { xs: 40, sm: 44 }, borderRadius: '50%',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         background: isFlowing
           ? 'linear-gradient(135deg, #2F80ED, #00B4D8)'
@@ -27,7 +27,7 @@ export function WaterFlowIndicator({ flowRate = 0, isFlowing = false }) {
         color: isFlowing ? '#fff' : 'text.disabled',
       }}>
         <WaterDrop sx={{
-          fontSize: 24,
+          fontSize: { xs: 20, sm: 24 },
           animation: isFlowing ? `${flow} 1.5s ease-in-out infinite` : 'none',
         }} />
       </Box>

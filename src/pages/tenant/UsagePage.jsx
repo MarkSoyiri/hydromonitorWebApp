@@ -100,10 +100,10 @@ export function UsagePage() {
       <Box>
         <Skeleton variant="text" width={200} height={36} sx={{ mb: 1 }} />
         <Skeleton variant="text" width={300} height={20} sx={{ mb: 3 }} />
-        <Grid container spacing={2.5}>
+        <Grid container spacing={{ xs: 1.5, sm: 2.5 }}>
           {[1, 2, 3].map((i) => (
             <Grid item xs={12} sm={4} key={i}>
-              <Card sx={{ borderRadius: 3 }}><CardContent sx={{ p: 2.5, textAlign: 'center' }}>
+              <Card sx={{ borderRadius: 3 }}><CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, textAlign: 'center' }}>
                 <Skeleton variant="circular" width={32} height={32} sx={{ mx: 'auto', mb: 1 }} />
                 <Skeleton variant="text" width="60%" sx={{ mx: 'auto' }} />
                 <Skeleton variant="text" width="40%" sx={{ mx: 'auto' }} />
@@ -118,50 +118,51 @@ export function UsagePage() {
   return (
     <Box>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>Water Usage</Typography>
+        <Box sx={{ mb: { xs: 2, sm: 3 } }}>
+          <Typography variant="h5" sx={{ fontWeight: 700, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>Water Usage</Typography>
           <Typography variant="body2" color="text.secondary">Detailed breakdown of your water consumption</Typography>
         </Box>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
-        <Grid container spacing={2.5} sx={{ mb: 3 }}>
+        <Grid container spacing={{ xs: 1.5, sm: 2.5 }} sx={{ mb: 3 }}>
           <Grid item xs={12} sm={4}>
             <Card sx={{ borderRadius: 3 }}>
-              <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
-                <WaterDrop sx={{ fontSize: 32, color: 'primary.main', mb: 1 }} />
-                <Typography variant="h4" sx={{ fontWeight: 800 }}>{todayUsage.toLocaleString()} L</Typography>
-                <Typography variant="body2" color="text.secondary">Today's Usage</Typography>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, textAlign: 'center' }}>
+                <WaterDrop sx={{ fontSize: { xs: 28, sm: 32 }, color: 'primary.main', mb: 1 }} />
+                <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>{todayUsage.toLocaleString()} L</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ wordBreak: 'break-word' }}>Today's Usage</Typography>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={12} sm={4}>
             <Card sx={{ borderRadius: 3 }}>
-              <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
-                <TrendingUp sx={{ fontSize: 32, color: 'warning.main', mb: 1 }} />
-                <Typography variant="h4" sx={{ fontWeight: 800 }}>{currentUsage.toLocaleString()} L</Typography>
-                <Typography variant="body2" color="text.secondary">This Month</Typography>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, textAlign: 'center' }}>
+                <TrendingUp sx={{ fontSize: { xs: 28, sm: 32 }, color: 'warning.main', mb: 1 }} />
+                <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>{currentUsage.toLocaleString()} L</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ wordBreak: 'break-word' }}>This Month</Typography>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={12} sm={4}>
             <Card sx={{ borderRadius: 3 }}>
-              <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
-                <Speed sx={{ fontSize: 32, color: 'success.main', mb: 1 }} />
-                <Typography variant="h4" sx={{ fontWeight: 800 }}>{dailyAvg.toFixed(0)} L</Typography>
-                <Typography variant="body2" color="text.secondary">Daily Average</Typography>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, textAlign: 'center' }}>
+                <Speed sx={{ fontSize: { xs: 28, sm: 32 }, color: 'success.main', mb: 1 }} />
+                <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>{dailyAvg.toFixed(0)} L</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ wordBreak: 'break-word' }}>Daily Average</Typography>
               </CardContent>
             </Card>
           </Grid>
         </Grid>
       </motion.div>
 
-      <Grid container spacing={2.5}>
+      <Grid container spacing={{ xs: 1.5, sm: 2.5 }}>
         <Grid item xs={12} md={8}>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.15 }}>
             <Card sx={{ borderRadius: 3 }}>
-              <CardContent sx={{ p: 2.5 }}>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 } }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Hourly Usage Today</Typography>
+                <Box sx={{ width: '100%', overflow: { xs: 'hidden', sm: 'visible' } }}>
                 <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={hourlyData}>
                     <defs><linearGradient id="hourlyGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#2F80ED" stopOpacity={0.3} /><stop offset="95%" stopColor="#2F80ED" stopOpacity={0} /></linearGradient></defs>
@@ -172,6 +173,7 @@ export function UsagePage() {
                     <Area type="monotone" dataKey="usage" stroke="#2F80ED" fill="url(#hourlyGrad)" strokeWidth={2} />
                   </AreaChart>
                 </ResponsiveContainer>
+                </Box>
               </CardContent>
             </Card>
           </motion.div>
@@ -180,13 +182,14 @@ export function UsagePage() {
         <Grid item xs={12} md={4}>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }}>
             <Card sx={{ borderRadius: 3, height: '100%' }}>
-              <CardContent sx={{ p: 2.5 }}>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 } }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Usage Summary</Typography>
                 {readings.length === 0 ? (
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}>
                     <Typography color="text.secondary">No readings data available</Typography>
                   </Box>
                 ) : (
+                  <Box sx={{ width: '100%', overflow: { xs: 'hidden', sm: 'visible' } }}>
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie
@@ -202,6 +205,7 @@ export function UsagePage() {
                       <Legend />
                     </PieChart>
                   </ResponsiveContainer>
+                  </Box>
                 )}
               </CardContent>
             </Card>
@@ -211,8 +215,9 @@ export function UsagePage() {
         <Grid item xs={12} md={6}>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.25 }}>
             <Card sx={{ borderRadius: 3 }}>
-              <CardContent sx={{ p: 2.5 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Weekly Usage</Typography>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 } }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2, wordBreak: 'break-word' }}>Weekly Usage</Typography>
+                <Box sx={{ width: '100%', overflow: { xs: 'hidden', sm: 'visible' } }}>
                 <ResponsiveContainer width="100%" height={250}>
                   <BarChart data={weeklyData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
@@ -222,6 +227,7 @@ export function UsagePage() {
                     <Bar dataKey="usage" fill="#2F80ED" radius={[6, 6, 0, 0]} maxBarSize={40} />
                   </BarChart>
                 </ResponsiveContainer>
+                </Box>
               </CardContent>
             </Card>
           </motion.div>
@@ -230,17 +236,19 @@ export function UsagePage() {
         <Grid item xs={12} md={6}>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.3 }}>
             <Card sx={{ borderRadius: 3 }}>
-              <CardContent sx={{ p: 2.5 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Monthly Trend</Typography>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 } }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2, wordBreak: 'break-word' }}>Monthly Trend</Typography>
+                <Box sx={{ width: '100%', overflow: { xs: 'hidden', sm: 'visible' } }}>
                 <ResponsiveContainer width="100%" height={250}>
-                  <LineChart data={monthlyData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                    <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
-                    <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Line type="monotone" dataKey="usage" stroke="#2F80ED" strokeWidth={3} dot={{ fill: '#2F80ED', r: 4 }} />
-                  </LineChart>
-                </ResponsiveContainer>
+                    <LineChart data={monthlyData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                      <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="#A0AEC0" />
+                      <YAxis tick={{ fontSize: 12 }} stroke="#A0AEC0" />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Line type="monotone" dataKey="usage" stroke="#2F80ED" strokeWidth={3} dot={{ fill: '#2F80ED', r: 4 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </Box>
               </CardContent>
             </Card>
           </motion.div>

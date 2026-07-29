@@ -16,4 +16,17 @@ export const roomService = {
 
   delete: (roomId) =>
     apiDelete(`${ENDPOINTS.ROOMS}/${roomId}`),
+
+  unassignTenant: async (roomId, tenantId) => {
+    if (!tenantId) {
+      return apiPut(`${ENDPOINTS.ROOMS}/${roomId}`, { tenantId: '', status: 'VACANT' });
+    }
+
+    const { data: tRes } = await apiGet(`${ENDPOINTS.TENANTS}/${tenantId}`);
+    const tenantData = tRes?.data || tRes;
+    const id = tenantData?.tenantId || tenantData?.uid || tenantData?.id || tenantId;
+
+    await apiPut(`${ENDPOINTS.TENANTS}/${id}`, { roomId: '' });
+    return apiPut(`${ENDPOINTS.ROOMS}/${roomId}`, { tenantId: '', status: 'VACANT' });
+  },
 };

@@ -54,8 +54,8 @@ function StatSkeleton() {
 }
 
 const SectionHeader = ({ title, subtitle }) => (
-  <Box sx={{ mb: 2 }}>
-    <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem' }}>{title}</Typography>
+  <Box sx={{ mb: { xs: 1.5, sm: 2 } }}>
+    <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: '0.9rem', sm: '1rem' } }}>{title}</Typography>
     {subtitle && <Typography variant="caption" color="text.secondary">{subtitle}</Typography>}
   </Box>
 );
@@ -201,7 +201,7 @@ export function TenantDashboardPage() {
       <Box>
         <Skeleton variant="text" width={300} height={40} sx={{ mb: 1 }} />
         <Skeleton variant="text" width={200} height={24} sx={{ mb: 3 }} />
-        <Grid container spacing={2.5}>
+        <Grid container spacing={{ xs: 1.5, sm: 2.5 }}>
           {[1, 2, 3, 4].map((i) => (
             <Grid item xs={12} sm={6} md={3} key={i}><StatSkeleton /></Grid>
           ))}
@@ -213,11 +213,11 @@ export function TenantDashboardPage() {
   return (
     <Box>
       <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={0}>
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: { xs: 2, sm: 3 } }}>
           <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', md: '1.75rem' } }}>
             {greeting}, {firstName}!
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, wordBreak: 'break-word' }}>
             Here's your water usage overview for today.
           </Typography>
         </Box>
@@ -227,15 +227,15 @@ export function TenantDashboardPage() {
       <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={0.5}>
         <SectionHeader title="Overview" subtitle="Your billing and usage summary" />
       </motion.div>
-      <Grid container spacing={2.5} sx={{ mb: 4 }}>
+      <Grid container spacing={{ xs: 1.5, sm: 2.5 }} sx={{ mb: 4 }}>
         {[0, 1, 2, 3].map((i) => (
           <Grid item xs={12} sm={6} md={3} key={i}>
             <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={i + 1}>
               {loading ? <StatSkeleton /> : (
                 <Card sx={{ borderRadius: 3 }}>
-                  <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                  <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, '&:last-child': { pb: { xs: 1.5, sm: 2.5 } } }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, minWidth: 0 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, wordBreak: 'break-word', pr: 1 }}>
                         {[
                           'THIS MONTH\'S USAGE',
                           'CURRENT BILL',
@@ -250,12 +250,12 @@ export function TenantDashboardPage() {
                           outstandingBalance > 0 ? 'error.main' : 'success.main',
                           'success.main'
                         ][i],
-                        width: 36, height: 36, borderRadius: 2
+                        width: { xs: 32, sm: 36 }, height: { xs: 32, sm: 36 }, borderRadius: 2
                       }}>
                         {[<WaterDrop />, <Receipt />, <AccountBalance />, <CheckCircle />][i]}
                       </Avatar>
                     </Box>
-                    <Typography variant="h4" sx={{ fontWeight: 800, color: i === 2 && outstandingBalance > 0 ? 'error.main' : 'text.primary' }}>
+                    <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.25rem', sm: '2.125rem' }, wordBreak: 'break-word', color: i === 2 && outstandingBalance > 0 ? 'error.main' : 'text.primary' }}>
                       {[
                         `${currentUsage.toLocaleString()} L`,
                         `GHS ${billAmount.toFixed(2)}`,
@@ -278,7 +278,7 @@ export function TenantDashboardPage() {
                     )}
                     {i === 3 && (
                       <Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 }, mt: 1 }}>
                           <Box sx={{ flex: 1 }}>
                             <LinearProgress
                               variant="determinate"
@@ -304,51 +304,51 @@ export function TenantDashboardPage() {
         ))}
       </Grid>
 
-      <Divider sx={{ mb: 4 }} />
+      <Divider sx={{ mb: { xs: 2.5, sm: 4 } }} />
 
       {/* Live Status & Usage Section */}
       <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={4}>
         <SectionHeader title="Live Status & Usage" subtitle="Real-time device status and daily consumption" />
       </motion.div>
-      <Grid container spacing={2.5} sx={{ mb: 4 }}>
+      <Grid container spacing={{ xs: 1.5, sm: 2.5 }} sx={{ mb: 4 }}>
         <Grid item xs={12} md={4}>
           <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={5}>
             <Card sx={{ borderRadius: 3, height: '100%' }}>
-              <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, '&:last-child': { pb: { xs: 1.5, sm: 2.5 } } }}>
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 2, display: 'block' }}>LIVE STATUS</Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1.5, sm: 2 } }}>
                   {device ? (
                     <WaterFlowIndicator flowRate={flowRate} isFlowing={isFlowing} />
                   ) : (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <WaterDrop sx={{ color: 'text.disabled', fontSize: 28 }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+                      <WaterDrop sx={{ color: 'text.disabled', fontSize: { xs: 24, sm: 28 } }} />
                       <Box>
                         <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.secondary' }}>No device data available</Typography>
                       </Box>
                     </Box>
                   )}
                   <Divider />
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <ValveIcon sx={{ color: valveOpen ? '#10B981' : 'text.disabled', fontSize: 28 }} />
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>Valve {valveOpen ? 'Open' : 'Closed'}</Typography>
-                      <Typography variant="caption" color="text.secondary">{valveOpen ? 'Water supply is active' : 'Water supply is shut'}</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 }, minWidth: 0 }}>
+                    <ValveIcon sx={{ color: valveOpen ? '#10B981' : 'text.disabled', fontSize: { xs: 24, sm: 28 } }} />
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, wordBreak: 'break-word' }}>Valve {valveOpen ? 'Open' : 'Closed'}</Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ wordBreak: 'break-word' }}>{valveOpen ? 'Water supply is active' : 'Water supply is shut'}</Typography>
                     </Box>
                   </Box>
                   <Divider />
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: deviceOnline ? '#43a047' : '#EF4444', boxShadow: deviceOnline ? '0 0 8px rgba(67,160,71,0.6)' : 'none' }} />
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>Device {deviceOnline ? 'Online' : 'Offline'}</Typography>
-                      <Typography variant="caption" color="text.secondary">{assignedDevice}</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 }, minWidth: 0 }}>
+                    <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: deviceOnline ? '#43a047' : '#EF4444', boxShadow: deviceOnline ? '0 0 8px rgba(67,160,71,0.6)' : 'none', flexShrink: 0 }} />
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, wordBreak: 'break-word' }}>Device {deviceOnline ? 'Online' : 'Offline'}</Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ wordBreak: 'break-word' }}>{assignedDevice}</Typography>
                     </Box>
                   </Box>
                   <Divider />
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <Home sx={{ color: 'text.secondary', fontSize: 28 }} />
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{currentRoomLabel}</Typography>
-                      <Typography variant="caption" color="text.secondary">Assigned room</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 }, minWidth: 0 }}>
+                    <Home sx={{ color: 'text.secondary', fontSize: { xs: 24, sm: 28 } }} />
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, wordBreak: 'break-word' }}>{currentRoomLabel}</Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ wordBreak: 'break-word' }}>Assigned room</Typography>
                     </Box>
                   </Box>
                 </Box>
@@ -360,9 +360,9 @@ export function TenantDashboardPage() {
         <Grid item xs={12} md={4}>
           <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={6}>
             <Card sx={{ borderRadius: 3, height: '100%' }}>
-              <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 }, display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, '&:last-child': { pb: { xs: 1.5, sm: 2.5 } }, display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 1.5, display: 'block' }}>TODAY'S USAGE</Typography>
-                <Box sx={{ flex: 1 }}>
+                <Box sx={{ flex: 1, width: '100%', overflow: { xs: 'hidden', sm: 'visible' } }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={dailyData}>
                       <defs>
@@ -390,7 +390,7 @@ export function TenantDashboardPage() {
         <Grid item xs={12} md={4}>
           <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={7}>
             <Card sx={{ borderRadius: 3, height: '100%' }}>
-              <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, '&:last-child': { pb: { xs: 1.5, sm: 2.5 } } }}>
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 1.5, display: 'block' }}>QUICK ACTIONS</Typography>
                 <QuickActions />
                 <Box sx={{ mt: 2 }}>
@@ -402,19 +402,19 @@ export function TenantDashboardPage() {
         </Grid>
       </Grid>
 
-      <Divider sx={{ mb: 4 }} />
+      <Divider sx={{ mb: { xs: 2.5, sm: 4 } }} />
 
       {/* Analytics Section */}
       <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={7.5}>
         <SectionHeader title="Analytics" subtitle="Usage trends and comparisons" />
       </motion.div>
-      <Grid container spacing={2.5} sx={{ mb: 4 }}>
+      <Grid container spacing={{ xs: 1.5, sm: 2.5 }} sx={{ mb: 4 }}>
         <Grid item xs={12}>
           <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={8}>
             <Card sx={{ borderRadius: 3 }}>
-              <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>WEEKLY USAGE COMPARISON</Typography>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, '&:last-child': { pb: { xs: 1.5, sm: 2.5 } } }}>
+                <Box sx={{ display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', mb: 2, flexDirection: { xs: 'column', sm: 'row' }, flexWrap: 'wrap', gap: { xs: 0.5, sm: 1 } }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, wordBreak: 'break-word' }}>WEEKLY USAGE COMPARISON</Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       <Box sx={{ width: 12, height: 3, borderRadius: 1, bgcolor: '#2F80ED' }} />
@@ -426,6 +426,7 @@ export function TenantDashboardPage() {
                     </Box>
                   </Box>
                 </Box>
+                <Box sx={{ width: '100%', overflow: { xs: 'hidden', sm: 'visible' } }}>
                 <ResponsiveContainer width="100%" height={250}>
                   <BarChart data={weeklyData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
@@ -436,6 +437,7 @@ export function TenantDashboardPage() {
                     <Bar dataKey="usage" fill="#2F80ED" radius={[4, 4, 0, 0]} maxBarSize={30} />
                   </BarChart>
                 </ResponsiveContainer>
+                </Box>
               </CardContent>
             </Card>
           </motion.div>
@@ -444,8 +446,9 @@ export function TenantDashboardPage() {
         <Grid item xs={12} md={6}>
           <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={9}>
             <Card sx={{ borderRadius: 3 }}>
-              <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 2, display: 'block' }}>MONTHLY USAGE TREND</Typography>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, '&:last-child': { pb: { xs: 1.5, sm: 2.5 } } }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 2, display: 'block', wordBreak: 'break-word' }}>MONTHLY USAGE TREND</Typography>
+                <Box sx={{ width: '100%', overflow: { xs: 'hidden', sm: 'visible' } }}>
                 <ResponsiveContainer width="100%" height={250}>
                   <LineChart data={monthlyData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
@@ -456,6 +459,7 @@ export function TenantDashboardPage() {
                     <Line type="monotone" dataKey="lastYear" stroke="#A0AEC0" strokeWidth={2} strokeDasharray="5 5" dot={{ fill: '#A0AEC0', r: 3 }} />
                   </LineChart>
                 </ResponsiveContainer>
+                </Box>
               </CardContent>
             </Card>
           </motion.div>
@@ -464,14 +468,14 @@ export function TenantDashboardPage() {
         <Grid item xs={12} md={3}>
           <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={10}>
             <Card sx={{ borderRadius: 3, height: '100%' }}>
-              <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 2, display: 'block' }}>USAGE INSIGHTS</Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, '&:last-child': { pb: { xs: 1.5, sm: 2.5 } } }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 2, display: 'block', wordBreak: 'break-word' }}>USAGE INSIGHTS</Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1.5, sm: 2 } }}>
                   <Box>
                     <Typography variant="body2" color="text.secondary">Estimated Bill</Typography>
                     <Typography variant="h5" sx={{ fontWeight: 700, mt: 0.3 }}>GHS {((currentBill?.amount || billAmount) * 1.15).toFixed(2)}</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.3 }}>
-                      <TrendingUp color="warning" sx={{ fontSize: 14 }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.3, flexWrap: 'wrap' }}>
+                      <TrendingUp color="warning" sx={{ fontSize: { xs: 12, sm: 14 } }} />
                       <Typography variant="caption" color="warning.main" sx={{ fontWeight: 600 }}>Est. 15% increase</Typography>
                     </Box>
                   </Box>
@@ -500,7 +504,7 @@ export function TenantDashboardPage() {
         <Grid item xs={12} md={3}>
           <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={11}>
             <Card sx={{ borderRadius: 3, height: '100%' }}>
-              <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, '&:last-child': { pb: { xs: 1.5, sm: 2.5 } } }}>
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 2, display: 'block' }}>ALERTS & NOTIFICATIONS</Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                   <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: leakDetected ? 'error.light' : 'success.light', opacity: 0.9, mb: 1 }}>
@@ -533,33 +537,33 @@ export function TenantDashboardPage() {
                     )}
                   </List>
                 </Box>
-                <Button size="small" endIcon={<ArrowForward />} onClick={() => navigate('/app/alerts')} sx={{ mt: 1 }}>View All Alerts</Button>
+                <Button size="small" endIcon={<ArrowForward />} onClick={() => navigate('/app/alerts')} sx={{ mt: 1, width: { xs: '100%', sm: 'auto' } }}>View All Alerts</Button>
               </CardContent>
             </Card>
           </motion.div>
         </Grid>
       </Grid>
 
-      <Divider sx={{ mb: 4 }} />
+      <Divider sx={{ mb: { xs: 2.5, sm: 4 } }} />
 
       {/* Billing Section */}
       <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={11.5}>
         <SectionHeader title="Billing" subtitle="Payment history and invoices" />
       </motion.div>
-      <Grid container spacing={2.5}>
+      <Grid container spacing={{ xs: 1.5, sm: 2.5 }}>
         <Grid item xs={12} md={6}>
           <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={12}>
             <Card sx={{ borderRadius: 3 }}>
-              <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>PAYMENT HISTORY</Typography>
-                  <Button size="small" endIcon={<ArrowForward />} onClick={() => navigate('/app/payments')}>View All</Button>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, '&:last-child': { pb: { xs: 1.5, sm: 2.5 } } }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, wordBreak: 'break-word' }}>PAYMENT HISTORY</Typography>
+                  <Button size="small" endIcon={<ArrowForward />} onClick={() => navigate('/app/payments')} sx={{ width: { xs: '100%', sm: 'auto' } }}>View All</Button>
                 </Box>
                 {paymentHistory.length > 0 ? (
                   <List dense sx={{ p: 0 }}>
                     {paymentHistory.map((p, i) => (
                       <ListItem key={i} sx={{ px: 0, py: 0.8 }}>
-                        <ListItemIcon sx={{ minWidth: 36 }}><Paid sx={{ color: 'success.main', fontSize: 20 }} /></ListItemIcon>
+                        <ListItemIcon sx={{ minWidth: { xs: 32, sm: 36 } }}><Paid sx={{ color: 'success.main', fontSize: { xs: 18, sm: 20 } }} /></ListItemIcon>
                         <ListItemText
                           primary={
                             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -591,16 +595,16 @@ export function TenantDashboardPage() {
         <Grid item xs={12} md={6}>
           <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={13}>
             <Card sx={{ borderRadius: 3 }}>
-              <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>INVOICES</Typography>
-                  <Button size="small" endIcon={<ArrowForward />} onClick={() => navigate('/app/invoices')}>View All</Button>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, '&:last-child': { pb: { xs: 1.5, sm: 2.5 } } }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, wordBreak: 'break-word' }}>INVOICES</Typography>
+                  <Button size="small" endIcon={<ArrowForward />} onClick={() => navigate('/app/invoices')} sx={{ width: { xs: '100%', sm: 'auto' } }}>View All</Button>
                 </Box>
                 {invoiceHistory.length > 0 ? (
                   <List dense sx={{ p: 0 }}>
                     {invoiceHistory.map((inv, i) => (
                       <ListItem key={i} sx={{ px: 0, py: 0.8 }}>
-                        <ListItemIcon sx={{ minWidth: 36 }}><Description sx={{ color: 'primary.main', fontSize: 20 }} /></ListItemIcon>
+                        <ListItemIcon sx={{ minWidth: { xs: 32, sm: 36 } }}><Description sx={{ color: 'primary.main', fontSize: { xs: 18, sm: 20 } }} /></ListItemIcon>
                         <ListItemText
                           primary={
                             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>

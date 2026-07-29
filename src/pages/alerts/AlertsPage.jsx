@@ -85,7 +85,7 @@ export function AlertsPage() {
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.3 }}>
-        <Grid container spacing={2.5} sx={{ mb: 3 }}>
+        <Grid container spacing={{ xs: 1.5, sm: 2.5 }} sx={{ mb: { xs: 2, sm: 3 } }}>
           <Grid item xs={6} sm={3}>
             <StatCard title="Total" value={alerts.length} icon={<Warning />} color="primary" />
           </Grid>
@@ -103,8 +103,8 @@ export function AlertsPage() {
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.3 }}>
         <Card>
-          <CardContent>
-            <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
+          <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+            <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto" sx={{ mb: 2, '& .MuiTab-root': { fontSize: { xs: '0.75rem', sm: '0.875rem' }, minWidth: { xs: 'auto', sm: 90 }, px: { xs: 1.5, sm: 2 } } }}>
               <Tab label="All" />
               <Tab label="Active" />
               <Tab label="Resolved" />

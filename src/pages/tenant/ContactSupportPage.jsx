@@ -22,18 +22,18 @@ export function ContactSupportPage() {
   return (
     <Box>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>Contact Support</Typography>
+        <Box sx={{ mb: { xs: 2, sm: 3 } }}>
+          <Typography variant="h5" sx={{ fontWeight: 700, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>Contact Support</Typography>
           <Typography variant="body2" color="text.secondary">We're here to help you</Typography>
         </Box>
       </motion.div>
 
-      <Grid container spacing={2.5} sx={{ mb: 3 }}>
+      <Grid container spacing={{ xs: 1.5, sm: 2.5 }} sx={{ mb: 3 }}>
         {supportOptions.map((opt, i) => (
           <Grid item xs={12} sm={4} key={i}>
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-              <Paper sx={{ p: 2.5, borderRadius: 3, textAlign: 'center', cursor: 'pointer', '&:hover': { boxShadow: 4 } }} elevation={0}>
-                <Box sx={{ width: 48, height: 48, borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 1.5, bgcolor: `${opt.color}15`, color: opt.color }}>
+              <Paper sx={{ p: { xs: 1.5, sm: 2.5 }, borderRadius: 3, textAlign: 'center', cursor: 'pointer', '&:hover': { boxShadow: 4 } }} elevation={0}>
+                <Box sx={{ width: { xs: 40, sm: 48 }, height: { xs: 40, sm: 48 }, borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 1.5, bgcolor: `${opt.color}15`, color: opt.color, fontSize: { xs: '1.5rem', sm: '1.75rem' } }}>
                   {opt.icon}
                 </Box>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{opt.label}</Typography>
@@ -46,7 +46,7 @@ export function ContactSupportPage() {
 
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.15 }}>
         <Card sx={{ borderRadius: 3 }}>
-          <CardContent sx={{ p: 2.5 }}>
+          <CardContent sx={{ p: { xs: 1.5, sm: 2.5 } }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Report an Issue</Typography>
             <TextField
               fullWidth
@@ -58,8 +58,8 @@ export function ContactSupportPage() {
               variant="outlined"
               sx={{ mb: 2 }}
             />
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Button variant="contained" endIcon={<Send />} onClick={handleSubmit} disabled={!message.trim()}>
+            <Box sx={{ display: 'flex', justifyContent: { xs: 'stretch', sm: 'flex-end' } }}>
+              <Button variant="contained" endIcon={<Send />} onClick={handleSubmit} disabled={!message.trim()} sx={{ width: { xs: '100%', sm: 'auto' } }}>
                 Send Message
               </Button>
             </Box>

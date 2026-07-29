@@ -15,7 +15,7 @@ export function EmptyState({ icon, title = 'No data found', description, action 
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          py: 8,
+          py: { xs: 6, sm: 8 },
           px: 2,
           textAlign: 'center',
         }}
@@ -25,15 +25,16 @@ export function EmptyState({ icon, title = 'No data found', description, action 
             color: 'text.disabled',
             mb: 2,
             opacity: 0.5,
+            '& .MuiSvgIcon-root': { fontSize: { xs: 40, sm: 56 } },
           }}
         >
-          {icon || <InboxOutlined sx={{ fontSize: 56 }} />}
+          {icon || <InboxOutlined />}
         </Box>
-        <Typography variant="h6" color="text.secondary" sx={{ mb: 1, fontWeight: 600 }}>
+        <Typography variant="h6" color="text.secondary" sx={{ mb: 1, fontWeight: 600, fontSize: { xs: '0.95rem', sm: '1.125rem' } }}>
           {title}
         </Typography>
         {description && (
-          <Typography variant="body2" color="text.disabled" sx={{ mb: 2, maxWidth: 400 }}>
+          <Typography variant="body2" color="text.disabled" sx={{ mb: 2, maxWidth: 400, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
             {description}
           </Typography>
         )}

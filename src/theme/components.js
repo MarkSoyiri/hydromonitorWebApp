@@ -25,7 +25,13 @@ export const getComponents = (mode) => {
           fontWeight: 600,
           fontSize: '0.875rem',
           textTransform: 'none',
+          minHeight: 44,
           transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          '@media (max-width:600px)': {
+            minHeight: 48,
+            padding: '10px 20px',
+            fontSize: '0.9rem',
+          },
         },
         contained: {
           boxShadow: isDark
@@ -59,8 +65,8 @@ export const getComponents = (mode) => {
             backgroundColor: isDark ? 'rgba(95,164,255,0.08)' : 'rgba(47,128,237,0.06)',
           },
         },
-        sizeSmall: { padding: '6px 16px', fontSize: '0.8125rem' },
-        sizeLarge: { padding: '10px 24px', fontSize: '1rem' },
+        sizeSmall: { padding: '6px 16px', fontSize: '0.8125rem', minHeight: 36 },
+        sizeLarge: { padding: '10px 24px', fontSize: '1rem', minHeight: 52 },
       },
     },
     MuiCard: {
@@ -84,6 +90,9 @@ export const getComponents = (mode) => {
               ? '0 12px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)'
               : '0 12px 40px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.7)',
             borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.8)',
+          },
+          '@media (max-width:600px)': {
+            borderRadius: 16,
           },
         },
       },
@@ -165,6 +174,14 @@ export const getComponents = (mode) => {
           boxShadow: isDark
             ? '0 24px 80px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05)'
             : '0 24px 80px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.7)',
+          '@media (max-width:600px)': {
+            margin: 12,
+            width: 'calc(100% - 24px)',
+            maxWidth: '100% !important',
+          },
+        },
+        fullScreen: {
+          borderRadius: 0,
         },
       },
     },
@@ -208,6 +225,9 @@ export const getComponents = (mode) => {
         root: {
           borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
           padding: '12px 16px',
+          '@media (max-width:600px)': {
+            padding: '8px 10px',
+          },
         },
       },
     },

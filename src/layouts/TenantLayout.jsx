@@ -171,10 +171,6 @@ function TenantBottomNav() {
     { label: 'Profile', path: '/app/profile', icon: <Person /> },
   ];
 
-  const currentValue = bottomNavItems.findIndex(
-    (item) => item.path === location.pathname || location.pathname.startsWith(item.path.replace('/app/', '/app/'))
-  );
-
   const getValue = () => {
     const idx = bottomNavItems.findIndex((item) => {
       if (item.path === '/app/dashboard') return location.pathname === '/app/dashboard';
@@ -186,16 +182,17 @@ function TenantBottomNav() {
   return (
     <Paper sx={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1100, borderRadius: 0,
-      background: isDark ? 'rgba(7,15,26,0.75)' : 'rgba(255,255,255,0.75)',
+      background: isDark ? 'rgba(7,15,26,0.85)' : 'rgba(255,255,255,0.85)',
       backdropFilter: 'blur(24px) saturate(200%)',
       WebkitBackdropFilter: 'blur(24px) saturate(200%)',
       borderTop: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.04)',
       boxShadow: '0 -2px 16px rgba(0,0,0,0.04)',
+      pb: 'env(safe-area-inset-bottom, 0px)',
     }} elevation={0}>
       <BottomNavigation
         value={getValue()}
         onChange={(_, newValue) => navigate(bottomNavItems[newValue].path)}
-        sx={{ height: 64 }}
+        sx={{ height: 72, '& .MuiBottomNavigationAction-root': { minWidth: 0, py: 0.5 } }}
       >
         {bottomNavItems.map((item) => (
           <BottomNavigationAction
@@ -204,14 +201,18 @@ function TenantBottomNav() {
             icon={item.icon}
             sx={{
               '& .MuiBottomNavigationAction-label': {
-                fontSize: '0.65rem',
+                fontSize: '0.6rem',
                 fontWeight: 500,
+                mt: 0.25,
               },
               '&.Mui-selected': {
                 '& .MuiBottomNavigationAction-label': {
-                  fontSize: '0.7rem',
+                  fontSize: '0.65rem',
                   fontWeight: 700,
                 },
+              },
+              '& .MuiSvgIcon-root': {
+                fontSize: '1.3rem',
               },
             }}
           />
@@ -333,7 +334,7 @@ export function TenantLayout() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', pb: isMobile ? 7 : 0 }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', pb: isMobile ? 'calc(72px + env(safe-area-inset-bottom, 0px))' : 0 }}>
       <TenantSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
@@ -343,7 +344,7 @@ export function TenantLayout() {
           component="main"
           sx={{
             flex: 1,
-            p: { xs: 2, sm: 3, md: 4 },
+            p: { xs: 1.5, sm: 3, md: 4 },
             maxWidth: 1200,
             width: '100%',
             mx: 'auto',

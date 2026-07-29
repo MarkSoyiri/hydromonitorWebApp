@@ -58,9 +58,9 @@ export function LogsPage() {
   );
 
   return (
-    <Box>
+    <Box sx={{ minWidth: 0, wordBreak: 'break-word' }}>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: { xs: 2, sm: 3 }, flexWrap: 'wrap', gap: { xs: 1.5, sm: 2 } }}>
           <Box>
             <Typography variant="h5" sx={{ fontWeight: 700 }}>System Logs</Typography>
             <Typography variant="body2" color="text.secondary">Monitor system activity and events</Typography>
@@ -73,14 +73,14 @@ export function LogsPage() {
             InputProps={{
               startAdornment: <InputAdornment position="start"><Search fontSize="small" /></InputAdornment>,
             }}
-            sx={{ minWidth: 280 }}
+            sx={{ minWidth: { xs: '100%', sm: 280 } }}
           />
         </Box>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
-        <Card sx={{ borderRadius: 2 }}>
-          <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
+          <Card sx={{ borderRadius: 2 }}>
+            <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, '&:last-child': { pb: { xs: 1.5, sm: 2.5 } } }}>
             {loading ? (
               <List sx={{ p: 0 }}>
                 {[1, 2, 3, 4, 5].map((i) => (
@@ -98,8 +98,8 @@ export function LogsPage() {
             ) : (
               <List sx={{ p: 0 }}>
                 {filtered.length === 0 ? (
-                  <Box sx={{ py: 4, textAlign: 'center' }}>
-                    <ListAlt sx={{ color: 'text.disabled', fontSize: 40, mb: 1 }} />
+                  <Box sx={{ py: { xs: 3, sm: 4 }, textAlign: 'center' }}>
+                    <ListAlt sx={{ color: 'text.disabled', fontSize: { xs: 32, sm: 40 }, mb: 1 }} />
                     <Typography variant="body2" color="text.secondary">
                       {search ? 'No logs match your search' : 'No system logs available'}
                     </Typography>
@@ -107,13 +107,13 @@ export function LogsPage() {
                 ) : (
                   filtered.map((log, i) => (
                     <Box key={i}>
-                      <ListItem sx={{ px: 0, py: 1 }}>
-                        <ListItemIcon sx={{ minWidth: 36 }}>{levelIcons[log.level] || <Info color="primary" />}</ListItemIcon>
+                      <ListItem sx={{ px: 0, py: { xs: 0.5, sm: 1 } }}>
+                        <ListItemIcon sx={{ minWidth: { xs: 28, sm: 36 } }}>{levelIcons[log.level] || <Info color="primary" />}</ListItemIcon>
                         <ListItemText
                           primary={
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <Typography variant="body2" sx={{ fontWeight: 500, fontFamily: 'monospace' }}>{log.message}</Typography>
-                              <Chip label={log.level} size="small" color={levelColors[log.level] || 'default'} sx={{ height: 18, fontSize: '0.6rem' }} />
+                            <Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 }, alignItems: 'flex-start', flexDirection: { xs: 'column', sm: 'row' } }}>
+                              <Typography variant="body2" sx={{ fontWeight: 500, fontFamily: 'monospace', fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>{log.message}</Typography>
+                              <Chip label={log.level} size="small" color={levelColors[log.level] || 'default'} sx={{ height: 18, fontSize: '0.6rem', flexShrink: 0 }} />
                             </Box>
                           }
                           secondary={

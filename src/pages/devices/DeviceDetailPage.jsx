@@ -106,7 +106,7 @@ export function DeviceDetailPage() {
     <Box>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-          <IconButton onClick={goBack} size="small"><ArrowBack /></IconButton>
+          <IconButton onClick={goBack} size="small" sx={{ minWidth: { xs: 44, sm: 'auto' }, minHeight: { xs: 44, sm: 'auto' } }}><ArrowBack /></IconButton>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>{device.deviceName}</Typography>
             <Typography variant="body2" color="text.secondary" noWrap>
@@ -122,7 +122,7 @@ export function DeviceDetailPage() {
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
-        <Grid container spacing={2.5} sx={{ mb: 3 }}>
+        <Grid container spacing={{ xs: 1.5, sm: 2.5 }} sx={{ mb: { xs: 2, sm: 3 } }}>
           <Grid item xs={6} sm={3}>
             <StatCard title="Flow Rate" value={`${telemetry.currentFlowRate || 0} L/min`} icon={<Wifi />} color="primary" />
           </Grid>

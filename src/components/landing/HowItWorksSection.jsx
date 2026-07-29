@@ -64,7 +64,7 @@ export function HowItWorksSection() {
               color: 'rgba(255,255,255,0.5)',
               maxWidth: 480,
               mx: 'auto',
-              mb: 8,
+              mb: { xs: 5, sm: 8 },
             }}
           >
             Our streamlined architecture transforms raw water data into actionable intelligence in seconds.
@@ -85,8 +85,8 @@ export function HowItWorksSection() {
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 3,
-                  p: 2.5,
+                  gap: { xs: 1.5, sm: 3 },
+                  p: { xs: 1.5, sm: 2.5 },
                   borderRadius: 3,
                   width: '100%',
                   maxWidth: 480,
@@ -101,9 +101,9 @@ export function HowItWorksSection() {
               >
                 <Box
                   sx={{
-                    width: 44,
-                    height: 44,
-                    minWidth: 44,
+                    width: { xs: 36, sm: 44 },
+                    height: { xs: 36, sm: 44 },
+                    minWidth: { xs: 36, sm: 44 },
                     borderRadius: 2,
                     background: 'linear-gradient(135deg, rgba(47,128,237,0.2), rgba(0,180,216,0.2))',
                     display: 'flex',
@@ -112,7 +112,7 @@ export function HowItWorksSection() {
                     border: '1px solid rgba(95,164,255,0.15)',
                   }}
                 >
-                  <step.icon sx={{ fontSize: 20, color: '#5FA4FF' }} />
+                  <step.icon sx={{ fontSize: { xs: 16, sm: 20 }, color: '#5FA4FF' }} />
                 </Box>
                 <Box sx={{ flex: 1 }}>
                   <Typography variant="subtitle2" sx={{ color: '#fff', fontWeight: 600, fontSize: '0.95rem' }}>
@@ -144,7 +144,7 @@ export function HowItWorksSection() {
                 whileInView={{ opacity: 1, scaleY: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.15 + 0.3 }}
-                style={{ height: 28, width: 2, transformOrigin: 'top' }}
+                style={{ width: 2, transformOrigin: 'top', height: 28 }}
               >
                 <Box
                   sx={{

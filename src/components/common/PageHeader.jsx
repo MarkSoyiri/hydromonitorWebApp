@@ -41,12 +41,13 @@ export function PageHeader({ title, subtitle, action, onAction, actionLabel, act
           )}
         </Box>
         {action && onAction && (
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ width: '100%' }}>
             <Button
               variant="contained"
               startIcon={actionIcon || <Add />}
               onClick={onAction}
               size="medium"
+              fullWidth
               sx={{
                 borderRadius: 2,
                 textTransform: 'none',
@@ -54,6 +55,7 @@ export function PageHeader({ title, subtitle, action, onAction, actionLabel, act
                 px: 3,
                 py: 1,
                 boxShadow: '0 4px 12px rgba(47,128,237,0.25)',
+                width: { xs: '100%', sm: 'auto' },
                 '&:hover': {
                   boxShadow: '0 6px 20px rgba(47,128,237,0.35)',
                 },

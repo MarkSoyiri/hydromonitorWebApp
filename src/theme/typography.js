@@ -14,3 +14,12 @@ export const typography = {
   overline: { fontSize: '0.75rem', fontWeight: 600, lineHeight: 2, letterSpacing: '0.08em', textTransform: 'uppercase' },
   button: { fontSize: '0.875rem', fontWeight: 600, lineHeight: 1.5, textTransform: 'none' },
 };
+
+export const responsiveTypography = {
+  h4: { fontSize: { xs: '1.1rem', sm: '1.25rem' }, fontWeight: 600, lineHeight: 1.4 },
+  h5: { fontSize: { xs: '1rem', sm: '1.125rem' }, fontWeight: 600, lineHeight: 1.45 },
+  h6: { fontSize: { xs: '0.95rem', sm: '1rem' }, fontWeight: 600, lineHeight: 1.5 },
+  body1: { fontSize: { xs: '0.9rem', sm: '1rem' }, fontWeight: 400, lineHeight: 1.6 },
+  body2: { fontSize: { xs: '0.8rem', sm: '0.875rem' }, fontWeight: 400, lineHeight: 1.6 },
+  caption: { fontSize: { xs: '0.7rem', sm: '0.75rem' }, fontWeight: 400, lineHeight: 1.5 },
+};

@@ -129,8 +129,8 @@ export function FeaturesSection() {
               color: 'rgba(255,255,255,0.5)',
               maxWidth: 520,
               mx: 'auto',
-              mb: 8,
-              fontSize: '1.05rem',
+              mb: { xs: 5, sm: 8 },
+              fontSize: { xs: '0.9rem', sm: '1.05rem' },
             }}
           >
             A complete platform with powerful tools for monitoring, detecting, billing, and analyzing water usage across your properties.
@@ -148,38 +148,38 @@ export function FeaturesSection() {
                 viewport={{ once: true, margin: '-50px' }}
                 whileHover={{ y: -6, transition: { duration: 0.2 } }}
               >
-                <Box
-                  sx={{
-                    p: 3.5,
-                    height: '100%',
-                    borderRadius: 3,
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    backdropFilter: 'blur(12px)',
-                    transition: 'all 0.3s ease',
-                    cursor: 'default',
-                    '&:hover': {
-                      border: '1px solid rgba(95, 164, 255, 0.15)',
-                      background: 'rgba(255,255,255,0.05)',
-                      boxShadow: '0 20px 60px rgba(0,0,0,0.3), 0 0 40px rgba(47,128,237,0.05)',
-                    },
-                  }}
-                >
                   <Box
                     sx={{
-                      width: 52,
-                      height: 52,
-                      borderRadius: 2.5,
-                      background: feature.gradient,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      mb: 2.5,
-                      boxShadow: '0 8px 24px rgba(47,128,237,0.2)',
+                      p: { xs: 2.5, sm: 3.5 },
+                      height: '100%',
+                      borderRadius: 3,
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid rgba(255,255,255,0.06)',
+                      backdropFilter: 'blur(12px)',
+                      transition: 'all 0.3s ease',
+                      cursor: 'default',
+                      '&:hover': {
+                        border: '1px solid rgba(95, 164, 255, 0.15)',
+                        background: 'rgba(255,255,255,0.05)',
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.3), 0 0 40px rgba(47,128,237,0.05)',
+                      },
                     }}
                   >
-                    <feature.icon sx={{ fontSize: 26, color: '#fff' }} />
-                  </Box>
+                    <Box
+                      sx={{
+                        width: { xs: 44, sm: 52 },
+                        height: { xs: 44, sm: 52 },
+                        borderRadius: 2.5,
+                        background: feature.gradient,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mb: 2.5,
+                        boxShadow: '0 8px 24px rgba(47,128,237,0.2)',
+                      }}
+                    >
+                      <feature.icon sx={{ fontSize: { xs: 22, sm: 26 }, color: '#fff' }} />
+                    </Box>
                   <Typography
                     variant="h6"
                     sx={{

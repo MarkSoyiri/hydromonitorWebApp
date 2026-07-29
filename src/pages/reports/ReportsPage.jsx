@@ -79,12 +79,12 @@ export function ReportsPage() {
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-      <Grid container spacing={2.5}>
+      <Grid container spacing={{ xs: 1.5, sm: 2.5 }}>
         <Grid item xs={12} md={4}>
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.3 }}>
             <Card>
-              <CardContent>
-                <Typography variant="h6" sx={{ mb: 3 }}>Generate Report</Typography>
+              <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+                <Typography variant="h6" sx={{ mb: { xs: 2, sm: 3 }, fontSize: { xs: '0.95rem', sm: '1.1rem' } }}>Generate Report</Typography>
                 <Stack spacing={2}>
                   <FormControl fullWidth>
                     <InputLabel>Report Type</InputLabel>
@@ -114,7 +114,7 @@ export function ReportsPage() {
         </Grid>
 
         <Grid item xs={12} md={8}>
-          <Grid container spacing={2}>
+          <Grid container spacing={{ xs: 1.5, sm: 2 }}>
             {loading ? (
               [1, 2, 3, 4, 5, 6].map((i) => (
                 <Grid item xs={12} sm={6} key={i}>
@@ -131,13 +131,13 @@ export function ReportsPage() {
                 <Grid item xs={12} sm={6} key={i}>
                   <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + i * 0.05, duration: 0.3 }}>
                     <Card sx={{ cursor: 'pointer', '&:hover': { boxShadow: 4 } }}>
-                      <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Box sx={{ color: `${report.color}.main`, opacity: 0.7 }}>{report.icon}</Box>
-                        <Box sx={{ flex: 1 }}>
-                          <Typography variant="subtitle2">{report.title}</Typography>
-                          <Typography variant="caption" color="text.secondary">{report.desc}</Typography>
+                      <CardContent sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 }, p: { xs: 1.5, sm: 2 } }}>
+                        <Box sx={{ color: `${report.color}.main`, opacity: 0.7, flexShrink: 0 }}>{report.icon}</Box>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography variant="subtitle2" sx={{ fontSize: { xs: '0.85rem', sm: '0.875rem' } }}>{report.title}</Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>{report.desc}</Typography>
                         </Box>
-                        <Button size="small" startIcon={<Download />}>Export</Button>
+                        <Button size="small" startIcon={<Download />} sx={{ flexShrink: 0 }}>Export</Button>
                       </CardContent>
                     </Card>
                   </motion.div>

@@ -30,7 +30,7 @@ export function Footer() {
         <Grid container spacing={{ xs: 4, md: 6 }}>
           <Grid item xs={12} md={4}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <WaterDrop sx={{ fontSize: 28, color: '#5FA4FF' }} />
+              <WaterDrop sx={{ fontSize: { xs: 24, sm: 28 }, color: '#5FA4FF' }} />
               <Typography
                 variant="h6"
                 sx={{
@@ -54,7 +54,7 @@ export function Footer() {
             >
               Smart water monitoring and management platform for modern buildings. Monitor every drop, save every cedi.
             </Typography>
-            <Box sx={{ display: 'flex', gap: 0.5 }}>
+            <Box sx={{ display: 'flex', gap: { xs: 0.25, sm: 0.5 } }}>
               {[
                 { icon: Twitter, label: 'Twitter' },
                 { icon: GitHub, label: 'GitHub' },
@@ -68,9 +68,11 @@ export function Footer() {
                     color: 'rgba(255,255,255,0.3)',
                     '&:hover': { color: '#5FA4FF', bgcolor: 'rgba(95,164,255,0.1)' },
                     transition: 'all 0.2s',
+                    minWidth: 44,
+                    minHeight: 44,
                   }}
                 >
-                  <Icon sx={{ fontSize: 20 }} />
+                  <Icon sx={{ fontSize: { xs: 18, sm: 20 } }} />
                 </IconButton>
               ))}
             </Box>

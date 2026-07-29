@@ -32,8 +32,8 @@ const sectionVariants = {
 };
 
 const SectionHeader = ({ title, subtitle }) => (
-  <Box sx={{ mb: 2 }}>
-    <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem' }}>{title}</Typography>
+  <Box sx={{ mb: { xs: 1.5, sm: 2 } }}>
+    <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: '0.95rem', sm: '1rem' } }}>{title}</Typography>
     {subtitle && <Typography variant="caption" color="text.secondary">{subtitle}</Typography>}
   </Box>
 );
@@ -86,8 +86,8 @@ function BuildingQuickCard({ building, stats, index, onNavigate }) {
         }}
         onClick={() => onNavigate(`/admin/buildings/${building.buildingId}`)}
       >
-        <CardContent sx={{ p: 2.5 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+        <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 }, mb: { xs: 1.5, sm: 2 } }}>
             <Avatar
               sx={{
                 width: 40, height: 40, borderRadius: 2,
@@ -108,7 +108,7 @@ function BuildingQuickCard({ building, stats, index, onNavigate }) {
             <ChevronRight sx={{ color: 'text.disabled', fontSize: 18 }} />
           </Box>
 
-          <Grid container spacing={1} sx={{ mb: 1.5 }}>
+          <Grid container spacing={{ xs: 0.5, sm: 1 }} sx={{ mb: { xs: 1, sm: 1.5 } }}>
             {[
               { label: 'Rooms', value: stats.totalRooms, icon: <MeetingRoom sx={{ fontSize: 12 }} />, color: '#2F80ED' },
               { label: 'Tenants', value: stats.totalTenants, icon: <People sx={{ fontSize: 12 }} />, color: '#4CAF50' },
@@ -128,7 +128,7 @@ function BuildingQuickCard({ building, stats, index, onNavigate }) {
             ))}
           </Grid>
 
-          <Box sx={{ display: 'flex', gap: 0.5 }}>
+          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
             {[
               { label: 'Manage', path: `/admin/buildings/${building.buildingId}`, icon: <Business sx={{ fontSize: 12 }} /> },
               { label: 'Tenants', path: '/admin/tenants', icon: <People sx={{ fontSize: 12 }} /> },
@@ -257,8 +257,8 @@ export function AdminDashboardPage() {
   return (
     <Box>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>
+        <Box sx={{ mb: { xs: 2, sm: 3 } }}>
+          <Typography variant="h5" sx={{ fontWeight: 700, fontSize: { xs: '1.15rem', sm: '1.5rem' } }}>
             Welcome{profile?.fullName ? `, ${profile.fullName.split(' ')[0]}` : ''}
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -270,7 +270,7 @@ export function AdminDashboardPage() {
       {/* Overview Section */}
       <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={0}>
         <SectionHeader title="Overview" subtitle="Key metrics at a glance" />
-        <Grid container spacing={2.5} sx={{ mb: 4 }}>
+        <Grid container spacing={{ xs: 1.5, sm: 2.5 }} sx={{ mb: { xs: 3, sm: 4 } }}>
           {[
             { icon: <Business />, label: 'BUILDINGS', value: assignedBuildings.length || stats?.totalBuildings || 0, color: 'primary', sub: 'Assigned buildings' },
             { icon: <MeetingRoom />, label: 'ROOMS', value: totalRooms, color: 'info', sub: `${occupiedRooms} occupied · ${totalRooms - occupiedRooms} vacant` },
@@ -292,12 +292,12 @@ export function AdminDashboardPage() {
         </Grid>
       </motion.div>
 
-      <Divider sx={{ mb: 4 }} />
+      <Divider sx={{ mb: { xs: 3, sm: 4 } }} />
 
       {/* Live Monitoring Section */}
       <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={1}>
         <SectionHeader title="Live Monitoring" subtitle="Real-time system status" />
-        <Grid container spacing={2.5} sx={{ mb: 4 }}>
+        <Grid container spacing={{ xs: 1.5, sm: 2.5 }} sx={{ mb: { xs: 3, sm: 4 } }}>
           <Grid item xs={12} sm={6} md={4}>
             <StatCard title="Today's Usage" value={todayUsage ? `${Number(todayUsage).toLocaleString()} L` : '0 L'} icon={<WaterDrop />} color="info" loading={loading} index={4} />
           </Grid>
@@ -313,11 +313,11 @@ export function AdminDashboardPage() {
       {/* My Buildings Section - Admin Only */}
       {isAdmin && assignedBuildings.length > 0 && (
         <>
-          <Divider sx={{ mb: 4 }} />
+          <Divider sx={{ mb: { xs: 3, sm: 4 } }} />
           <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={2}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '1rem' }}>My Buildings</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: '0.95rem', sm: '1rem' } }}>My Buildings</Typography>
                 <Typography variant="caption" color="text.secondary">
                   Buildings assigned to you
                 </Typography>
@@ -327,12 +327,12 @@ export function AdminDashboardPage() {
                 size="small"
                 endIcon={<ChevronRight />}
                 onClick={() => navigate('/admin/buildings')}
-                sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 2 }}
+                sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 2, width: { xs: '100%', sm: 'auto' } }}
               >
                 View All
               </Button>
             </Box>
-            <Grid container spacing={2.5} sx={{ mb: 4 }}>
+            <Grid container spacing={{ xs: 1.5, sm: 2.5 }} sx={{ mb: { xs: 3, sm: 4 } }}>
               {assignedBuildings.slice(0, 3).map((building, index) => (
                 <Grid item xs={12} sm={6} md={4} key={building.buildingId}>
                   <BuildingQuickCard
@@ -348,16 +348,16 @@ export function AdminDashboardPage() {
         </>
       )}
 
-      <Divider sx={{ mb: 4 }} />
+      <Divider sx={{ mb: { xs: 3, sm: 4 } }} />
 
       {/* Charts & Activity Section */}
       <motion.div variants={sectionVariants} initial="hidden" animate="visible" custom={3}>
         <SectionHeader title="Activity & Analytics" subtitle="Usage patterns and system status" />
-        <Grid container spacing={2.5}>
+        <Grid container spacing={{ xs: 1.5, sm: 2.5 }}>
           <Grid item xs={12} md={8}>
             <Card>
-              <CardContent sx={{ p: 2.5 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Weekly Building Usage</Typography>
+              <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: { xs: 1.5, sm: 2 } }}>Weekly Building Usage</Typography>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={fallbackWeeklyUsage}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
@@ -373,8 +373,8 @@ export function AdminDashboardPage() {
 
           <Grid item xs={12} md={4}>
             <Card sx={{ height: '100%' }}>
-              <CardContent sx={{ p: 2.5 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>System Activity</Typography>
+              <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: { xs: 1.5, sm: 2 } }}>System Activity</Typography>
                 {recentActivity.length > 0 ? (
                   <List dense sx={{ p: 0 }}>
                     {recentActivity.map((item, i) => (

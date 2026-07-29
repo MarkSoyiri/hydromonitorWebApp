@@ -65,11 +65,11 @@ export function SettingsPage() {
     return (
       <Box>
         <PageHeader title="Settings" subtitle="System configuration" />
-        <Grid container spacing={2.5}>
+        <Grid container spacing={{ xs: 1.5, sm: 2.5 }}>
           {[1, 2, 3].map((i) => (
             <Grid item xs={12} md={6} key={i}>
               <Card>
-                <CardContent>
+                <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
                   <Skeleton variant="text" width={120} height={30} />
                   <Skeleton variant="rounded" width="100%" height={120} sx={{ mt: 2 }} />
                 </CardContent>
@@ -82,18 +82,18 @@ export function SettingsPage() {
   }
 
   return (
-    <Box>
+    <Box sx={{ minWidth: 0, wordBreak: 'break-word' }}>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <PageHeader title="Settings" subtitle="System configuration" />
       </motion.div>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-      <Grid container spacing={2.5}>
+      <Grid container spacing={{ xs: 1.5, sm: 2.5 }}>
         <Grid item xs={12} md={6}>
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.3 }}>
             <Card>
-              <CardContent>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
                 <Typography variant="h6" sx={{ mb: 3 }}>Water Rates</Typography>
                 <Stack spacing={2}>
                   <TextField label="Rate per Liter" type="number" value={waterRate}
@@ -116,7 +116,7 @@ export function SettingsPage() {
         <Grid item xs={12} md={6}>
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.3 }}>
             <Card>
-              <CardContent>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
                 <Typography variant="h6" sx={{ mb: 3 }}>Leak Detection</Typography>
                 <Stack spacing={2}>
                   <TextField label="Leak Threshold (L/min)" type="number" value={leakThreshold}
@@ -133,7 +133,7 @@ export function SettingsPage() {
         <Grid item xs={12}>
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.3 }}>
             <Card>
-              <CardContent>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
                 <Typography variant="h6" sx={{ mb: 3 }}>Notifications</Typography>
                 <Stack spacing={2}>
                   <FormControlLabel control={<Switch checked={notifications} onChange={(e) => setNotifications(e.target.checked)} />}
@@ -148,7 +148,8 @@ export function SettingsPage() {
 
         <Grid item xs={12}>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button variant="contained" size="large" onClick={handleSave} disabled={saving}>
+            <Button variant="contained" size="large" onClick={handleSave} disabled={saving}
+              sx={{ width: { xs: '100%', sm: 'auto' } }}>
               {saving ? 'Saving...' : 'Save Settings'}
             </Button>
           </Box>

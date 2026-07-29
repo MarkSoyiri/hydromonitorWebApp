@@ -23,7 +23,7 @@ export function QuickActions() {
       <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5 }}>
         Quick Actions
       </Typography>
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: { xs: 0.5, sm: 1 } }}>
         {actions.map((action, i) => (
           <motion.div
             key={action.label}
@@ -36,7 +36,7 @@ export function QuickActions() {
             <Paper
               onClick={() => navigate(action.path)}
               sx={{
-                p: 1.5,
+                p: { xs: 1, sm: 1.5 },
                 borderRadius: 2,
                 cursor: 'pointer',
                 textAlign: 'center',
@@ -47,19 +47,21 @@ export function QuickActions() {
                   borderColor: action.color,
                   boxShadow: `0 4px 12px ${action.color}20`,
                 },
+                minHeight: 44,
               }}
               elevation={0}
             >
               <Box sx={{
-                width: 36, height: 36, borderRadius: '50%',
+                width: { xs: 32, sm: 36 }, height: { xs: 32, sm: 36 }, borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 mx: 'auto', mb: 0.5,
                 background: `${action.color}15`,
                 color: action.color,
+                fontSize: { xs: '1.25rem', sm: '1.5rem' },
               }}>
                 {action.icon}
               </Box>
-              <Typography variant="caption" sx={{ fontWeight: 500, fontSize: '0.65rem' }}>
+              <Typography variant="caption" sx={{ fontWeight: 500, fontSize: { xs: '0.6rem', sm: '0.65rem' } }}>
                 {action.label}
               </Typography>
             </Paper>

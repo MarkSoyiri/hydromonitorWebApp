@@ -52,7 +52,7 @@ export function LoginPage() {
         alignItems: 'center',
         justifyContent: 'center',
         bgcolor: 'background.default',
-        p: 2,
+        p: { xs: 1.5, sm: 2 },
         position: 'relative',
         overflow: 'hidden',
         '&::before': {
@@ -75,7 +75,7 @@ export function LoginPage() {
         style={{ width: '100%', maxWidth: 420 }}
       >
         <Card sx={{ overflow: 'hidden', backdropFilter: 'blur(40px) saturate(200%)', WebkitBackdropFilter: 'blur(40px) saturate(200%)' }}>
-          <CardContent sx={{ p: 4 }}>
+          <CardContent sx={{ p: { xs: 2.5, sm: 4 } }}>
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -84,8 +84,8 @@ export function LoginPage() {
               <Box sx={{ textAlign: 'center', mb: 3 }}>
                 <Box
                   sx={{
-                    width: 64,
-                    height: 64,
+                    width: { xs: 56, sm: 64 },
+                    height: { xs: 56, sm: 64 },
                     borderRadius: 3,
                     background: 'linear-gradient(135deg, #2F80ED 0%, #00B4D8 100%)',
                     display: 'inline-flex',
@@ -95,7 +95,7 @@ export function LoginPage() {
                     boxShadow: '0 8px 24px rgba(47,128,237,0.25)',
                   }}
                 >
-                  <WaterDrop sx={{ color: '#fff', fontSize: 32 }} />
+                  <WaterDrop sx={{ color: '#fff', fontSize: { xs: 28, sm: 32 } }} />
                 </Box>
                 <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
                   HydroMonitor

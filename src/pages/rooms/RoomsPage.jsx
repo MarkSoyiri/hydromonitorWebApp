@@ -166,9 +166,9 @@ export function RoomsPage() {
               onChange={(e) => setForm({ ...form, description: e.target.value })} />
           </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleSave} variant="contained" disabled={saving}>
+        <DialogActions sx={{ flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 1, sm: 0 } }}>
+          <Button onClick={() => setDialogOpen(false)} fullWidth={true}>Cancel</Button>
+          <Button onClick={handleSave} variant="contained" disabled={saving} fullWidth={true}>
             {saving ? 'Saving...' : (editing ? 'Update' : 'Create')}
           </Button>
         </DialogActions>

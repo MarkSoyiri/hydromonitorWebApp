@@ -136,8 +136,8 @@ export function CTASection() {
               background: 'linear-gradient(135deg, #2F80ED 0%, #00B4D8 100%)',
               color: '#fff',
               fontWeight: 700,
-              fontSize: '1rem',
-              px: 4,
+              fontSize: { xs: '0.9rem', sm: '1rem' },
+              px: { xs: 2, sm: 4 },
               py: 1.5,
               borderRadius: 2.5,
               boxShadow: '0 8px 32px rgba(47, 128, 237, 0.35)',
@@ -160,6 +160,7 @@ export function CTASection() {
                 transition: 'left 0.5s',
               },
               '&:hover::after': { left: '100%' },
+              width: { xs: '100%', sm: 'auto' },
             }}
           >
             Sign In
@@ -172,8 +173,8 @@ export function CTASection() {
               borderWidth: 2,
               color: '#fff',
               fontWeight: 600,
-              fontSize: '1rem',
-              px: 3.5,
+              fontSize: { xs: '0.9rem', sm: '1rem' },
+              px: { xs: 2, sm: 3.5 },
               py: 1.5,
               borderRadius: 2.5,
               '&:hover': {
@@ -182,6 +183,7 @@ export function CTASection() {
                 transform: 'translateY(-2px)',
               },
               transition: 'all 0.3s',
+              width: { xs: '100%', sm: 'auto' },
             }}
           >
             Get Started

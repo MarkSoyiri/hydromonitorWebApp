@@ -87,7 +87,7 @@ export function TestimonialsSection() {
               color: 'rgba(255,255,255,0.5)',
               maxWidth: 480,
               mx: 'auto',
-              mb: 8,
+              mb: { xs: 5, sm: 8 },
             }}
           >
             Hear from property owners, administrators, and tenants who use HydroMonitor every day.
@@ -107,7 +107,7 @@ export function TestimonialsSection() {
               >
                 <Box
                   sx={{
-                    p: 3.5,
+                    p: { xs: 2, sm: 3.5 },
                     height: '100%',
                     borderRadius: 3,
                     background: 'rgba(255,255,255,0.02)',
@@ -122,7 +122,7 @@ export function TestimonialsSection() {
                     },
                   }}
                 >
-                  <FormatQuote sx={{ fontSize: 28, color: 'rgba(95,164,255,0.3)', mb: 1.5 }} />
+                  <FormatQuote sx={{ fontSize: { xs: 22, sm: 28 }, color: 'rgba(95,164,255,0.3)', mb: 1.5 }} />
                   <Typography
                     variant="body2"
                     sx={{
@@ -139,8 +139,8 @@ export function TestimonialsSection() {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <Avatar
                       sx={{
-                        width: 40,
-                        height: 40,
+                        width: { xs: 36, sm: 40 },
+                        height: { xs: 36, sm: 40 },
                         background: 'linear-gradient(135deg, #2F80ED, #00B4D8)',
                         fontWeight: 700,
                         fontSize: '0.8rem',

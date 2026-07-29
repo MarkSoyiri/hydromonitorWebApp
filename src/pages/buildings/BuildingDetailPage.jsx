@@ -366,7 +366,7 @@ export function BuildingDetailPage() {
     return (
       <Box>
         <PageHeader title="Loading..." />
-        <Grid container spacing={2.5}>
+        <Grid container spacing={{ xs: 1.5, sm: 2.5 }}>
           {[1, 2, 3, 4].map((i) => (
             <Grid item xs={6} sm={3} key={i}>
               <StatCard title="" value="" loading />
@@ -392,7 +392,7 @@ export function BuildingDetailPage() {
     <Box>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-          <IconButton onClick={goBack} size="small"><ArrowBack /></IconButton>
+          <IconButton onClick={goBack} size="small" sx={{ minWidth: { xs: 44, sm: 'auto' }, minHeight: { xs: 44, sm: 'auto' } }}><ArrowBack /></IconButton>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>{building.name}</Typography>
             <Typography variant="body2" color="text.secondary" noWrap>{building.address}</Typography>
@@ -432,7 +432,7 @@ export function BuildingDetailPage() {
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
-        <Grid container spacing={2.5} sx={{ mb: 3 }}>
+        <Grid container spacing={{ xs: 1.5, sm: 2.5 }} sx={{ mb: { xs: 2, sm: 3 } }}>
           <Grid item xs={6} sm={3}>
             <StatCard title="Total Rooms" value={totalRooms} icon={<MeetingRoom />} color="primary" subtitle={`${vacantRooms} vacant`} />
           </Grid>
@@ -458,9 +458,9 @@ export function BuildingDetailPage() {
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.15 }}>
-        <Card sx={{ mb: 3 }}>
+        <Card sx={{ mb: { xs: 2, sm: 3 } }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto">
+            <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto" sx={{ '& .MuiTab-root': { fontSize: { xs: '0.75rem', sm: '0.875rem' }, minWidth: { xs: 'auto', sm: 90 }, px: { xs: 1.5, sm: 2 } } }}>
               <Tab label="Overview" />
               <Tab label={`Rooms (${rooms.length})`} />
               <Tab label={`Devices (${devices.length})`} />
@@ -473,11 +473,11 @@ export function BuildingDetailPage() {
 
           <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
           {tab === 0 && (
-            <Grid container spacing={3}>
+            <Grid container spacing={{ xs: 1.5, sm: 3 }}>
               <Grid item xs={12} md={6}>
                 <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="h6" sx={{ mb: 2 }}>Occupancy</Typography>
+                  <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1rem' }, mb: { xs: 1.5, sm: 2 } }}>Occupancy</Typography>
                     {occupancyPieData.some((d) => d.value > 0) ? (
                       <Box>
                         <ResponsiveContainer width="100%" height={200}>
@@ -509,8 +509,8 @@ export function BuildingDetailPage() {
               </Grid>
               <Grid item xs={12} md={6}>
                 <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="h6" sx={{ mb: 2 }}>Recent Usage</Typography>
+                  <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1rem' }, mb: { xs: 1.5, sm: 2 } }}>Recent Usage</Typography>
                     {usageChartData.length > 0 ? (
                       <ResponsiveContainer width="100%" height={220}>
                         <BarChart data={usageChartData}>
@@ -529,9 +529,9 @@ export function BuildingDetailPage() {
               </Grid>
               <Grid item xs={12}>
                 <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="h6" sx={{ mb: 2 }}>Building Details</Typography>
-                    <Grid container spacing={2}>
+                  <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1rem' }, mb: { xs: 1.5, sm: 2 } }}>Building Details</Typography>
+                    <Grid container spacing={{ xs: 1, sm: 2 }}>
                       {[
                         { label: 'Name', value: building.name },
                         { label: 'Address', value: building.address },
@@ -556,8 +556,8 @@ export function BuildingDetailPage() {
 
           {tab === 1 && (
             <Box>
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                <Button variant="contained" startIcon={<Add />} onClick={openAddRoom}>
+              <Box sx={{ display: 'flex', justifyContent: { xs: 'stretch', sm: 'flex-end' }, mb: 2 }}>
+                <Button variant="contained" startIcon={<Add />} onClick={openAddRoom} fullWidth={true} sx={{ width: { xs: '100%', sm: 'auto' } }}>
                   Add Room
                 </Button>
               </Box>
@@ -597,11 +597,11 @@ export function BuildingDetailPage() {
           )}
 
           {tab === 4 && (
-            <Grid container spacing={3}>
+            <Grid container spacing={{ xs: 1.5, sm: 3 }}>
               <Grid item xs={12} md={8}>
                 <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="h6" sx={{ mb: 2 }}>Consumption Trend</Typography>
+                  <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1rem' }, mb: { xs: 1.5, sm: 2 } }}>Consumption Trend</Typography>
                     {usageChartData.length > 0 ? (
                       <ResponsiveContainer width="100%" height={300}>
                         <LineChart data={usageChartData}>
@@ -620,9 +620,9 @@ export function BuildingDetailPage() {
               </Grid>
               <Grid item xs={12} md={4}>
                 <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="h6" sx={{ mb: 2 }}>Summary</Typography>
-                    <Stack spacing={2}>
+                  <CardContent sx={{ p: { xs: 2, sm: 2.5 } }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1rem' }, mb: { xs: 1.5, sm: 2 } }}>Summary</Typography>
+                    <Stack spacing={{ xs: 1.5, sm: 2 }}>
                       {analytics && [
                         { label: 'Avg Daily Usage', value: `${analytics.avgDailyUsage?.toFixed(1) ?? '—'} L` },
                         { label: 'Total Usage', value: `${analytics.totalUsage?.toFixed(1) ?? '—'} L` },
@@ -660,16 +660,16 @@ export function BuildingDetailPage() {
 
           {tab === 6 && isSuperAdmin && (
             <Box>
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                <Button variant="contained" startIcon={<Add />} onClick={() => { fetchAllAdmins(); setAdminDialogOpen(true); }}>
+              <Box sx={{ display: 'flex', justifyContent: { xs: 'stretch', sm: 'flex-end' }, mb: 2 }}>
+                <Button variant="contained" startIcon={<Add />} onClick={() => { fetchAllAdmins(); setAdminDialogOpen(true); }} fullWidth={true} sx={{ width: { xs: '100%', sm: 'auto' } }}>
                   Assign Admin
                 </Button>
               </Box>
               <Stack spacing={2}>
                 {buildingAdmins.map((admin) => (
                   <Box key={admin.uid || admin.id} sx={{
-                    p: 2, borderRadius: 2, border: 1, borderColor: 'divider',
-                    display: 'flex', alignItems: 'center', gap: 1.5,
+                    p: { xs: 1.5, sm: 2 }, borderRadius: 2, border: 1, borderColor: 'divider',
+                    display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 }, flexWrap: 'wrap',
                   }}>
                     <Avatar sx={{ bgcolor: 'primary.main' }}>
                       <Shield />
@@ -762,9 +762,9 @@ export function BuildingDetailPage() {
             </FormControl>
           </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setRoomDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleSaveRoom} variant="contained" disabled={roomSaving}>
+        <DialogActions sx={{ flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 1, sm: 0 } }}>
+          <Button onClick={() => setRoomDialogOpen(false)} fullWidth={true}>Cancel</Button>
+          <Button onClick={handleSaveRoom} variant="contained" disabled={roomSaving} fullWidth={true}>
             {roomSaving ? 'Saving...' : editingRoom ? 'Update' : 'Create'}
           </Button>
         </DialogActions>
@@ -802,9 +802,9 @@ export function BuildingDetailPage() {
               />
             </Stack>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setAdminDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleAssignAdmin} variant="contained" disabled={adminSaving || !selectedAdmin}>
+          <DialogActions sx={{ flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 1, sm: 0 } }}>
+            <Button onClick={() => setAdminDialogOpen(false)} fullWidth={true}>Cancel</Button>
+            <Button onClick={handleAssignAdmin} variant="contained" disabled={adminSaving || !selectedAdmin} fullWidth={true}>
               {adminSaving ? 'Assigning...' : 'Assign'}
             </Button>
           </DialogActions>

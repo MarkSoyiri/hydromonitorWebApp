@@ -49,10 +49,10 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 const InfoRow = ({ label, value, icon }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1 }}>
+  <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 }, py: { xs: 0.75, sm: 1 } }}>
     {icon && (
       <Box sx={{
-        width: 32, height: 32, borderRadius: 1.5,
+        width: { xs: 28, sm: 32 }, height: { xs: 28, sm: 32 }, borderRadius: 1.5,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         bgcolor: 'action.hover', color: 'text.secondary', flexShrink: 0,
       }}>
@@ -73,11 +73,11 @@ const InfoRow = ({ label, value, icon }) => (
 const SectionCard = ({ title, icon, children, delay = 0 }) => (
   <motion.div custom={delay} variants={sectionVariants} initial="hidden" animate="visible">
     <Card sx={{ height: '100%', overflow: 'hidden' }}>
-      <CardContent sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
+      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 1 }, mb: { xs: 2, sm: 2.5 } }}>
           {icon && (
             <Box sx={{
-              width: 36, height: 36, borderRadius: 2, display: 'flex',
+              width: { xs: 32, sm: 36 }, height: { xs: 32, sm: 36 }, borderRadius: 2, display: 'flex',
               alignItems: 'center', justifyContent: 'center',
               background: 'linear-gradient(135deg, #2F80ED, #5FA4FF)',
               color: '#fff', boxShadow: '0 4px 12px rgba(47,128,237,0.25)',
@@ -85,7 +85,7 @@ const SectionCard = ({ title, icon, children, delay = 0 }) => (
               {icon}
             </Box>
           )}
-          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: '0.95rem' }}>{title}</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: '0.85rem', sm: '0.95rem' } }}>{title}</Typography>
         </Box>
         {children}
       </CardContent>
@@ -389,6 +389,7 @@ export function TenantDetailPage() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3, flexWrap: 'wrap' }}>
           <IconButton onClick={goBack} sx={{
             bgcolor: 'action.hover', '&:hover': { bgcolor: 'action.selected' },
+            minWidth: { xs: 44, sm: 48 }, minHeight: { xs: 44, sm: 48 },
           }}>
             <ArrowBack />
           </IconButton>
@@ -414,7 +415,7 @@ export function TenantDetailPage() {
 
       {/* Summary Stat Cards */}
       <motion.div custom={1} variants={sectionVariants} initial="hidden" animate="visible">
-        <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid container spacing={{ xs: 1.5, sm: 2 }} sx={{ mb: { xs: 2, sm: 3 } }}>
           <Grid item xs={6} sm={4} lg>
             <StatCard title="Total Consumed" value={`${Math.round(usageStats.monthUsage).toLocaleString()} L`} icon={<WaterDrop />} color="primary" subtitle="This month" index={0} />
           </Grid>
@@ -437,7 +438,7 @@ export function TenantDetailPage() {
       <Grid container spacing={{ xs: 2, sm: 2.5 }}>
         {/* Left Column */}
         <Grid item xs={12} md={4}>
-          <Stack spacing={2.5}>
+          <Stack spacing={{ xs: 1.5, sm: 2.5 }}>
             {/* Personal Information */}
             <SectionCard title="Personal Information" icon={<Person />} delay={2}>
               <Stack spacing={0.5}>
@@ -475,9 +476,9 @@ export function TenantDetailPage() {
                 <Stack spacing={0.5}>
                   <InfoRow label="Device Name" value={device.deviceName} icon={<DevicesOther sx={{ fontSize: 16 }} />} />
                   <InfoRow label="Device ID" value={device.deviceId} icon={<InfoOutlined sx={{ fontSize: 16 }} />} />
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 1 }, py: { xs: 0.75, sm: 1 } }}>
                     <Box sx={{
-                      width: 32, height: 32, borderRadius: 1.5,
+                      width: { xs: 28, sm: 32 }, height: { xs: 28, sm: 32 }, borderRadius: 1.5,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       bgcolor: 'action.hover', color: 'text.secondary', flexShrink: 0,
                     }}>
@@ -492,9 +493,9 @@ export function TenantDetailPage() {
                       </Box>
                     </Box>
                   </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 1 }, py: { xs: 0.75, sm: 1 } }}>
                     <Box sx={{
-                      width: 32, height: 32, borderRadius: 1.5,
+                      width: { xs: 28, sm: 32 }, height: { xs: 28, sm: 32 }, borderRadius: 1.5,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       bgcolor: 'action.hover', color: 'text.secondary', flexShrink: 0,
                     }}>
@@ -525,10 +526,10 @@ export function TenantDetailPage() {
 
         {/* Right Column */}
         <Grid item xs={12} md={8}>
-          <Stack spacing={2.5}>
+          <Stack spacing={{ xs: 1.5, sm: 2.5 }}>
             {/* Charts */}
             <SectionCard title="Usage Analytics" icon={<Analytics />} delay={2}>
-              <Grid container spacing={2.5}>
+              <Grid container spacing={{ xs: 1.5, sm: 2.5 }}>
                 <Grid item xs={12}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>Daily Water Usage</Typography>
                   {chartData.daily.some((d) => d.usage > 0) ? (

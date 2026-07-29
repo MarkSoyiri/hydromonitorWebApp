@@ -60,10 +60,10 @@ export function TenantAlertsPage() {
       <Box>
         <Skeleton variant="text" width={200} height={36} sx={{ mb: 1 }} />
         <Skeleton variant="text" width={250} height={20} sx={{ mb: 3 }} />
-        <Grid container spacing={2.5}>
+        <Grid container spacing={{ xs: 1.5, sm: 2.5 }}>
           {[1, 2, 3].map((i) => (
             <Grid item xs={12} sm={4} key={i}>
-              <Card sx={{ borderRadius: 3 }}><CardContent sx={{ p: 2.5, textAlign: 'center' }}>
+              <Card sx={{ borderRadius: 3 }}><CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, textAlign: 'center' }}>
                 <Skeleton variant="circular" width={36} height={36} sx={{ mx: 'auto', mb: 1 }} />
                 <Skeleton variant="text" width="40%" sx={{ mx: 'auto' }} />
               </CardContent></Card>
@@ -80,37 +80,37 @@ export function TenantAlertsPage() {
   return (
     <Box>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>Alerts & Notifications</Typography>
+        <Box sx={{ mb: { xs: 2, sm: 3 } }}>
+          <Typography variant="h5" sx={{ fontWeight: 700, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>Alerts & Notifications</Typography>
           <Typography variant="body2" color="text.secondary">Stay informed about your water system</Typography>
         </Box>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
-        <Grid container spacing={2.5} sx={{ mb: 3 }}>
+        <Grid container spacing={{ xs: 1.5, sm: 2.5 }} sx={{ mb: 3 }}>
           <Grid item xs={12} sm={4}>
             <Card sx={{ borderRadius: 3, bgcolor: leakDetected ? 'error.light' : 'success.light', opacity: 0.9 }}>
-              <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
-                {leakDetected ? <Warning sx={{ fontSize: 36, color: 'error.main' }} /> : <CheckCircle sx={{ fontSize: 36, color: 'success.main' }} />}
-                <Typography variant="h4" sx={{ fontWeight: 800, mt: 1 }}>{leakDetected ? 'Leak!' : 'No Issues'}</Typography>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, textAlign: 'center' }}>
+                {leakDetected ? <Warning sx={{ fontSize: { xs: 28, sm: 36 }, color: 'error.main' }} /> : <CheckCircle sx={{ fontSize: { xs: 28, sm: 36 }, color: 'success.main' }} />}
+                <Typography variant="h4" sx={{ fontWeight: 800, mt: 1, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>{leakDetected ? 'Leak!' : 'No Issues'}</Typography>
                 <Typography variant="body2" color="text.secondary">{leakDetected ? 'Immediate attention required' : 'All systems normal'}</Typography>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={12} sm={4}>
             <Card sx={{ borderRadius: 3 }}>
-              <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
-                <NotificationsActive sx={{ fontSize: 36, color: 'primary.main' }} />
-                <Typography variant="h4" sx={{ fontWeight: 800, mt: 1 }}>{alerts.length}</Typography>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, textAlign: 'center' }}>
+                <NotificationsActive sx={{ fontSize: { xs: 28, sm: 36 }, color: 'primary.main' }} />
+                <Typography variant="h4" sx={{ fontWeight: 800, mt: 1, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>{alerts.length}</Typography>
                 <Typography variant="body2" color="text.secondary">Total Notifications</Typography>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={12} sm={4}>
             <Card sx={{ borderRadius: 3 }}>
-              <CardContent sx={{ p: 2.5, textAlign: 'center' }}>
-                <Warning sx={{ fontSize: 36, color: activeIssues > 0 ? 'warning.main' : 'success.main' }} />
-                <Typography variant="h4" sx={{ fontWeight: 800, mt: 1 }}>{activeIssues}</Typography>
+              <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, textAlign: 'center' }}>
+                <Warning sx={{ fontSize: { xs: 28, sm: 36 }, color: activeIssues > 0 ? 'warning.main' : 'success.main' }} />
+                <Typography variant="h4" sx={{ fontWeight: 800, mt: 1, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>{activeIssues}</Typography>
                 <Typography variant="body2" color="text.secondary">Active Alerts</Typography>
               </CardContent>
             </Card>
@@ -120,13 +120,13 @@ export function TenantAlertsPage() {
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.15 }}>
         <Card sx={{ borderRadius: 3 }}>
-          <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
+          <CardContent sx={{ p: { xs: 1.5, sm: 2.5 }, '&:last-child': { pb: { xs: 1.5, sm: 2.5 } } }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>Recent Alerts</Typography>
             {alerts.length > 0 ? (
               <List sx={{ p: 0 }}>
                 {alerts.map((alert, i) => (
                   <ListItem key={i} sx={{ px: 0, py: 1.2 }}>
-                    <ListItemIcon sx={{ minWidth: 40 }}>
+                    <ListItemIcon sx={{ minWidth: { xs: 36, sm: 40 } }}>
                       {severityIcons[alert.severity] || <Info color="primary" />}
                     </ListItemIcon>
                     <ListItemText

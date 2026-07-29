@@ -136,13 +136,13 @@ export function AdminManagementPage() {
   };
 
   return (
-    <Box>
+    <Box sx={{ minWidth: 0, wordBreak: 'break-word' }}>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <PageHeader title="Admin Management" subtitle="Manage system administrators" action actionLabel="Add Admin" onAction={openCreate} />
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: { xs: 2, sm: 3 } }}>
           <StatCard title="Total Admins" value={admins.length} icon={<AdminPanelSettings />} color="primary" loading={loading} />
         </Box>
       </motion.div>
@@ -150,18 +150,18 @@ export function AdminManagementPage() {
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.15 }}>
         <Card>
           <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>Administrators</Typography>
+            <Typography variant="h6" sx={{ mb: { xs: 1.5, sm: 2 } }}>Administrators</Typography>
             <Stack spacing={2}>
               {admins.map((admin) => (
                 <Box key={admin.uid || admin.id} sx={{
                   p: 2, borderRadius: 2, border: 1, borderColor: 'divider',
                 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-                    <Avatar sx={{ bgcolor: admin.role === 'SUPER_ADMIN' ? 'error.main' : 'primary.main' }}>
-                      <Shield />
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 }, mb: 1 }}>
+                    <Avatar sx={{ bgcolor: admin.role === 'SUPER_ADMIN' ? 'error.main' : 'primary.main', width: { xs: 36, sm: 40 }, height: { xs: 36, sm: 40 } }}>
+                      <Shield sx={{ fontSize: { xs: 18, sm: 20 } }} />
                     </Avatar>
                     <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: { xs: '0.85rem', sm: '0.875rem' } }}>
                         {admin.fullName || admin.name}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">

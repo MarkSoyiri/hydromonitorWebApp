@@ -33,17 +33,17 @@ export function WaterSavingTip() {
 
   return (
     <Box sx={{
-      p: 2.5, borderRadius: 3,
+      p: { xs: 1.5, sm: 2.5 }, borderRadius: 3,
       background: 'linear-gradient(135deg, #0EA5E9 0%, #06B6D4 100%)',
       color: '#fff',
       position: 'relative',
       overflow: 'hidden',
     }}>
       <Box sx={{ position: 'absolute', top: -10, right: -10, opacity: 0.1 }}>
-        <Lightbulb sx={{ fontSize: 80 }} />
+        <Lightbulb sx={{ fontSize: { xs: 60, sm: 80 } }} />
       </Box>
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, position: 'relative', zIndex: 1 }}>
-        <Lightbulb sx={{ fontSize: 24, mt: 0.3 }} />
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: { xs: 1, sm: 1.5 }, position: 'relative', zIndex: 1 }}>
+        <Lightbulb sx={{ fontSize: { xs: 20, sm: 24 }, mt: 0.3 }} />
         <Box sx={{ flex: 1 }}>
           <Typography variant="caption" sx={{ opacity: 0.8, fontWeight: 600, letterSpacing: 1 }}>
             WATER SAVING TIP

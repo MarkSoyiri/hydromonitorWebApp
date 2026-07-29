@@ -185,7 +185,7 @@ export function RoomDetailPage() {
             {room.device && <StatusChip status={room.device.telemetry?.valveStatus === 'OPEN' ? 'OPEN' : 'CLOSED'} />}
             {canManage && !room.tenantId && (
               <Button
-                variant="contained"
+                variant="outlined"
                 size="small"
                 startIcon={<PersonAdd />}
                 onClick={handleOpenAssign}
@@ -194,11 +194,17 @@ export function RoomDetailPage() {
                   textTransform: 'none',
                   fontWeight: 600,
                   borderRadius: 2,
-                  background: 'linear-gradient(135deg, #2F80ED, #00B4D8)',
-                  boxShadow: '0 2px 8px rgba(47,128,237,0.25)',
+                  borderColor: 'primary.main',
+                  color: 'primary.main',
+                  fontSize: { xs: '0.75rem', sm: '0.8125rem' },
+                  px: { xs: 1.25, sm: 1.5 },
+                  py: { xs: 0.25, sm: 0.5 },
+                  minWidth: { xs: 0, sm: 'auto' },
+                  '& .MuiButton-startIcon': { mr: { xs: 0.25, sm: 0.5 } },
+                  '& .MuiSvgIcon-root': { fontSize: { xs: '1rem', sm: '1.25rem' } },
                   '&:hover': {
-                    background: 'linear-gradient(135deg, #1a6bc4, #0097b2)',
-                    boxShadow: '0 4px 16px rgba(47,128,237,0.35)',
+                    borderColor: 'primary.dark',
+                    backgroundColor: 'rgba(47,128,237,0.06)',
                   },
                 }}
               >

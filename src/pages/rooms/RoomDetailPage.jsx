@@ -179,6 +179,11 @@ export function RoomDetailPage() {
             <Typography variant="body2" color="text.secondary" noWrap>
               Floor {room.floor} · {room.buildingId || 'Unknown Building'}
             </Typography>
+            {room.description && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25, wordBreak: 'break-word' }}>
+                {room.description}
+              </Typography>
+            )}
           </Box>
           <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', alignItems: 'center' }}>
             <StatusChip status={room.status} />

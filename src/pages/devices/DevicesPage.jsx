@@ -7,8 +7,8 @@ import {
 import {
   Add, Delete, SignalCellularAlt,
 } from '@mui/icons-material';
-import { PageHeader, DataTable, StatusChip, ConfirmDialog, IdBadge } from '@/components/common';
-import { deviceService, buildingService } from '@/services';
+import { PageHeader, DataTable, StatusChip, ConfirmDialog, IdBadge, BuildingSelector, RoomSelector } from '@/components/common';
+import { deviceService } from '@/services';
 import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
@@ -20,7 +20,6 @@ export function DevicesPage() {
   const { isSuperAdmin } = useAuth();
   const basePath = isSuperAdmin ? '/super-admin' : '/admin';
   const [devices, setDevices] = useState([]);
-  const [, setBuildings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -31,15 +30,9 @@ export function DevicesPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [dRes, bRes] = await Promise.allSettled([
-        deviceService.getAll(),
-        buildingService.getAll(),
-      ]);
-      if (dRes.status === 'fulfilled' && dRes.value.data?.success) {
-        setDevices(extractList(dRes.value.data.data));
-      }
-      if (bRes.status === 'fulfilled' && bRes.value.data?.success) {
-        setBuildings(extractList(bRes.value.data.data));
+      const dRes = await deviceService.getAll();
+      if (dRes.data?.success) {
+        setDevices(extractList(dRes.data.data));
       }
     } catch {
       toast.error('Failed to load devices');
@@ -57,8 +50,8 @@ export function DevicesPage() {
   };
 
   const handleSave = async () => {
-    if (!form.deviceName.trim() || !form.serialNumber.trim()) {
-      toast.error('Device name and serial number are required');
+    if (!form.deviceName.trim() || !form.serialNumber.trim() || !form.buildingId || !form.roomId) {
+      toast.error('Device name, serial number, building, and room are required');
       return;
     }
     setSaving(true);
@@ -154,7 +147,7 @@ export function DevicesPage() {
           loading={loading}
           onRowClick={(row) => navigate(`${basePath}/devices/${row.deviceId}`, { state: { from: location.pathname } })}
           emptyTitle="No devices registered"
-          emptyAction={isSuperAdmin && <Button variant="contained" startIcon={<Add />} onClick={openCreate}>Add Device</Button>}
+          emptyAction={<Button variant="contained" startIcon={<Add />} onClick={openCreate}>Add Device</Button>}
         />
       </motion.div>
 
@@ -166,10 +159,19 @@ export function DevicesPage() {
               onChange={(e) => setForm({ ...form, deviceName: e.target.value })} autoFocus />
             <TextField label="Serial Number" fullWidth value={form.serialNumber}
               onChange={(e) => setForm({ ...form, serialNumber: e.target.value })} />
-            <TextField label="Building ID" fullWidth value={form.buildingId}
-              onChange={(e) => setForm({ ...form, buildingId: e.target.value })} />
-            <TextField label="Room ID" fullWidth value={form.roomId}
-              onChange={(e) => setForm({ ...form, roomId: e.target.value })} />
+            <BuildingSelector
+              value={form.buildingId}
+              onChange={(buildingId) => setForm({ ...form, buildingId, roomId: '' })}
+              required
+            />
+            <RoomSelector
+              buildingId={form.buildingId}
+              value={form.roomId}
+              onChange={(roomId) => setForm({ ...form, roomId })}
+              label="Room"
+              required
+              disabled={!form.buildingId}
+            />
           </Stack>
         </DialogContent>
         <DialogActions sx={{ flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 1, sm: 0 } }}>

@@ -11,7 +11,7 @@ import {
   Business, AdminPanelSettings, People,
   Analytics, Assessment, Settings, ListAlt,
   Person, Logout, DarkModeOutlined, LightModeOutlined,
-  Menu as MenuIcon, ChevronLeft, WaterDrop,
+  Menu as MenuIcon, ChevronLeft, WaterDrop, DevicesOther,
 } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';
 import { useThemeMode } from '@/contexts/ThemeContext';
@@ -26,6 +26,7 @@ const superAdminNavGroups = [
     items: [
       { label: 'Dashboard', path: '/super-admin/dashboard', icon: <DashIcon /> },
       { label: 'Buildings', path: '/super-admin/buildings', icon: <Business /> },
+      { label: 'Devices', path: '/super-admin/devices', icon: <DevicesOther /> },
       { label: 'Admins', path: '/super-admin/admins', icon: <AdminPanelSettings /> },
       { label: 'Tenants', path: '/super-admin/tenants', icon: <People /> },
     ],
@@ -378,6 +379,7 @@ function SuperAdminBottomNav() {
   const bottomNavItems = [
     { label: 'Dashboard', path: '/super-admin/dashboard', icon: <DashIcon /> },
     { label: 'Buildings', path: '/super-admin/buildings', icon: <Business /> },
+    { label: 'Devices', path: '/super-admin/devices', icon: <DevicesOther /> },
     { label: 'Admins', path: '/super-admin/admins', icon: <AdminPanelSettings /> },
     { label: 'Analytics', path: '/super-admin/analytics', icon: <Analytics /> },
     { label: 'Settings', path: '/super-admin/settings', icon: <Settings /> },

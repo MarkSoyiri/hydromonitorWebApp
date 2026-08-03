@@ -1,5 +1,5 @@
 import { Box, Grid, Card, CardContent, Typography, Button, TextField, Paper } from '@mui/material';
-import { HeadsetMic, Email, Phone, Chat, Send } from '@mui/icons-material';
+import { Email, Phone, Chat, Send } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import toast from 'react-hot-toast';

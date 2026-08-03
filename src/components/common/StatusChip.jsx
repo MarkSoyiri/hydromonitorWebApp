@@ -1,6 +1,6 @@
 import { Chip } from '@mui/material';
 import {
-  CheckCircle, Cancel, Warning, HourglassEmpty, OfflineBolt, Circle,
+  CheckCircle, Cancel, HourglassEmpty, OfflineBolt, Circle,
 } from '@mui/icons-material';
 import { STATUS_COLORS } from '@/constants';
 

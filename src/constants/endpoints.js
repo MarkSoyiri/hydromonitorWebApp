@@ -11,7 +11,6 @@ export const ENDPOINTS = {
   BUILDINGS: `${API_PREFIX}/buildings`,
   ROOMS: `${API_PREFIX}/rooms`,
   DEVICES: `${API_PREFIX}/devices`,
-  DEVICE_AUTH: `${API_PREFIX}/devices/auth`,
   TENANTS: `${API_PREFIX}/tenants`,
   ALERTS: `${API_PREFIX}/alerts`,
   BILLING: {
@@ -26,7 +25,6 @@ export const ENDPOINTS = {
     TENANTS: `${API_PREFIX}/analytics/tenants`,
   },
   TELEMETRY: `${API_PREFIX}/telemetry`,
-  USAGE: `${API_PREFIX}/usage`,
   USERS: `${API_PREFIX}/users`,
 };
 

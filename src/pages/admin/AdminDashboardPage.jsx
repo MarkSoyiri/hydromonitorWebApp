@@ -1,18 +1,18 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Grid, Card, CardContent, Typography, Skeleton,
   List, ListItem, ListItemText, ListItemIcon, Divider, Avatar,
-  Button, Chip, IconButton, Tooltip,
+  Button, IconButton, Tooltip,
 } from '@mui/material';
 import {
   MeetingRoom, DevicesOther, People, WaterDrop, Warning,
-  CheckCircle, TrendingUp, OfflineBolt, Business, ChevronRight,
-  Add, Assessment, NotificationsActive,
+  CheckCircle, OfflineBolt, Business, ChevronRight,
+  NotificationsActive,
 } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';
-import { PageHeader, StatCard } from '@/components/common';
-import { dashboardService, roomService, deviceService, tenantService, alertService, buildingService } from '@/services';
+import { StatCard } from '@/components/common';
+import { dashboardService, roomService, deviceService, tenantService, alertService } from '@/services';
 import { extractList } from '@/utils/response';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as ReTooltip, ResponsiveContainer } from 'recharts';

@@ -75,7 +75,6 @@ export function TenantAlertsPage() {
   }
 
   const activeIssues = alerts.filter((a) => a.severity === 'Critical' || a.severity === 'Warning').length;
-  const resolvedIssues = alerts.filter((a) => a.severity === 'OK').length;
 
   return (
     <Box>

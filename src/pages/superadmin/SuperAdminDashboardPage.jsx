@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Box, Grid, Card, CardContent, Typography, Skeleton, Chip, LinearProgress, Paper, Divider } from '@mui/material';
 import {
-  Business, MeetingRoom, DevicesOther, People, AdminPanelSettings,
-  TrendingUp, AttachMoney, Storage, Cloud, Memory, CheckCircle,
+  Business, MeetingRoom, DevicesOther, People,
+  AttachMoney, Storage, Cloud, Memory, CheckCircle,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -97,7 +97,6 @@ export function SuperAdminDashboardPage() {
   const totalDevices = devices.length ?? 0;
   const totalTenants = stats?.activeTenants ?? tenants.filter((t) => t?.status === 'ACTIVE').length ?? 0;
   const totalRevenue = stats?.totalRevenue ?? 0;
-  const activeAlerts = stats?.recentAlerts ?? 0;
 
   const buildingData = buildings.slice(0, 3).map((b) => ({
     name: b.name || 'Building',

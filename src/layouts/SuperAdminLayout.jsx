@@ -3,8 +3,8 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Drawer, List, ListItemButton, ListItemIcon, ListItemText,
   Typography, IconButton, Avatar, Menu, MenuItem, ListItemIcon as LI,
-  Divider, Tooltip, Badge, AppBar, Toolbar, useMediaQuery, useTheme,
-  Collapse, Chip, BottomNavigation, BottomNavigationAction, Paper,
+  Divider, Tooltip, AppBar, Toolbar, useMediaQuery, useTheme,
+  Chip, BottomNavigation, BottomNavigationAction, Paper,
 } from '@mui/material';
 import {
   Dashboard as DashIcon,
@@ -12,7 +12,6 @@ import {
   Analytics, Assessment, Settings, ListAlt,
   Person, Logout, DarkModeOutlined, LightModeOutlined,
   Menu as MenuIcon, ChevronLeft, WaterDrop,
-  ExpandLess, ExpandMore, Security,
 } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';
 import { useThemeMode } from '@/contexts/ThemeContext';

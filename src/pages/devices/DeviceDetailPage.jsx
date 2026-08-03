@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
-  Box, Grid, Card, CardContent, Typography, IconButton, Button, Stack, Chip, Divider,
+  Box, Grid, Card, CardContent, Typography, IconButton, Button, Stack, Chip,
 } from '@mui/material';
 import {
   ArrowBack, Wifi, SignalCellularAlt, Warning,
@@ -25,8 +25,6 @@ const fallbackTelemetryHistory = Array.from({ length: 24 }, (_, i) => ({
 
 export function DeviceDetailPage() {
   const { deviceId } = useParams();
-  const navigate = useNavigate();
-  const location = useLocation();
   const { isSuperAdmin } = useAuth();
   const basePath = isSuperAdmin ? '/super-admin' : '/admin';
   const goBack = useBackNavigation(`${basePath}/devices`);
@@ -60,7 +58,7 @@ export function DeviceDetailPage() {
 
   useEffect(() => {
     fetchDevice();
-    const unsubscribe = subscribeRealtime(`devices/${deviceId}`, (data) => {
+    subscribeRealtime(`devices/${deviceId}`, (data) => {
       if (data) setDevice((prev) => ({ ...prev, ...data }));
     });
     return () => {

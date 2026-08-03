@@ -53,7 +53,7 @@ export function RoomSelector({
     return () => {
       cancelled = true;
     };
-  }, [buildingId]);
+  }, [buildingId, value]);
 
   const selected = useMemo(
     () => rooms.find((r) => r.roomId === value) || null,

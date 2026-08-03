@@ -5,7 +5,7 @@ import {
 import { PageHeader } from '@/components/common';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LineChart, Line, AreaChart, Area, PieChart, Pie, Cell, Legend,
+  LineChart, Line, AreaChart, Area, PieChart, Pie, Cell,
 } from 'recharts';
 import { motion } from 'framer-motion';
 import { analyticsService } from '@/services';

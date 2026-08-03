@@ -3,7 +3,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Drawer, List, ListItemButton, ListItemIcon, ListItemText,
   Typography, IconButton, Avatar, Menu, MenuItem, ListItemIcon as LI,
-  Divider, Tooltip, Badge, AppBar, Toolbar, useMediaQuery, useTheme,
+  Divider, Tooltip, AppBar, Toolbar, useMediaQuery, useTheme,
   BottomNavigation, BottomNavigationAction, Paper,
 } from '@mui/material';
 import {
@@ -17,7 +17,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useThemeMode } from '@/contexts/ThemeContext';
 import { ROLE_LABELS, ROLE_COLORS } from '@/constants/roles';
 import { Chip } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const tenantNavItems = [
   { label: 'Dashboard', path: '/app/dashboard', icon: <DashIcon /> },

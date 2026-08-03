@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Box, Card, CardContent, TextField, Typography, Button, Alert, IconButton,
-  InputAdornment, Checkbox, FormControlLabel, Divider,
+  InputAdornment, Checkbox, FormControlLabel,
 } from '@mui/material';
 import { Visibility, VisibilityOff, WaterDrop } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';

@@ -1,15 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate, useLocation, useMatch } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Grid, Card, CardContent, Typography, Button, IconButton, Tabs, Tab,
   TextField, Stack, Dialog, DialogTitle, DialogContent, DialogActions,
   Tooltip, Select, MenuItem, FormControl, InputLabel, Avatar, Autocomplete,
-  Divider,
 } from '@mui/material';
 import {
   ArrowBack, Edit, MeetingRoom, DevicesOther, People,
-  Add, Warning, CheckCircle, Shield, PersonRemove, Business,
-  WaterDrop, DoorFront, OnlinePrediction,
+  Add, Warning, CheckCircle, Shield, PersonRemove,
+  WaterDrop, DoorFront,
 } from '@mui/icons-material';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as ReTooltip,
@@ -120,7 +119,7 @@ export function BuildingDetailPage() {
   const { buildingId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isSuperAdmin, isAdmin } = useAuth();
+  const { isSuperAdmin } = useAuth();
   const basePath = isSuperAdmin ? '/super-admin' : '/admin';
   const goBack = useBackNavigation(`${basePath}/buildings`);
 

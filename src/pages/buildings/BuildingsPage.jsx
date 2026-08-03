@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useLocation, useMatch } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Grid, Card, CardContent, Typography, Button, IconButton, TextField,
   Dialog, DialogTitle, DialogContent, DialogActions, Stack, Chip, Tooltip,
@@ -7,9 +7,9 @@ import {
 } from '@mui/material';
 import {
   Add, Edit, Delete, Business, MeetingRoom, DevicesOther, People, CheckCircle,
-  Warning, DoorFront, OnlinePrediction, ChevronRight,
+  Warning, ChevronRight,
 } from '@mui/icons-material';
-import { PageHeader, StatCard, DataTable, ConfirmDialog, StatusChip, EmptyState } from '@/components/common';
+import { PageHeader, DataTable, ConfirmDialog, StatusChip, EmptyState } from '@/components/common';
 import { buildingService, roomService, deviceService, tenantService, alertService } from '@/services';
 import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
@@ -177,7 +177,7 @@ function AdminBuildingCard({ building, stats, index, onClick }) {
 export function BuildingsPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isSuperAdmin, isAdmin, assignedBuildings } = useAuth();
+  const { isSuperAdmin, isAdmin } = useAuth();
   const basePath = isSuperAdmin ? '/super-admin' : '/admin';
 
   const [buildings, setBuildings] = useState([]);

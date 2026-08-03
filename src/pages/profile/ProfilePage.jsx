@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Box, Grid, Card, CardContent, Typography, TextField, Button, Avatar, Stack,
-  Chip, IconButton, Tooltip, Divider, Paper,
+  Chip,
 } from '@mui/material';
 import {
   Person, Email, Phone, Badge, CalendarMonth, AccessTime,
   Home, MeetingRoom, DevicesOther, WaterDrop, TrendingUp, Speed,
-  MonetizationOn, Business, People, Warning, CheckCircle, InfoOutlined,
+  MonetizationOn, Business, People, Warning, CheckCircle,
   Settings, Edit, ArrowForward, Timeline, Shield, Analytics,
 } from '@mui/icons-material';
 import { StatCard, StatusChip } from '@/components/common';
@@ -200,7 +200,7 @@ export function ProfilePage() {
   const [alerts, setAlerts] = useState([]);
   const [readings, setReadings] = useState([]);
   const [analyticsData, setAnalyticsData] = useState(null);
-  const [dashStats, setDashStats] = useState(null);
+  const [, setDashStats] = useState(null);
   const [billData, setBillData] = useState(null);
 
   const fetchRoleData = useCallback(async () => {
@@ -274,7 +274,6 @@ export function ProfilePage() {
     if (!isTenant || readings.length === 0) return null;
     const now = dayjs();
     const todayStr = now.format('YYYY-MM-DD');
-    const weekAgo = now.subtract(7, 'day');
 
     const todayUsage = readings
       .filter((r) => r.timestamp && dayjs(r.timestamp).format('YYYY-MM-DD') === todayStr)

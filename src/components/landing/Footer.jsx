@@ -1,5 +1,4 @@
 import { Box, Container, Typography, Grid, IconButton, Button } from '@mui/material';
-import { motion } from 'framer-motion';
 import {
   WaterDrop, Twitter, GitHub, LinkedIn, Mail,
 } from '@mui/icons-material';

@@ -6,10 +6,7 @@ import {
   signOut as firebaseSignOut,
 } from 'firebase/auth';
 import { auth } from '@/services/firebase';
-import { authService } from '@/services';
-import { buildingService } from '@/services';
-import { roomService } from '@/services';
-import { deviceService } from '@/services';
+import { authService, buildingService, roomService } from '@/services';
 import { ROLES } from '@/constants';
 
 const AuthContext = createContext(null);
@@ -50,8 +47,8 @@ export function AuthProvider({ children }) {
                   .filter((res) => res.data?.success)
                   .map((res) => res.data.data);
                 setAssignedBuildings(buildings);
-                if (buildings.length > 0 && !building) {
-                  setBuilding(buildings[0]);
+                if (buildings.length > 0) {
+                  setBuilding((prev) => prev || buildings[0]);
                 }
               })
               .catch(() => {});
@@ -162,6 +159,7 @@ export function AuthProvider({ children }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+// oxlint-disable-next-line react/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error('useAuth must be used within an AuthProvider');

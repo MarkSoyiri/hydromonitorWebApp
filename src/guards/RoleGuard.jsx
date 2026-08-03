@@ -1,7 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { getDashboardPath } from '@/constants/roles';
-import { Box, Typography } from '@mui/material';
 
 export function RoleGuard({ children, allowedRoles, fallback }) {
   const { profile } = useAuth();

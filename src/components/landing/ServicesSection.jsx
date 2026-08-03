@@ -28,13 +28,6 @@ const SERVICES = [
   },
 ];
 
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.15 },
-  },
-};
-
 const cardVariants = {
   hidden: { opacity: 0, y: 40 },
   visible: {
@@ -104,7 +97,7 @@ export function ServicesSection() {
         </motion.div>
 
         <Grid container spacing={3}>
-          {SERVICES.map((service, i) => (
+          {SERVICES.map((service) => (
             <Grid item xs={12} md={4} key={service.title}>
               <motion.div
                 variants={cardVariants}

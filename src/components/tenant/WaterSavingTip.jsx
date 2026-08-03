@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Box, Typography, IconButton } from '@mui/material';
-import { Lightbulb, ChevronRight } from '@mui/icons-material';
+import { Box, Typography } from '@mui/material';
+import { Lightbulb } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const tips = [

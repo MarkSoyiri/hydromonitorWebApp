@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Box, Card, CardContent, TextField, Typography, Button, Alert, IconButton,
+  Box, Card, CardContent, TextField, Typography, Button, Alert,
 } from '@mui/material';
 import { ArrowBack, WaterDrop } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';

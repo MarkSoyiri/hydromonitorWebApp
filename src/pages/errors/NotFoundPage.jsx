@@ -1,10 +1,8 @@
 import { Box, Typography, Button } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import { WaterDrop } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 
 export function NotFoundPage() {
-  const navigate = useNavigate();
   return (
     <Box
       sx={{

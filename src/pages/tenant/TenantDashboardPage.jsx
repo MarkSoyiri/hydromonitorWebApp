@@ -8,7 +8,7 @@ import {
 import {
   WaterDrop, Receipt, AccountBalance, CheckCircle, Warning,
   Home, Adjust as ValveIcon, TrendingUp,
-  Download, ArrowForward, NotificationsActive,
+  Download, ArrowForward,
   Paid, Description, ErrorOutline,
 } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';
@@ -252,7 +252,7 @@ export function TenantDashboardPage() {
                         ][i],
                         width: { xs: 32, sm: 36 }, height: { xs: 32, sm: 36 }, borderRadius: 2
                       }}>
-                        {[<WaterDrop />, <Receipt />, <AccountBalance />, <CheckCircle />][i]}
+                        {[<WaterDrop key="water-drop" />, <Receipt key="receipt" />, <AccountBalance key="account-balance" />, <CheckCircle key="check-circle" />][i]}
                       </Avatar>
                     </Box>
                     <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.25rem', sm: '2.125rem' }, wordBreak: 'break-word', color: i === 2 && outstandingBalance > 0 ? 'error.main' : 'text.primary' }}>

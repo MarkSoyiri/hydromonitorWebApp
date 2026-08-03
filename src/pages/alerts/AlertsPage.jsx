@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
-  Box, Grid, Card, CardContent, Typography, Chip, Tabs, Tab, Alert as MuiAlert,
+  Box, Grid, Card, CardContent, Chip, Tabs, Tab, Alert as MuiAlert,
 } from '@mui/material';
-import { Warning, CheckCircle, Error as ErrorIcon, Info } from '@mui/icons-material';
+import { Warning, Error as ErrorIcon, Info } from '@mui/icons-material';
 import { PageHeader, StatCard, DataTable, StatusChip, IdBadge } from '@/components/common';
 import { alertService } from '@/services';
 import { extractList } from '@/utils/response';

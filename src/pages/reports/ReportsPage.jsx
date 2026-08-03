@@ -6,7 +6,6 @@ import {
 import { PictureAsPdf, Description, TableChart, Download } from '@mui/icons-material';
 import { PageHeader } from '@/components/common';
 import { analyticsService, dashboardService } from '@/services';
-import { extractList } from '@/utils/response';
 import { motion } from 'framer-motion';
 import dayjs from 'dayjs';
 
@@ -56,9 +55,7 @@ export function ReportsPage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const totalUsage = stats?.totalUsageToday ?? 0;
   const totalBuildings = stats?.totalBuildings ?? 0;
-  const totalRooms = stats?.totalRooms ?? 0;
   const totalDevices = stats?.totalDevices ?? 0;
   const activeAlerts = stats?.unresolvedAlerts ?? 0;
 

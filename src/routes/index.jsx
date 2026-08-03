@@ -6,6 +6,7 @@ import { TenantLayout } from '@/layouts/TenantLayout';
 import { AdminLayout } from '@/layouts/AdminLayout';
 import { SuperAdminLayout } from '@/layouts/SuperAdminLayout';
 
+// oxlint-disable-next-line react/only-export-components
 const Lazy = (Component) => (props) => (
   <Suspense fallback={<LoadingScreen />}>
     <Component {...props} />

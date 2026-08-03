@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Stack,
-  TextField, Typography, IconButton, Chip, Tooltip,
+  TextField, IconButton, Chip, Tooltip,
 } from '@mui/material';
 import {
   Add, Delete, SignalCellularAlt,
@@ -20,7 +20,7 @@ export function DevicesPage() {
   const { isSuperAdmin } = useAuth();
   const basePath = isSuperAdmin ? '/super-admin' : '/admin';
   const [devices, setDevices] = useState([]);
-  const [buildings, setBuildings] = useState([]);
+  const [, setBuildings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);

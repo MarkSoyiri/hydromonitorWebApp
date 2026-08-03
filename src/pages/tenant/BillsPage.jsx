@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Box, Grid, Card, CardContent, Typography, Button, Chip, List, ListItem, ListItemText, ListItemIcon, Divider, Skeleton } from '@mui/material';
 import { Receipt, Payment as PaymentIcon, Download } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { billingService } from '@/services';
 import { extractList } from '@/utils/response';
 
 export function BillsPage() {
-  const navigate = useNavigate();
   const { profile } = useAuth();
   const [bills, setBills] = useState([]);
   const [currentBill, setCurrentBill] = useState(null);

@@ -52,11 +52,6 @@ const BENEFITS = [
   { value: 100, suffix: '+', decimals: 0, label: 'Buildings Supported', sub: 'Scale without limits' },
 ];
 
-const containerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.1 } },
-};
-
 const itemVariants = {
   hidden: { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },

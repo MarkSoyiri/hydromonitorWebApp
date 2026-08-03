@@ -38,7 +38,7 @@ function StatusDot({ active = true }) {
 }
 
 export function DashboardPreview() {
-  const [currentTime, setCurrentTime] = useState('');
+  const [, setCurrentTime] = useState('');
 
   useEffect(() => {
     const update = () => {

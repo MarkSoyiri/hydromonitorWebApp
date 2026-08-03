@@ -97,6 +97,10 @@ export function AuthProvider({ children }) {
     const token = await credential.user.getIdToken();
     await authService.login(token);
     const profileData = await fetchProfile();
+    if (!profileData?.role) {
+      await firebaseSignOut(auth);
+      throw new Error('Failed to load your profile. Please try again.');
+    }
     return profileData;
   };
 

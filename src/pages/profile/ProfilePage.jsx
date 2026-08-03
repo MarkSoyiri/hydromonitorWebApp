@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Box, Grid, Card, CardContent, Typography, TextField, Button, Avatar, Stack,
-  Chip,
+  Chip, CircularProgress,
 } from '@mui/material';
 import {
   Person, Email, Phone, Badge, CalendarMonth, AccessTime,
@@ -218,7 +218,8 @@ export function ProfilePage() {
         dashboardService.getStats().then((r) => { if (r.data?.success) setDashStats(r.data.data); }).catch(() => {}),
       );
     } else if (isAdmin) {
-      const bid = profile.buildingId;
+      const bid = profile.buildingId
+        || (profile.buildingIds && Object.keys(profile.buildingIds)[0]);
       parallel.push(
         bid ? buildingService.getById(bid).then((r) => { if (r.data?.success) setBuildings([{ ...r.data.data, buildingId: bid }]); }).catch(() => {}) : Promise.resolve(),
         bid ? roomService.getAll(bid).then((r) => { if (r.data?.success) setRooms(extractList(r.data.data)); }).catch(() => {}) : Promise.resolve(),
@@ -331,7 +332,7 @@ export function ProfilePage() {
         { icon: <Business />, label: 'Add Building', color: 'primary', onClick: () => navigate('/super-admin/buildings') },
         { icon: <People />, label: 'Manage Admins', color: 'info', onClick: () => navigate('/super-admin/admins') },
         { icon: <Analytics />, label: 'System Overview', color: 'success', onClick: () => navigate('/super-admin/analytics') },
-        { icon: <Warning />, label: 'View Alerts', color: 'error', onClick: () => navigate('/super-admin/alerts') },
+        { icon: <Warning />, label: 'View Alerts', color: 'error', onClick: () => navigate('/admin/alerts') },
       ];
     }
     if (isAdmin) {
@@ -355,7 +356,13 @@ export function ProfilePage() {
 
   const roleStyle = ROLE_BADGE_COLORS[profile?.role] || ROLE_BADGE_COLORS.TENANT;
 
-  if (!profile) return null;
+  if (!profile) {
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ minWidth: 0, wordBreak: 'break-word' }}>

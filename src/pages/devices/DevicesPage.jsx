@@ -2,10 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Stack,
-  TextField, IconButton, Chip, Tooltip,
+  TextField, IconButton, Chip, Tooltip, Typography, Alert, InputAdornment,
 } from '@mui/material';
 import {
-  Add, Delete, SignalCellularAlt,
+  Add, Delete, SignalCellularAlt, ContentCopy, Check,
 } from '@mui/icons-material';
 import { PageHeader, DataTable, StatusChip, ConfirmDialog, IdBadge, BuildingSelector, RoomSelector } from '@/components/common';
 import { deviceService } from '@/services';
@@ -13,6 +13,40 @@ import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+
+function CopyField({ label, value }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      toast.error('Failed to copy to clipboard');
+    }
+  };
+
+  return (
+    <TextField
+      label={label}
+      value={value}
+      fullWidth
+      InputProps={{
+        readOnly: true,
+        endAdornment: (
+          <InputAdornment position="end">
+            <Tooltip title={copied ? 'Copied!' : 'Copy'}>
+              <IconButton size="small" onClick={handleCopy}>
+                {copied ? <Check fontSize="small" color="success" /> : <ContentCopy fontSize="small" />}
+              </IconButton>
+            </Tooltip>
+          </InputAdornment>
+        ),
+      }}
+    />
+  );
+}
 
 export function DevicesPage() {
   const navigate = useNavigate();
@@ -27,6 +61,7 @@ export function DevicesPage() {
   const [deleting, setDeleting] = useState(false);
   const [form, setForm] = useState({ deviceName: '', serialNumber: '', buildingId: '', roomId: '' });
   const [saving, setSaving] = useState(false);
+  const [provision, setProvision] = useState(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -60,8 +95,16 @@ export function DevicesPage() {
         await deviceService.update(editing.deviceId, form);
         toast.success('Device updated');
       } else {
-        await deviceService.create(form);
+        const res = await deviceService.create(form);
         toast.success('Device created');
+        const created = res.data?.data;
+        if (created?.deviceSecret) {
+          setProvision({
+            deviceId: created.deviceId,
+            deviceName: created.deviceName,
+            deviceSecret: created.deviceSecret,
+          });
+        }
       }
       setDialogOpen(false);
       fetchData();
@@ -179,6 +222,25 @@ export function DevicesPage() {
           <Button onClick={handleSave} variant="contained" disabled={saving} fullWidth={true}>
             {saving ? 'Saving...' : (editing ? 'Update' : 'Create')}
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={!!provision} onClose={() => setProvision(null)} maxWidth="sm" fullWidth>
+        <DialogTitle>Device Provisioned</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2}>
+            <Alert severity="warning">
+              Save these credentials now. The device secret is shown only once and cannot be recovered later.
+            </Alert>
+            <Typography variant="body2" color="text.secondary">
+              Flash these into the ESP32 firmware in <code>config.h</code> as <code>DEVICE_ID</code> and <code>DEVICE_SECRET</code>.
+            </Typography>
+            <CopyField label="Device ID" value={provision?.deviceId || ''} />
+            <CopyField label="Device Secret" value={provision?.deviceSecret || ''} />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 1, sm: 0 } }}>
+          <Button onClick={() => setProvision(null)} variant="contained" fullWidth={true}>Done</Button>
         </DialogActions>
       </Dialog>
 

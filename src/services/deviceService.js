@@ -1,5 +1,5 @@
 import { apiGet, apiPost, apiPut, apiDelete } from './api';
-import { ENDPOINTS, devicePath, deviceOpenValvePath, deviceCloseValvePath, deviceResetAlertPath, deviceStartSimPath, deviceStopSimPath, deviceCommandsPath, deviceCommandAckPath, deviceTokenPath } from '@/constants';
+import { ENDPOINTS, devicePath, deviceOpenValvePath, deviceCloseValvePath, deviceResetAlertPath, deviceStartSimPath, deviceStopSimPath, deviceCommandsPath, deviceCommandAckPath, deviceTokenPath, deviceTelemetryPath } from '@/constants';
 
 export const deviceService = {
   getAll: () =>
@@ -7,6 +7,9 @@ export const deviceService = {
 
   getById: (deviceId) =>
     apiGet(devicePath(deviceId)),
+
+  getLiveTelemetry: (deviceId) =>
+    apiGet(deviceTelemetryPath(deviceId)),
 
   create: (data) =>
     apiPost(ENDPOINTS.DEVICES, data),

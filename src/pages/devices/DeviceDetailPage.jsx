@@ -13,7 +13,6 @@ import { extractList } from '@/utils/response';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBackNavigation } from '@/hooks/useBackNavigation';
-import { subscribeRealtime, unsubscribeRealtime } from '@/services/firebaseRealtime';
 import toast from 'react-hot-toast';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import dayjs from 'dayjs';
@@ -58,12 +57,20 @@ export function DeviceDetailPage() {
 
   useEffect(() => {
     fetchDevice();
-    subscribeRealtime(`devices/${deviceId}`, (data) => {
-      if (data) setDevice((prev) => ({ ...prev, ...data }));
-    });
-    return () => {
-      unsubscribeRealtime(`devices/${deviceId}`);
+    const poll = async () => {
+      try {
+        const { data } = await deviceService.getLiveTelemetry(deviceId);
+        setDevice((prev) => ({
+          ...prev,
+          telemetry: data?.success && data.data ? data.data : (prev?.telemetry || {}),
+        }));
+      } catch {
+        // keep last known telemetry when the poll fails
+      }
     };
+    poll();
+    const timer = setInterval(poll, 5000);
+    return () => clearInterval(timer);
   }, [deviceId, fetchDevice]);
 
   const sendCommand = async (action) => {

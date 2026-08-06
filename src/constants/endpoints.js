@@ -60,6 +60,9 @@ export const deviceTokenPath = (deviceId) =>
 export const deviceReadingsPath = (deviceId) =>
   `${ENDPOINTS.TELEMETRY}/${deviceId}/readings`;
 
+export const deviceTelemetryPath = (deviceId) =>
+  `${API_PREFIX}/deviceTelemetry/${deviceId}`;
+
 export const roomPath = (roomId) => `${ENDPOINTS.ROOMS}/${roomId}`;
 export const buildingPath = (buildingId) => `${ENDPOINTS.BUILDINGS}/${buildingId}`;
 export const tenantPath = (tenantId) => `${ENDPOINTS.TENANTS}/${tenantId}`;

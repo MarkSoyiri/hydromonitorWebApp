@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Box, Grid, Card, CardContent, Typography, Chip, List, ListItem, ListItemText, ListItemIcon, Skeleton } from '@mui/material';
 import { CheckCircle, Warning, Info, NotificationsActive } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { alertService } from '@/services';
-import { extractList } from '@/utils/response';
+import {
+  NODES, useRealtimeValue, useLiveAlerts, useLiveTelemetry,
+} from '@/services/realtime';
 import { useAuth } from '@/contexts/AuthContext';
-
-const fallbackAlerts = [];
+import dayjs from 'dayjs';
 
 const severityIcons = {
   'OK': <CheckCircle color="success" />,
@@ -22,38 +22,44 @@ const severityColors = {
   'Critical': 'error',
 };
 
+const toTitleCase = (s) => {
+  const lower = (s || 'Info').toLowerCase();
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+};
+
 export function TenantAlertsPage() {
-  const { device } = useAuth();
-  const [alerts, setAlerts] = useState([]);
+  const { profile, device: authDevice, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
 
-  const leakDetected = device?.telemetry?.leakDetected ?? false;
+  const tenantUid = profile?.uid || profile?.currentUser?.uid;
+
+  const userLive = useRealtimeValue(tenantUid ? `${NODES.users}/${tenantUid}` : null);
+  const liveProfile = userLive.value ? { ...profile, ...userLive.value, uid: tenantUid } : profile;
+  const buildingId = liveProfile?.buildingId;
+
+  const deviceId = liveProfile?.deviceId || authDevice?.deviceId;
+  const { telemetry: liveTelemetry } = useLiveTelemetry(deviceId);
+  const leakDetected = liveTelemetry?.leakDetected ?? authDevice?.telemetry?.leakDetected ?? false;
+
+  const { alerts: apiAlerts, loaded: alertsLoaded } = useLiveAlerts();
+  const alerts = useMemo(
+    () => {
+      const relevant = apiAlerts.filter(
+        (a) => a.tenantId === tenantUid || (buildingId && a.buildingId === buildingId)
+      );
+      return relevant.map((a) => ({
+        ...a,
+        severity: toTitleCase(a.severity || 'Info'),
+        message: a.message || a.type || 'Notification',
+        time: a.createdAt ? dayjs(a.createdAt).format('MMM D, HH:mm') : 'Just now',
+      }));
+    },
+    [apiAlerts, tenantUid, buildingId]
+  );
 
   useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const response = await alertService.getAll();
-        const apiData = response?.data;
-        if (!cancelled && apiData?.success) {
-          setAlerts(extractList(apiData.data));
-        } else {
-          if (!cancelled) setAlerts(fallbackAlerts);
-        }
-      } catch {
-        if (!cancelled) {
-          const leakAlert = leakDetected
-            ? [{ type: 'critical', message: 'Leak detected in your system!', time: 'Just now', severity: 'Critical' }, ...fallbackAlerts]
-            : fallbackAlerts;
-          setAlerts(leakAlert);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    load();
-    return () => { cancelled = true; };
-  }, [leakDetected]);
+    if (profile && alertsLoaded) setLoading(false);
+  }, [profile, alertsLoaded, authLoading]);
 
   if (loading) {
     return (

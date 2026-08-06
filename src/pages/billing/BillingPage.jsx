@@ -1,75 +1,86 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Box, Grid, Card, CardContent, Typography, Button, IconButton, Stack, Chip,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Alert,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
 } from '@mui/material';
 import { Download, Print, Description } from '@mui/icons-material';
 import { PageHeader, StatCard } from '@/components/common';
-import { billingService } from '@/services';
-import { extractList } from '@/utils/response';
+import { useAuth } from '@/contexts/AuthContext';
+import { NODES, useRealtimeValue, useRealtimeMap } from '@/services/realtime';
 import { motion } from 'framer-motion';
 import dayjs from 'dayjs';
 
 const statusColors = { PAID: 'success', PENDING: 'warning', OVERDUE: 'error' };
 
 export function BillingPage() {
-  const [billingHistory, setBillingHistory] = useState([]);
-  const [currentBill, setCurrentBill] = useState(null);
-  const [stats, setStats] = useState({ total: 0, paid: 0, pending: 0, overdue: 0 });
+  const { profile, isSuperAdmin, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
+  const usersState = useRealtimeMap(NODES.users);
+  const billingState = useRealtimeMap(NODES.billingHistory);
+  const rateLive = useRealtimeValue(`${NODES.rates}/current`);
+  const pricePerUnit = rateLive.value?.pricePerUnit ?? 0;
+
+  const scopedTenantIds = useMemo(() => {
+    if (isSuperAdmin || !profile?.buildingIds) return null;
+    return new Set(Object.keys(profile.buildingIds));
+  }, [isSuperAdmin, profile?.buildingIds]);
+
+  const tenants = useMemo(
+    () => Object.values(usersState.data || {}).filter((u) => u?.role === 'TENANT'),
+    [usersState.data]
+  );
+
+  const scopedTenants = useMemo(
+    () => (scopedTenantIds ? tenants.filter((t) => scopedTenantIds.has(t.buildingId)) : tenants),
+    [scopedTenantIds, tenants]
+  );
+
+  const billingHistory = useMemo(() => {
+    const rows = [];
+    Object.entries(billingState.data || {}).forEach(([tenantId, entries]) => {
+      if (scopedTenantIds && !scopedTenantIds.has(tenantId)) return;
+      Object.values(entries || {}).forEach((p) => {
+        if (!p || typeof p !== 'object') return;
+        const at = p.recordedAt || 0;
+        rows.push({
+          ...p,
+          tenantId,
+          status: 'PAID',
+          amount: p.amount || 0,
+          period: at ? dayjs(at).format('MMM YYYY') : '',
+          date: at ? dayjs(at).format('MMM D, YYYY') : '',
+        });
+      });
+    });
+    return rows.sort((a, b) => (b.recordedAt || 0) - (a.recordedAt || 0));
+  }, [billingState.data, scopedTenantIds]);
+
+  const stats = useMemo(() => {
+    const total = billingHistory.reduce((s, i) => s + (i.amount || 0), 0);
+    return {
+      total,
+      paid: billingHistory.filter((i) => i.status === 'PAID').reduce((s, i) => s + (i.amount || 0), 0),
+      pending: 0,
+      overdue: 0,
+    };
+  }, [billingHistory]);
+
+  const monthUsage = scopedTenants.reduce((s, t) => s + (t.usage?.totalUsageMonth || 0), 0);
+  const currentBill = {
+    amount: monthUsage * pricePerUnit,
+    status: monthUsage * pricePerUnit > 0 ? 'PENDING' : 'PAID',
+  };
 
   useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-    setError(null);
-
-    const fetchData = async () => {
-      try {
-        const [historyRes, billRes] = await Promise.allSettled([
-          billingService.getHistory(),
-          billingService.getCurrentBill(),
-        ]);
-
-        if (!mounted) return;
-
-        if (historyRes.status === 'fulfilled') {
-          const data = historyRes.value.data;
-          if (data?.success) {
-            const list = extractList(data.data);
-            setBillingHistory(list);
-            setStats({
-              total: list.reduce((s, i) => s + (i.amount || 0), 0),
-              paid: list.filter((i) => i.status === 'PAID').reduce((s, i) => s + (i.amount || 0), 0),
-              pending: list.filter((i) => i.status === 'PENDING').reduce((s, i) => s + (i.amount || 0), 0),
-              overdue: list.filter((i) => i.status === 'OVERDUE').reduce((s, i) => s + (i.amount || 0), 0),
-            });
-          }
-        } else {
-          setError(historyRes.reason?.message || 'Failed to load billing history');
-        }
-
-        if (billRes.status === 'fulfilled' && billRes.value.data?.success) {
-          setCurrentBill(billRes.value.data.data);
-        }
-      } catch (err) {
-        if (mounted) setError(err?.message || 'Failed to load billing data');
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-
-    fetchData();
-    return () => { mounted = false; };
-  }, []);
+    if (profile && usersState.loaded && billingState.loaded && rateLive.loaded) setLoading(false);
+  }, [profile, usersState.loaded, billingState.loaded, rateLive.loaded, authLoading]);
 
   return (
     <Box>
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <PageHeader title="Billing" subtitle="Invoice and payment management" />
       </motion.div>
-
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.3 }}>
         <Grid container spacing={{ xs: 1.5, sm: 2.5 }} sx={{ mb: { xs: 2, sm: 3 } }}>

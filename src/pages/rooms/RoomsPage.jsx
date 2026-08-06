@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Stack,
@@ -7,8 +7,8 @@ import {
 } from '@mui/material';
 import { Add, Edit, Delete } from '@mui/icons-material';
 import { PageHeader, DataTable, StatusChip, ConfirmDialog, IdBadge } from '@/components/common';
-import { roomService, buildingService } from '@/services';
-import { extractList } from '@/utils/response';
+import { roomService } from '@/services';
+import { useRealtimeList, useRealtimeMap, NODES } from '@/services/realtime';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -18,36 +18,17 @@ export function RoomsPage() {
   const location = useLocation();
   const { isSuperAdmin } = useAuth();
   const basePath = isSuperAdmin ? '/super-admin' : '/admin';
-  const [rooms, setRooms] = useState([]);
-  const [buildings, setBuildings] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const roomsState = useRealtimeList(NODES.rooms);
+  const buildingsState = useRealtimeMap(NODES.buildings);
+  const rooms = roomsState.data;
+  const buildings = Object.values(buildingsState.data || {});
+  const loading = !(roomsState.loaded && buildingsState.loaded);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [form, setForm] = useState({ roomNumber: '', floor: 1, buildingId: '', description: '' });
   const [saving, setSaving] = useState(false);
-
-  const fetchData = useCallback(async () => {
-    try {
-      const [rRes, bRes] = await Promise.allSettled([
-        roomService.getAll(),
-        buildingService.getAll(),
-      ]);
-      if (rRes.status === 'fulfilled' && rRes.value.data?.success) {
-        setRooms(extractList(rRes.value.data.data));
-      }
-      if (bRes.status === 'fulfilled' && bRes.value.data?.success) {
-        setBuildings(extractList(bRes.value.data.data));
-      }
-    } catch {
-      toast.error('Failed to load rooms');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => { fetchData(); }, [fetchData]);
 
   const openCreate = () => {
     setEditing(null);
@@ -76,7 +57,6 @@ export function RoomsPage() {
         toast.success('Room created');
       }
       setDialogOpen(false);
-      fetchData();
     } catch (err) {
       toast.error(err?.message || 'Failed to save room');
     } finally {
@@ -91,7 +71,6 @@ export function RoomsPage() {
       await roomService.delete(deleteTarget.roomId);
       toast.success('Room deleted');
       setDeleteTarget(null);
-      fetchData();
     } catch (err) {
       toast.error(err?.message || 'Failed to delete room');
     } finally {

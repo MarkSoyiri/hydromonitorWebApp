@@ -1,9 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import { Box, Card, CardContent, Typography, Chip, List, ListItem, ListItemText, ListItemIcon, TextField, InputAdornment, Skeleton } from '@mui/material';
 import { ListAlt, Search, Info, Warning, Error as ErrorIcon, CheckCircle } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { alertService } from '@/services';
-import { extractList } from '@/utils/response';
+import { useLiveAlerts } from '@/services/realtime';
 import dayjs from 'dayjs';
 
 const levelIcons = {
@@ -24,32 +23,24 @@ const levelColors = {
 
 export function LogsPage() {
   const [search, setSearch] = useState('');
-  const [logs, setLogs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { alerts, loaded } = useLiveAlerts();
 
-  const fetchLogs = useCallback(async () => {
-    try {
-      const { data } = await alertService.getAll();
-      if (data?.success) {
-        const alerts = extractList(data.data);
-        const logEntries = alerts.map((alert) => ({
-          time: alert.createdAt || alert.timestamp || '',
-          level: alert.type || alert.severity || 'INFO',
-          message: alert.message || `Alert ${alert.alertId || ''}`,
-          source: alert.deviceId ? 'Device' : alert.type === 'LEAK' ? 'Alert' : 'System',
-          status: alert.status || 'PENDING',
-        }));
-        logEntries.sort((a, b) => new Date(b.time) - new Date(a.time));
-        setLogs(logEntries);
-      }
-    } catch {
-      // silently fail
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const logs = useMemo(() => {
+    const entries = alerts.map((alert) => {
+      const level = (alert.type || alert.severity || 'INFO').toString().toUpperCase();
+      return {
+        time: alert.createdAt || alert.timestamp || '',
+        level,
+        message: alert.message || `Alert ${alert.alertId || ''}`,
+        source: alert.deviceId ? 'Device' : level === 'LEAK' ? 'Alert' : 'System',
+        status: alert.status || 'PENDING',
+      };
+    });
+    entries.sort((a, b) => new Date(b.time || 0) - new Date(a.time || 0));
+    return entries;
+  }, [alerts]);
 
-  useEffect(() => { fetchLogs(); }, [fetchLogs]);
+  const loading = !loaded;
 
   const filtered = logs.filter((log) =>
     log.message.toLowerCase().includes(search.toLowerCase()) ||

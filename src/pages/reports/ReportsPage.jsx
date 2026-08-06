@@ -6,6 +6,7 @@ import {
 import { PictureAsPdf, Description, TableChart, Download } from '@mui/icons-material';
 import { PageHeader } from '@/components/common';
 import { analyticsService, dashboardService } from '@/services';
+import { NODES, useLiveTick } from '@/services/realtime';
 import { motion } from 'framer-motion';
 import dayjs from 'dayjs';
 
@@ -34,6 +35,11 @@ export function ReportsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const tick = useLiveTick([
+    NODES.devices, NODES.deviceTelemetry, NODES.alerts,
+    NODES.users, NODES.rooms, NODES.buildings, NODES.billingHistory,
+  ]);
+
   const fetchData = useCallback(async () => {
     try {
       const [analyticsRes, statsRes] = await Promise.allSettled([
@@ -53,7 +59,7 @@ export function ReportsPage() {
     }
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { fetchData(); }, [fetchData, tick]);
 
   const totalBuildings = stats?.totalBuildings ?? 0;
   const totalDevices = stats?.totalDevices ?? 0;

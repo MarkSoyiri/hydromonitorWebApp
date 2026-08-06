@@ -2,30 +2,35 @@ import { useState, useEffect } from 'react';
 import { Box, Card, CardContent, Typography, Chip, Button, List, ListItem, ListItemText, ListItemIcon, Divider, Skeleton } from '@mui/material';
 import { Description, Download } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { billingService } from '@/services';
-import { extractList } from '@/utils/response';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  NODES, useRealtimeMap,
+} from '@/services/realtime';
+import dayjs from 'dayjs';
 
 export function InvoicesPage() {
-  const [invoices, setInvoices] = useState([]);
+  const { profile, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
 
+  const tenantUid = profile?.uid || profile?.currentUser?.uid;
+  const billingMap = useRealtimeMap(tenantUid ? `${NODES.billingHistory}/${tenantUid}` : null);
+
+  const invoices = (Object.values(billingMap.data || {}) || [])
+    .filter((p) => p && typeof p === 'object')
+    .map((p) => ({
+      ...p,
+      billId: p.paymentId,
+      id: p.paymentId,
+      status: 'PAID',
+      amount: p.amount || 0,
+      date: p.recordedAt ? dayjs(p.recordedAt).format('MMM D, YYYY') : '',
+      billDate: p.recordedAt ? dayjs(p.recordedAt).format('MMM D, YYYY') : '',
+    }))
+    .sort((a, b) => (b.recordedAt || 0) - (a.recordedAt || 0));
+
   useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const { data } = await billingService.getHistory();
-        if (!cancelled && data?.success) {
-          setInvoices(extractList(data.data));
-        }
-      } catch {
-        // silently fail
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    load();
-    return () => { cancelled = true; };
-  }, []);
+    if (profile && billingMap.loaded) setLoading(false);
+  }, [profile, billingMap.loaded, authLoading]);
 
   if (loading) {
     return (

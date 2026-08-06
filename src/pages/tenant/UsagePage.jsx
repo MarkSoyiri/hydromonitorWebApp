@@ -11,6 +11,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Paper } from '@mui/material';
 import { usageService } from '@/services';
 import { extractList } from '@/utils/response';
+import {
+  NODES, useRealtimeValue,
+} from '@/services/realtime';
 import dayjs from 'dayjs';
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -30,14 +33,19 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export function UsagePage() {
-  const { profile, device } = useAuth();
+  const { profile, device, loading: authLoading } = useAuth();
   const [readings, setReadings] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const tenantUid = profile?.uid || profile?.currentUser?.uid;
+  const userLive = useRealtimeValue(tenantUid ? `${NODES.users}/${tenantUid}` : null);
+  const liveProfile = userLive.value ? { ...profile, ...userLive.value, uid: tenantUid } : profile;
+
+  const deviceId = liveProfile?.deviceId || device?.deviceId;
 
   useEffect(() => {
     let cancelled = false;
     const fetchReadings = async () => {
-      const deviceId = device?.deviceId || profile?.deviceId;
       if (!deviceId) {
         if (!cancelled) setLoading(false);
         return;
@@ -55,7 +63,11 @@ export function UsagePage() {
     };
     fetchReadings();
     return () => { cancelled = true; };
-  }, [device, profile]);
+  }, [deviceId]);
+
+  useEffect(() => {
+    if (profile && userLive.loaded) setLoading(false);
+  }, [profile, userLive.loaded, authLoading]);
 
   const now = dayjs();
   const todayStr = now.format('YYYY-MM-DD');
@@ -91,8 +103,8 @@ export function UsagePage() {
     return { month: monthDate.format('MMM'), usage };
   });
 
-  const currentUsage = profile?.usage?.totalUsageMonth ?? readings.reduce((sum, r) => sum + (r.flowRate || r.flow || r.usage || 0), 0);
-  const todayUsage = profile?.usage?.totalUsageToday ?? todayReadings.reduce((sum, r) => sum + (r.flowRate || r.flow || r.usage || 0), 0);
+  const currentUsage = liveProfile?.usage?.totalUsageMonth ?? readings.reduce((sum, r) => sum + (r.flowRate || r.flow || r.usage || 0), 0);
+  const todayUsage = liveProfile?.usage?.totalUsageToday ?? todayReadings.reduce((sum, r) => sum + (r.flowRate || r.flow || r.usage || 0), 0);
   const dailyAvg = currentUsage / (now.date() || 1);
 
   if (loading) {

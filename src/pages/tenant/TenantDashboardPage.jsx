@@ -21,8 +21,11 @@ import { Paper as MuiPaper } from '@mui/material';
 import { WaterFlowIndicator } from '@/components/tenant/WaterFlowIndicator';
 import { QuickActions } from '@/components/tenant/QuickActions';
 import { WaterSavingTip } from '@/components/tenant/WaterSavingTip';
-import { billingService, usageService } from '@/services';
+import { usageService } from '@/services';
 import { extractList } from '@/utils/response';
+import {
+  NODES, useRealtimeValue, useRealtimeMap, useLiveTelemetry,
+} from '@/services/realtime';
 import dayjs from 'dayjs';
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -70,13 +73,52 @@ const sectionVariants = {
 
 export function TenantDashboardPage() {
   const navigate = useNavigate();
-  const { profile, building, room, device, loading: authLoading } = useAuth();
-  const [billingHistory, setBillingHistory] = useState([]);
-  const [currentBill, setCurrentBill] = useState(null);
+  const { profile, building, room, device: authDevice, loading: authLoading } = useAuth();
   const [readings, setReadings] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  const firstName = profile?.fullName?.split(' ')[0] || 'there';
+  const tenantUid = profile?.uid || profile?.currentUser?.uid;
+
+  const userLive = useRealtimeValue(tenantUid ? `${NODES.users}/${tenantUid}` : null);
+  const liveUser = userLive.value;
+  const liveProfile = liveUser ? { ...profile, ...liveUser, uid: tenantUid } : profile;
+
+  const roomId = liveProfile?.roomId || room?.roomId;
+  const roomLive = useRealtimeValue(roomId ? `${NODES.rooms}/${roomId}` : null);
+  const liveRoom = roomLive.value ? { ...roomLive.value, roomId } : roomLive.value;
+
+  const buildingId = liveProfile?.buildingId || liveRoom?.buildingId || building?.buildingId;
+  const buildingLive = useRealtimeValue(buildingId ? `${NODES.buildings}/${buildingId}` : null);
+  const liveBuilding = buildingLive.value ? { ...buildingLive.value, buildingId } : buildingLive.value;
+
+  const deviceId = liveRoom?.device?.deviceId || liveProfile?.deviceId || authDevice?.deviceId;
+  const { telemetry: liveTelemetry } = useLiveTelemetry(deviceId);
+  const device = deviceId
+    ? {
+        ...(authDevice || {}),
+        deviceId,
+        deviceName: liveRoom?.device?.deviceName || authDevice?.deviceName || deviceId,
+        telemetry: liveTelemetry || authDevice?.telemetry || null,
+        online: liveTelemetry?.online ?? authDevice?.online ?? false,
+        lastSeen: liveTelemetry?.lastSeen ?? authDevice?.lastSeen ?? 0,
+      }
+    : authDevice;
+
+  const rateLive = useRealtimeValue(`${NODES.rates}/current`);
+  const pricePerUnit = rateLive.value?.pricePerUnit ?? 0;
+
+  const billingMap = useRealtimeMap(tenantUid ? `${NODES.billingHistory}/${tenantUid}` : null);
+  const billingHistory = (Object.values(billingMap.data || {}) || [])
+    .filter((p) => p && typeof p === 'object')
+    .map((p) => ({
+      ...p,
+      status: 'PAID',
+      amount: p.amount || 0,
+      date: p.recordedAt ? dayjs(p.recordedAt).format('MMM D, YYYY') : '—',
+      method: p.recordedBy || '—',
+    }))
+    .sort((a, b) => (b.recordedAt || 0) - (a.recordedAt || 0));
+
+  const firstName = liveProfile?.fullName?.split(' ')[0] || 'there';
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -134,35 +176,7 @@ export function TenantDashboardPage() {
 
   useEffect(() => {
     let cancelled = false;
-    const loadBilling = async () => {
-      setLoading(true);
-      try {
-        const [historyRes, billRes] = await Promise.allSettled([
-          billingService.getHistory(),
-          billingService.getCurrentBill(),
-        ]);
-        if (!cancelled) {
-          if (historyRes.status === 'fulfilled' && historyRes.value.data?.success) {
-            setBillingHistory(extractList(historyRes.value.data.data));
-          }
-          if (billRes.status === 'fulfilled' && billRes.value.data?.success) {
-            setCurrentBill(billRes.value.data.data);
-          }
-        }
-      } catch {
-        // silent
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    loadBilling();
-    return () => { cancelled = true; };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
     const loadReadings = async () => {
-      const deviceId = device?.deviceId || profile?.deviceId;
       if (!deviceId) return;
       try {
         const { data } = await usageService.getDeviceReadings(deviceId);
@@ -175,28 +189,33 @@ export function TenantDashboardPage() {
     };
     loadReadings();
     return () => { cancelled = true; };
-  }, [device, profile]);
+  }, [deviceId]);
 
   const hour = currentTime.getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
-  const flowRate = device?.telemetry?.currentFlowRate ?? profile?.usage?.currentFlowRate ?? 0;
+  const flowRate = device?.telemetry?.currentFlowRate ?? liveProfile?.usage?.currentFlowRate ?? 0;
   const isFlowing = flowRate > 0;
   const valveOpen = device?.telemetry?.valveStatus === 'OPEN';
-  const deviceOnline = device?.telemetry?.status === 'ACTIVE';
+  const deviceOnline = device?.telemetry?.status === 'ACTIVE' || device?.online;
   const leakDetected = device?.telemetry?.leakDetected ?? false;
 
-  const currentUsage = profile?.usage?.totalUsageMonth ?? 0;
-  const billAmount = currentBill?.amount ?? profile?.billing?.currentBill ?? 0;
-  const outstandingBalance = currentBill?.outstandingBalance ?? profile?.billing?.outstandingBalance ?? 0;
-  const totalPaid = currentBill?.totalPaid ?? profile?.billing?.totalPaid ?? 0;
-  const currentRoomLabel = room?.roomNumber ? `Room ${room.roomNumber}${building?.name ? `, ${building.name}` : ''}` : profile?.roomId || 'Not assigned';
-  const assignedDevice = device?.deviceName || room?.device?.deviceName || profile?.assignedDevice || 'Not assigned';
+  const currentUsage = liveProfile?.usage?.totalUsageMonth ?? 0;
+  const monthAmount = currentUsage * pricePerUnit;
+  const totalPaid = liveProfile?.billing?.totalPaid ?? 0;
+  const outstandingBalance = liveProfile?.billing?.outstandingBalance ?? Math.max(monthAmount - totalPaid, 0);
+  const billAmount = totalPaid > 0 || outstandingBalance > 0 ? outstandingBalance + totalPaid : monthAmount;
+  const currentRoomLabel = liveRoom?.roomNumber
+    ? `Room ${liveRoom.roomNumber}${liveBuilding?.name ? `, ${liveBuilding.name}` : ''}`
+    : liveProfile?.roomId || 'Not assigned';
+  const assignedDevice = liveRoom?.device?.deviceName || device?.deviceName || authDevice?.deviceName || liveProfile?.deviceId || 'Not assigned';
 
   const paymentHistory = Array.isArray(billingHistory) ? billingHistory.filter(b => b.status === 'PAID' || b.type === 'payment') : [];
   const invoiceHistory = Array.isArray(billingHistory) ? billingHistory.filter(b => b.status !== 'PAID' || b.type === 'invoice') : [];
 
-  if (authLoading) {
+  const loading = authLoading || !(profile && userLive.loaded);
+
+  if (loading) {
     return (
       <Box>
         <Skeleton variant="text" width={300} height={40} sx={{ mb: 1 }} />
@@ -265,7 +284,7 @@ export function TenantDashboardPage() {
                     </Typography>
                     {i === 1 && (
                       <Typography variant="caption" color="text.secondary">
-                        {currentBill?.billDate || profile?.billing?.billDate || 'Current period'}
+                        Current period
                       </Typography>
                     )}
                     {i === 2 && (
@@ -473,7 +492,7 @@ export function TenantDashboardPage() {
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1.5, sm: 2 } }}>
                   <Box>
                     <Typography variant="body2" color="text.secondary">Estimated Bill</Typography>
-                    <Typography variant="h5" sx={{ fontWeight: 700, mt: 0.3 }}>GHS {((currentBill?.amount || billAmount) * 1.15).toFixed(2)}</Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 700, mt: 0.3 }}>GHS {(billAmount * 1.15).toFixed(2)}</Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.3, flexWrap: 'wrap' }}>
                       <TrendingUp color="warning" sx={{ fontSize: { xs: 12, sm: 14 } }} />
                       <Typography variant="caption" color="warning.main" sx={{ fontWeight: 600 }}>Est. 15% increase</Typography>

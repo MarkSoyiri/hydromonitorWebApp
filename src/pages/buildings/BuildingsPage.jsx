@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Grid, Card, CardContent, Typography, Button, IconButton, TextField,
@@ -10,8 +10,15 @@ import {
   Warning, ChevronRight,
 } from '@mui/icons-material';
 import { PageHeader, DataTable, ConfirmDialog, StatusChip, EmptyState } from '@/components/common';
-import { buildingService, roomService, deviceService, tenantService, alertService } from '@/services';
-import { extractList } from '@/utils/response';
+import { buildingService } from '@/services';
+import {
+  useLiveDevices,
+  useLiveAlerts,
+  useLiveTenants,
+  useRealtimeList,
+  useRealtimeMap,
+  NODES,
+} from '@/services/realtime';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -180,9 +187,40 @@ export function BuildingsPage() {
   const { isSuperAdmin, isAdmin } = useAuth();
   const basePath = isSuperAdmin ? '/super-admin' : '/admin';
 
-  const [buildings, setBuildings] = useState([]);
-  const [buildingStats, setBuildingStats] = useState({});
-  const [loading, setLoading] = useState(true);
+  const { devices, loaded: devicesLoaded } = useLiveDevices();
+  const { alerts, loaded: alertsLoaded } = useLiveAlerts();
+  const { tenants, loaded: tenantsLoaded } = useLiveTenants();
+  const roomsState = useRealtimeList(NODES.rooms);
+  const buildingsState = useRealtimeMap(NODES.buildings);
+
+  const buildings = Object.values(buildingsState.data || {});
+  const rooms = roomsState.data;
+  const loading = !(
+    devicesLoaded &&
+    alertsLoaded &&
+    tenantsLoaded &&
+    roomsState.loaded &&
+    buildingsState.loaded
+  );
+
+  const buildingStats = Object.fromEntries(
+    buildings.map((b) => {
+      const bid = b.buildingId;
+      const bRooms = rooms.filter((r) => r.buildingId === bid);
+      const bDevices = devices.filter((d) => d.buildingId === bid);
+      const bTenants = tenants.filter((t) => t.buildingId === bid);
+      const bAlerts = alerts.filter((a) => a.buildingId === bid);
+      return [bid, {
+        totalRooms: bRooms.length,
+        occupiedRooms: bRooms.filter((r) => r.status === 'OCCUPIED').length,
+        totalTenants: bTenants.filter((t) => t.status === 'ACTIVE').length,
+        totalDevices: bDevices.length,
+        onlineDevices: bDevices.filter((d) => d.online).length,
+        activeAlerts: bAlerts.filter((a) => !a.resolved).length,
+      }];
+    })
+  );
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -190,67 +228,6 @@ export function BuildingsPage() {
   const [enabling, setEnabling] = useState(null);
   const [form, setForm] = useState({ name: '', address: '', description: '' });
   const [saving, setSaving] = useState(false);
-
-  const fetchBuildings = useCallback(async () => {
-    try {
-      const { data } = await buildingService.getAll();
-      if (data?.success) {
-        setBuildings(extractList(data.data));
-      }
-    } catch {
-      toast.error('Failed to load buildings');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const fetchBuildingStats = useCallback(async (buildingList) => {
-    if (!buildingList.length) return;
-    try {
-      const [roomsRes, devicesRes, tenantsRes, alertsRes] = await Promise.allSettled([
-        roomService.getAll(),
-        deviceService.getAll(),
-        tenantService.getAll(),
-        alertService.getAll(),
-      ]);
-
-      const rooms = roomsRes.status === 'fulfilled' ? extractList(roomsRes.value.data?.data) : [];
-      const devices = devicesRes.status === 'fulfilled' ? extractList(devicesRes.value.data?.data) : [];
-      const tenants = tenantsRes.status === 'fulfilled' ? extractList(tenantsRes.value.data?.data) : [];
-      const alerts = alertsRes.status === 'fulfilled' ? extractList(alertsRes.value.data?.data) : [];
-
-      const stats = {};
-      for (const b of buildingList) {
-        const bid = b.buildingId;
-        const bRooms = rooms.filter((r) => r.buildingId === bid);
-        const bDevices = devices.filter((d) => d.buildingId === bid);
-        const bTenants = tenants.filter((t) => t.buildingId === bid);
-        const bAlerts = alerts.filter((a) => a.buildingId === bid);
-
-        stats[bid] = {
-          totalRooms: bRooms.length,
-          occupiedRooms: bRooms.filter((r) => r.status === 'OCCUPIED').length,
-          totalTenants: bTenants.filter((t) => t.status === 'ACTIVE').length,
-          totalDevices: bDevices.length,
-          onlineDevices: bDevices.filter((d) => d.online).length,
-          activeAlerts: bAlerts.filter((a) => !a.resolved).length,
-        };
-      }
-      setBuildingStats(stats);
-    } catch {
-      // Stats are optional
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchBuildings();
-  }, [fetchBuildings]);
-
-  useEffect(() => {
-    if (buildings.length > 0) {
-      fetchBuildingStats(buildings);
-    }
-  }, [buildings, fetchBuildingStats]);
 
   const openCreate = () => {
     setEditing(null);
@@ -276,7 +253,6 @@ export function BuildingsPage() {
         toast.success('Building created');
       }
       setDialogOpen(false);
-      fetchBuildings();
     } catch (err) {
       toast.error(err?.message || 'Failed to save building');
     } finally {
@@ -291,7 +267,6 @@ export function BuildingsPage() {
       await buildingService.delete(deleteTarget.buildingId);
       toast.success('Building deleted');
       setDeleteTarget(null);
-      fetchBuildings();
     } catch (err) {
       toast.error(err?.message || 'Failed to delete building');
     } finally {
@@ -304,7 +279,6 @@ export function BuildingsPage() {
     try {
       await buildingService.update(building.buildingId, { status: 'ACTIVE' });
       toast.success('Building enabled');
-      fetchBuildings();
     } catch (err) {
       toast.error(err?.message || 'Failed to enable building');
     } finally {

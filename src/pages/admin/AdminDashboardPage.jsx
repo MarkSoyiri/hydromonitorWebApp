@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Grid, Card, CardContent, Typography, Skeleton,
@@ -12,8 +12,14 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';
 import { StatCard } from '@/components/common';
-import { dashboardService, roomService, deviceService, tenantService, alertService } from '@/services';
-import { extractList } from '@/utils/response';
+import {
+  useLiveDevices,
+  useLiveAlerts,
+  useLiveTenants,
+  useRealtimeList,
+  useRealtimeMap,
+  NODES,
+} from '@/services/realtime';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as ReTooltip, ResponsiveContainer } from 'recharts';
 
@@ -160,73 +166,64 @@ function BuildingQuickCard({ building, stats, index, onNavigate }) {
 export function AdminDashboardPage() {
   const { profile, assignedBuildings, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState(null);
-  const [rooms, setRooms] = useState([]);
-  const [devices, setDevices] = useState([]);
-  const [tenants, setTenants] = useState([]);
-  const [alerts, setAlerts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [buildingStats, setBuildingStats] = useState({});
 
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const [statsRes, roomsRes, devicesRes, tenantsRes, alertsRes] = await Promise.allSettled([
-          dashboardService.getStats(),
-          roomService.getAll(),
-          deviceService.getAll(),
-          tenantService.getAll(),
-          alertService.getAll(),
-        ]);
-        if (cancelled) return;
-        if (statsRes.value?.data?.success) setStats(statsRes.value.data.data);
-        const r = roomsRes.value?.data?.success ? extractList(roomsRes.value.data.data) : [];
-        const d = devicesRes.value?.data?.success ? extractList(devicesRes.value.data.data) : [];
-        const t = tenantsRes.value?.data?.success ? extractList(tenantsRes.value.data.data) : [];
-        const a = alertsRes.value?.data?.success ? extractList(alertsRes.value.data.data) : [];
-        setRooms(r);
-        setDevices(d);
-        setTenants(t);
-        setAlerts(a);
+  const { devices, loaded: devicesLoaded } = useLiveDevices();
+  const { alerts, loaded: alertsLoaded } = useLiveAlerts();
+  const { tenants, loaded: tenantsLoaded } = useLiveTenants();
+  const roomsState = useRealtimeList(NODES.rooms);
+  const buildingsState = useRealtimeMap(NODES.buildings);
 
-        if (isAdmin && assignedBuildings.length > 0) {
-          const bStats = {};
-          for (const b of assignedBuildings) {
-            const bid = b.buildingId;
-            const bRooms = r.filter((room) => room.buildingId === bid);
-            const bDevices = d.filter((dev) => dev.buildingId === bid);
-            const bTenants = t.filter((ten) => ten.buildingId === bid);
-            const bAlerts = a.filter((al) => al.buildingId === bid);
-            bStats[bid] = {
-              totalRooms: bRooms.length,
-              occupiedRooms: bRooms.filter((room) => room.status === 'OCCUPIED').length,
-              totalTenants: bTenants.filter((ten) => ten.status === 'ACTIVE').length,
-              totalDevices: bDevices.length,
-              onlineDevices: bDevices.filter((dev) => dev.online).length,
-              activeAlerts: bAlerts.filter((al) => !al.resolved).length,
-            };
-          }
-          setBuildingStats(bStats);
-        }
-      } catch {
-        // Use defaults
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    load();
-    return () => { cancelled = true; };
-  }, [isAdmin, assignedBuildings]);
+  const rooms = roomsState.data;
+  const buildings = Object.values(buildingsState.data || {});
+  const loading = !(
+    devicesLoaded &&
+    alertsLoaded &&
+    tenantsLoaded &&
+    roomsState.loaded &&
+    buildingsState.loaded
+  );
 
-  const totalRooms = stats?.totalRooms ?? rooms.length ?? 0;
-  const totalDevices = stats?.totalDevices ?? devices.length ?? 0;
-  const activeTenants = stats?.activeTenants ?? tenants.filter((t) => t?.status === 'ACTIVE').length ?? 0;
-  const onlineDevices = devices.filter((d) => d?.online).length ?? 0;
+  const buildingStats = useMemo(() => {
+    if (!isAdmin || assignedBuildings.length === 0) return {};
+    const bStats = {};
+    for (const b of assignedBuildings) {
+      const bid = b.buildingId;
+      const bRooms = rooms.filter((room) => room.buildingId === bid);
+      const bDevices = devices.filter((dev) => dev.buildingId === bid);
+      const bTenants = tenants.filter((ten) => ten.buildingId === bid);
+      const bAlerts = alerts.filter((al) => al.buildingId === bid);
+      bStats[bid] = {
+        totalRooms: bRooms.length,
+        occupiedRooms: bRooms.filter((room) => room.status === 'OCCUPIED').length,
+        totalTenants: bTenants.filter((ten) => ten.status === 'ACTIVE').length,
+        totalDevices: bDevices.length,
+        onlineDevices: bDevices.filter((dev) => dev.online).length,
+        activeAlerts: bAlerts.filter((al) => !al.resolved).length,
+      };
+    }
+    return bStats;
+  }, [isAdmin, assignedBuildings, rooms, devices, tenants, alerts]);
+
+  const totalRooms = rooms.length;
+  const totalDevices = devices.length;
+  const activeTenants = tenants.filter((t) => t?.status === 'ACTIVE').length;
+  const onlineDevices = devices.filter((d) => d?.online).length;
   const offlineDevices = totalDevices - onlineDevices;
-  const unresolvedAlerts = stats?.unresolvedAlerts ?? alerts.filter((a) => !a.resolved).length ?? 0;
-  const todayUsage = stats?.totalUsageToday ?? 0;
-  const occupiedRooms = stats?.occupiedRooms ?? rooms.filter((r) => r.status === 'OCCUPIED').length ?? 0;
+  const unresolvedAlerts = alerts.filter((a) => !a.resolved).length;
+  const occupiedRooms = rooms.filter((r) => r.status === 'OCCUPIED').length;
+
+  // Today's usage aggregates the buildings' live usage nodes. Scope to the
+  // admin's assigned buildings when provided.
+  const scopedBuildingIds = isAdmin && assignedBuildings.length > 0
+    ? new Set(assignedBuildings.map((b) => b.buildingId))
+    : null;
+  const todayUsage = buildings.reduce(
+    (sum, b) => {
+      if (scopedBuildingIds && !scopedBuildingIds.has(b.buildingId)) return sum;
+      return sum + (b.usage?.totalUsageToday || 0);
+    },
+    0
+  );
 
   const recentActivity = [
     ...(offlineDevices > 0 ? [{ type: 'device', message: `${offlineDevices} device(s) offline`, time: 'Current', icon: <OfflineBolt color="error" /> }] : []),
@@ -272,7 +269,7 @@ export function AdminDashboardPage() {
         <SectionHeader title="Overview" subtitle="Key metrics at a glance" />
         <Grid container spacing={{ xs: 1.5, sm: 2.5 }} sx={{ mb: { xs: 3, sm: 4 } }}>
           {[
-            { icon: <Business />, label: 'BUILDINGS', value: assignedBuildings.length || stats?.totalBuildings || 0, color: 'primary', sub: 'Assigned buildings' },
+            { icon: <Business />, label: 'BUILDINGS', value: assignedBuildings.length || 0, color: 'primary', sub: 'Assigned buildings' },
             { icon: <MeetingRoom />, label: 'ROOMS', value: totalRooms, color: 'info', sub: `${occupiedRooms} occupied · ${totalRooms - occupiedRooms} vacant` },
             { icon: <People />, label: 'TENANTS', value: activeTenants, color: 'warning', sub: 'Active tenants' },
             { icon: <DevicesOther />, label: 'DEVICES', value: totalDevices, color: 'success', sub: `${onlineDevices} online · ${offlineDevices} offline` },

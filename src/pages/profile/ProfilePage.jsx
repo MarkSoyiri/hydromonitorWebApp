@@ -18,6 +18,7 @@ import {
   alertService, usageService, billingService, analyticsService, dashboardService,
 } from '@/services';
 import { extractList } from '@/utils/response';
+import { NODES, useLiveTick } from '@/services/realtime';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import dayjs from 'dayjs';
@@ -203,8 +204,14 @@ export function ProfilePage() {
   const [, setDashStats] = useState(null);
   const [billData, setBillData] = useState(null);
 
+  const profileTick = useLiveTick([
+    NODES.users, NODES.rooms, NODES.buildings, NODES.devices,
+    NODES.deviceTelemetry, NODES.alerts, NODES.billingHistory,
+  ]);
+
   const fetchRoleData = useCallback(async () => {
     if (!profile) return;
+    void profileTick;
 
     const parallel = [];
 
@@ -259,7 +266,7 @@ export function ProfilePage() {
     }
 
     await Promise.allSettled(parallel);
-  }, [profile, isSuperAdmin, isAdmin, isTenant, device]);
+  }, [profile, isSuperAdmin, isAdmin, isTenant, device, profileTick]);
 
   useEffect(() => { fetchRoleData(); }, [fetchRoleData]);
 

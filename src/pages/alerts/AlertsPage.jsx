@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
-  Box, Grid, Card, CardContent, Chip, Tabs, Tab, Alert as MuiAlert,
+  Box, Grid, Card, CardContent, Chip, Tabs, Tab,
 } from '@mui/material';
 import { Warning, Error as ErrorIcon, Info } from '@mui/icons-material';
 import { PageHeader, StatCard, DataTable, StatusChip, IdBadge } from '@/components/common';
-import { alertService } from '@/services';
-import { extractList } from '@/utils/response';
+import { useLiveAlerts } from '@/services/realtime';
 import { motion } from 'framer-motion';
 import dayjs from 'dayjs';
 
@@ -29,34 +28,8 @@ const columns = [
 ];
 
 export function AlertsPage() {
-  const [alerts, setAlerts] = useState([]);
+  const { alerts, loaded } = useLiveAlerts();
   const [tab, setTab] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-    setError(null);
-    alertService.getAll()
-      .then((response) => {
-        if (!mounted) return;
-        const apiData = response?.data;
-        if (apiData?.success) {
-          setAlerts(extractList(apiData.data));
-        } else {
-          setAlerts([]);
-        }
-      })
-      .catch((err) => {
-        if (!mounted) return;
-        setError(err?.message || 'Failed to load alerts');
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-    return () => { mounted = false; };
-  }, []);
 
   const activeAlerts = alerts.filter((a) => a.status !== 'RESOLVED');
   const resolvedAlerts = alerts.filter((a) => a.status === 'RESOLVED');
@@ -68,15 +41,6 @@ export function AlertsPage() {
       : tab === 2 ? resolvedAlerts
         : tab === 3 ? leakAlerts
           : criticalAlerts;
-
-  if (error) {
-    return (
-      <Box>
-        <PageHeader title="Alerts" subtitle="Real-time alerts and notifications" />
-        <MuiAlert severity="error" sx={{ mt: 2 }}>{error}</MuiAlert>
-      </Box>
-    );
-  }
 
   return (
     <Box>
@@ -111,7 +75,7 @@ export function AlertsPage() {
               <Tab label="Leaks" />
               <Tab label="Critical" />
             </Tabs>
-            <DataTable columns={columns} rows={displayAlerts} loading={loading} />
+            <DataTable columns={columns} rows={displayAlerts} loading={!loaded} />
           </CardContent>
         </Card>
       </motion.div>

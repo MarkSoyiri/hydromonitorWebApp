@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Box, Grid, Card, CardContent, Typography, IconButton, Chip,
@@ -16,12 +16,14 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { StatCard, StatusChip, LoadingScreen } from '@/components/common';
-import { tenantService, roomService, buildingService, deviceService, analyticsService, usageService, alertService, billingService } from '@/services';
+import { analyticsService, usageService, billingService } from '@/services';
 import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBackNavigation } from '@/hooks/useBackNavigation';
+import {
+  NODES, useRealtimeValue, useLiveAlerts, useLiveTick,
+} from '@/services/realtime';
 import { motion } from 'framer-motion';
-import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
 
 const sectionVariants = {
@@ -160,90 +162,78 @@ export function TenantDetailPage() {
   const basePath = isSuperAdmin ? '/super-admin' : '/admin';
   const goBack = useBackNavigation(`${basePath}/tenants`);
 
-  const [tenant, setTenant] = useState(null);
-  const [room, setRoom] = useState(null);
-  const [building, setBuilding] = useState(null);
-  const [device, setDevice] = useState(null);
-  const [analytics, setAnalytics] = useState(null);
   const [readings, setReadings] = useState([]);
-  const [alerts, setAlerts] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
   const [billData, setBillData] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  const fetchAll = useCallback(async () => {
-    try {
-      const tRes = await tenantService.getById(tenantId);
-      const tenantData = tRes.data?.success ? { ...tRes.data.data, uid: tenantId } : null;
-      if (!tenantData) { setTenant(null); setLoading(false); return; }
-      setTenant(tenantData);
+  const tenantLive = useRealtimeValue(`${NODES.users}/${tenantId}`);
+  const tenant = tenantLive.value ? { ...tenantLive.value, uid: tenantId } : tenantLive.value;
 
-      const parallel = [];
+  const roomLive = useRealtimeValue(tenant?.roomId ? `${NODES.rooms}/${tenant.roomId}` : null);
+  const room = roomLive.value ? { ...roomLive.value, roomId: tenant?.roomId } : roomLive.value;
 
-      if (tenantData.roomId) {
-        parallel.push(
-          roomService.getById(tenantData.roomId).then((r) => {
-            if (r.data?.success) {
-              const roomData = { ...r.data.data, roomId: tenantData.roomId };
-              setRoom(roomData);
-              if (roomData.buildingId) {
-                buildingService.getById(roomData.buildingId).then((b) => {
-                  if (b.data?.success) setBuilding({ ...b.data.data, buildingId: roomData.buildingId });
-                }).catch(() => {});
-              }
-            }
-          }).catch(() => {})
-        );
+  const buildingLive = useRealtimeValue(room?.buildingId ? `${NODES.buildings}/${room.buildingId}` : null);
+  const building = buildingLive.value ? { ...buildingLive.value, buildingId: room?.buildingId } : buildingLive.value;
 
-        parallel.push(
-          deviceService.getByRoom(tenantData.roomId).then((d) => {
-            if (d.data?.success) {
-              const devices = extractList(d.data.data);
-              if (devices.length > 0) {
-                const primaryDevice = devices[0];
-                setDevice(primaryDevice);
-                usageService.getDeviceReadings(primaryDevice.deviceId).then((u) => {
-                  if (u.data?.success) setReadings(extractList(u.data.data));
-                }).catch(() => {});
-              }
-            }
-          }).catch(() => {})
-        );
+  const deviceMeta = room?.device;
+  const deviceTelemetryLive = useRealtimeValue(deviceMeta?.deviceId ? `${NODES.deviceTelemetry}/${deviceMeta.deviceId}` : null);
+  const device = deviceMeta
+    ? {
+        ...deviceMeta,
+        online: deviceTelemetryLive.value?.online ?? deviceMeta.online ?? false,
+        lastSeen: deviceTelemetryLive.value?.lastSeen ?? deviceMeta.lastSeen ?? 0,
+        telemetry: deviceMeta.telemetry ?? null,
       }
+    : null;
 
-      parallel.push(
-        analyticsService.getTenantAnalytics(tenantId).then((a) => {
-          if (a.data?.success) setAnalytics(a.data.data);
-        }).catch(() => {})
-      );
+  const { alerts: liveAlerts } = useLiveAlerts();
+  const alerts = useMemo(
+    () => liveAlerts.filter((a) => a.tenantId === tenantId || (room?.buildingId && a.buildingId === room.buildingId)),
+    [liveAlerts, tenantId, room?.buildingId]
+  );
 
-      parallel.push(
-        alertService.getAll({ tenantId }).then((a) => {
-          if (a.data?.success) setAlerts(extractList(a.data.data));
-        }).catch(() => {
-          alertService.getAll().then((a) => {
-            if (a.data?.success) {
-              const all = extractList(a.data.data);
-              setAlerts(all.filter((al) => al.tenantId === tenantId || al.buildingId === tenantData.buildingId));
-            }
-          }).catch(() => {});
-        })
-      );
+  const analyticsTick = useLiveTick([NODES.deviceTelemetry, NODES.alerts]);
+  const billingTick = useLiveTick([NODES.billingHistory, NODES.users]);
 
-      parallel.push(
-        billingService.getCurrentBill().then((b) => {
-          if (b.data?.success) setBillData(b.data.data);
-        }).catch(() => {})
-      );
+  const loading = !tenantLive.loaded || (!!tenant?.roomId && !roomLive.loaded);
 
-      await Promise.allSettled(parallel);
-    } catch {
-      toast.error('Failed to load tenant details');
-    } finally {
-      setLoading(false);
+  // REST-only payloads (readings, analytics, current bill) are seeded once and
+  // debounced-refetched when the live nodes they depend on change.
+  useEffect(() => {
+    if (!deviceMeta?.deviceId) {
+      setReadings([]);
+      return undefined;
     }
-  }, [tenantId]);
+    let active = true;
+    usageService.getDeviceReadings(deviceMeta.deviceId)
+      .then(({ data }) => {
+        if (active && data?.success) setReadings(extractList(data.data));
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [deviceMeta?.deviceId]);
 
-  useEffect(() => { fetchAll(); }, [fetchAll]);
+  useEffect(() => {
+    if (!tenantId) return undefined;
+    let active = true;
+    analyticsService.getTenantAnalytics(tenantId)
+      .then(({ data }) => {
+        if (active && data?.success) setAnalytics(data.data);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [tenantId, analyticsTick]);
+
+  useEffect(() => {
+    if (!tenantId) return undefined;
+    let active = true;
+    billingService.getCurrentBill()
+      .then(({ data }) => {
+        if (active && data?.success) setBillData(data.data);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [tenantId, billingTick]);
 
   const chartData = useMemo(() => {
     if (!readings.length) return { daily: [], weekly: [], monthly: [] };
@@ -310,7 +300,7 @@ export function TenantDetailPage() {
     const currentBill = billData?.totalAmount ?? tenant?.billing?.currentBill ?? 0;
 
     return { todayUsage, weekUsage, monthUsage, dailyAvg, peakDaily, currentBill };
-  }, [readings, analytics, tenant, billData]);
+  }, [readings, analytics, billData, tenant?.usage?.totalUsageMonth, tenant?.billing?.currentBill]);
 
   const activityItems = useMemo(() => {
     const items = [];
@@ -367,7 +357,8 @@ export function TenantDetailPage() {
     });
 
     return items.slice(0, 8);
-  }, [device, alerts, room]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alerts, device?.deviceName, device?.deviceId, device?.createdAt, device?.telemetry, room?.roomNumber, room?.roomId, room?.updatedAt]);
 
   if (loading) return <LoadingScreen />;
 

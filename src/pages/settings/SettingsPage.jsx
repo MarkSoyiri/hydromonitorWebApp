@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import { PageHeader } from '@/components/common';
 import { ratesService } from '@/services';
+import { NODES, useRealtimeValue } from '@/services/realtime';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
@@ -18,30 +19,23 @@ export function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [dirty, setDirty] = useState(false);
+
+  const rateLive = useRealtimeValue(`${NODES.rates}/current`);
+  const liveRate = rateLive.value;
 
   useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-    ratesService.getCurrent()
-      .then((response) => {
-        if (!mounted) return;
-        const apiData = response?.data;
-        if (apiData?.success && apiData?.data) {
-          const rate = apiData.data;
-          if (rate.pricePerUnit !== undefined) setWaterRate(rate.pricePerUnit);
-          if (rate.currency) setCurrency(rate.currency);
-          if (rate.leakThreshold !== undefined) setLeakThreshold(rate.leakThreshold);
-        }
-      })
-      .catch((err) => {
-        if (!mounted) return;
-        setError(err?.message || 'Failed to load settings');
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-    return () => { mounted = false; };
-  }, []);
+    if (!rateLive.loaded || dirty || !liveRate) return;
+    if (liveRate.pricePerUnit !== undefined) setWaterRate(liveRate.pricePerUnit);
+    if (liveRate.currency) setCurrency(liveRate.currency);
+    if (liveRate.leakThreshold !== undefined) setLeakThreshold(liveRate.leakThreshold);
+    setLoading(false);
+  }, [rateLive.loaded, liveRate, dirty]);
+
+  const markDirty = (updater) => {
+    setDirty(true);
+    updater();
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -52,6 +46,7 @@ export function SettingsPage() {
         currency,
         leakThreshold,
       });
+      setDirty(false);
       toast.success('Settings saved');
     } catch (err) {
       setError(err?.message || 'Failed to save settings');
@@ -97,11 +92,11 @@ export function SettingsPage() {
                 <Typography variant="h6" sx={{ mb: 3 }}>Water Rates</Typography>
                 <Stack spacing={2}>
                   <TextField label="Rate per Liter" type="number" value={waterRate}
-                    onChange={(e) => setWaterRate(parseFloat(e.target.value) || 0)}
+                    onChange={(e) => markDirty(() => setWaterRate(parseFloat(e.target.value) || 0))}
                     InputProps={{ startAdornment: <Typography sx={{ mr: 1, color: 'text.secondary' }}>{currency}</Typography> }} />
                   <FormControl fullWidth>
                     <InputLabel>Currency</InputLabel>
-                    <Select value={currency} label="Currency" onChange={(e) => setCurrency(e.target.value)}>
+                    <Select value={currency} label="Currency" onChange={(e) => markDirty(() => setCurrency(e.target.value))}>
                       <MenuItem value="GHS">GHS (Ghanaian Cedi)</MenuItem>
                       <MenuItem value="USD">USD (US Dollar)</MenuItem>
                       <MenuItem value="EUR">EUR (Euro)</MenuItem>
@@ -120,7 +115,7 @@ export function SettingsPage() {
                 <Typography variant="h6" sx={{ mb: 3 }}>Leak Detection</Typography>
                 <Stack spacing={2}>
                   <TextField label="Leak Threshold (L/min)" type="number" value={leakThreshold}
-                    onChange={(e) => setLeakThreshold(parseInt(e.target.value) || 0)} />
+                    onChange={(e) => markDirty(() => setLeakThreshold(parseInt(e.target.value) || 0))} />
                   <Typography variant="caption" color="text.secondary">
                     Flow rates above this threshold will trigger leak alerts.
                   </Typography>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Box, Grid, Card, CardContent, Typography, Skeleton, Chip, LinearProgress, Paper, Divider } from '@mui/material';
 import {
   Business, MeetingRoom, DevicesOther, People,
@@ -7,8 +7,16 @@ import {
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '@/contexts/AuthContext';
-import { dashboardService, buildingService, deviceService, tenantService, roomService, analyticsService } from '@/services';
-import { extractList } from '@/utils/response';
+import {
+  useLiveDevices,
+  useLiveAlerts,
+  useLiveTenants,
+  useRealtimeList,
+  useRealtimeMap,
+  useLiveTick,
+  NODES,
+} from '@/services/realtime';
+import { analyticsService } from '@/services';
 
 const fallbackMonthlyRevenue = [
   { month: 'Jan', revenue: 0 }, { month: 'Feb', revenue: 0 }, { month: 'Mar', revenue: 0 },
@@ -55,54 +63,61 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 export function SuperAdminDashboardPage() {
   const { profile } = useAuth();
-  const [buildings, setBuildings] = useState([]);
-  const [rooms, setRooms] = useState([]);
-  const [devices, setDevices] = useState([]);
-  const [tenants, setTenants] = useState([]);
-  const [stats, setStats] = useState(null);
+
+  const { devices, loaded: devicesLoaded } = useLiveDevices();
+  const { alerts: _alerts, loaded: alertsLoaded } = useLiveAlerts();
+  const { tenants, loaded: tenantsLoaded } = useLiveTenants();
+  const roomsState = useRealtimeList(NODES.rooms);
+  const buildingsState = useRealtimeMap(NODES.buildings);
+
+  const rooms = roomsState.data;
+  const buildings = useMemo(
+    () => Object.values(buildingsState.data || {}),
+    [buildingsState.data]
+  );
+  const loading = !(
+    devicesLoaded &&
+    alertsLoaded &&
+    tenantsLoaded &&
+    roomsState.loaded &&
+    buildingsState.loaded
+  );
+
+  // Revenue/analytics chart data is server-computed; refetch on a debounced
+  // tick driven by live telemetry/alert changes (charts stay consistent with
+  // with backend math without polling every telemetry push).
+  const analyticsTick = useLiveTick([NODES.deviceTelemetry, NODES.alerts]);
   const [analytics, setAnalytics] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    const load = async () => {
+    const timer = setTimeout(async () => {
       try {
-        const [buildingsRes, roomsRes, devicesRes, tenantsRes, statsRes, analyticsRes] = await Promise.allSettled([
-          buildingService.getAll(),
-          roomService.getAll(),
-          deviceService.getAll(),
-          tenantService.getAll(),
-          dashboardService.getStats(),
-          analyticsService.getSystem(),
-        ]);
-        if (cancelled) return;
-        if (buildingsRes.value?.data?.success) setBuildings(extractList(buildingsRes.value.data.data));
-        if (roomsRes.value?.data?.success) setRooms(extractList(roomsRes.value.data.data));
-        if (devicesRes.value?.data?.success) setDevices(extractList(devicesRes.value.data.data));
-        if (tenantsRes.value?.data?.success) setTenants(extractList(tenantsRes.value.data.data));
-        if (statsRes.value?.data?.success) setStats(statsRes.value.data.data);
-        if (analyticsRes.value?.data?.success) setAnalytics(analyticsRes.value.data.data);
+        const res = await analyticsService.getSystem();
+        if (!cancelled && res.data?.success) setAnalytics(res.data.data);
       } catch {
-        // Use defaults
-      } finally {
-        if (!cancelled) setLoading(false);
+        // keep last known analytics on transient failures
       }
+    }, 1500);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
     };
-    load();
-    return () => { cancelled = true; };
-  }, []);
+  }, [analyticsTick]);
 
-  const totalBuildings = stats?.totalBuildings ?? buildings.length ?? 0;
-  const totalRooms = stats?.occupiedRooms ?? rooms.length ?? 0;
-  const totalDevices = devices.length ?? 0;
-  const totalTenants = stats?.activeTenants ?? tenants.filter((t) => t?.status === 'ACTIVE').length ?? 0;
-  const totalRevenue = stats?.totalRevenue ?? 0;
+  const totalBuildings = buildings.length;
+  const totalRooms = rooms.length;
+  const totalDevices = devices.length;
+  const totalTenants = tenants.filter((t) => t?.status === 'ACTIVE').length;
+  const totalRevenue = analytics?.totalRevenue ?? 0;
 
   const buildingData = buildings.slice(0, 3).map((b) => ({
     name: b.name || 'Building',
     usage: b.usage?.totalUsageToday ?? 0,
-    tenants: b.occupancy?.totalTenants ?? 0,
-    devices: b.occupancy?.totalDevices ?? 0,
+    tenants: tenants.filter(
+      (t) => t.buildingId === b.buildingId && t.status === 'ACTIVE'
+    ).length,
+    devices: devices.filter((d) => d.buildingId === b.buildingId).length,
   }));
 
   if (loading) {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Stack,
@@ -7,7 +7,7 @@ import {
 import { Add, Edit, Block, Delete } from '@mui/icons-material';
 import { PageHeader, DataTable, StatusChip, ConfirmDialog, BuildingSelector, RoomSelector, IdBadge } from '@/components/common';
 import { tenantService } from '@/services';
-import { extractList } from '@/utils/response';
+import { useLiveTenants } from '@/services/realtime';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -17,8 +17,8 @@ export function TenantsPage() {
   const location = useLocation();
   const { isSuperAdmin } = useAuth();
   const basePath = isSuperAdmin ? '/super-admin' : '/admin';
-  const [tenants, setTenants] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { tenants, loaded } = useLiveTenants();
+  const loading = !loaded;
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -27,20 +27,7 @@ export function TenantsPage() {
   const [saving, setSaving] = useState(false);
   const [formErrors, setFormErrors] = useState({});
 
-  const fetchTenants = useCallback(async () => {
-    try {
-      const { data } = await tenantService.getAll();
-      if (data?.success) {
-        setTenants(extractList(data.data));
-      }
-    } catch {
-      toast.error('Failed to load tenants');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => { fetchTenants(); }, [fetchTenants]);
+  const getTenantId = (t) => t.tenantId || t.uid || t.id;
 
   const openCreate = () => {
     setEditing(null);
@@ -55,8 +42,6 @@ export function TenantsPage() {
     setFormErrors({});
     setDialogOpen(true);
   };
-
-  const getTenantId = (t) => t.tenantId || t.uid || t.id;
 
   const handleBuildingChange = (buildingId) => {
     setForm((prev) => ({ ...prev, buildingId, roomId: '' }));
@@ -97,7 +82,6 @@ export function TenantsPage() {
         toast.success('Tenant created');
       }
       setDialogOpen(false);
-      fetchTenants();
     } catch (err) {
       if (err?.errors && Array.isArray(err.errors)) {
         err.errors.forEach((e) => toast.error(e.message));
@@ -116,7 +100,6 @@ export function TenantsPage() {
       await tenantService.delete(getTenantId(deleteTarget));
       toast.success('Tenant deleted');
       setDeleteTarget(null);
-      fetchTenants();
     } catch (err) {
       toast.error(err?.message || 'Failed to delete tenant');
     } finally {
@@ -129,7 +112,6 @@ export function TenantsPage() {
     try {
       await tenantService.update(getTenantId(tenant), { status: newStatus });
       toast.success(`Tenant ${newStatus === 'DISABLED' ? 'disabled' : 'enabled'}`);
-      fetchTenants();
     } catch (err) {
       toast.error(err?.message || 'Failed to update tenant status');
     }

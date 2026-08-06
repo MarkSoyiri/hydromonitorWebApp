@@ -1,14 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Box, Grid, Card, CardContent, Typography, IconButton, Button, Stack, Chip,
 } from '@mui/material';
 import {
   ArrowBack, Wifi, SignalCellularAlt, Warning,
-  PlayArrow, Stop, Refresh, History,
+  PlayArrow, Stop, Refresh, History, HourglassEmpty, CheckCircle,
 } from '@mui/icons-material';
 import { StatCard, StatusChip, PageHeader, LoadingScreen } from '@/components/common';
 import { deviceService, usageService } from '@/services';
+import { useLiveDevice, useRealtimeValue, NODES } from '@/services/realtime';
 import { extractList } from '@/utils/response';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -27,51 +28,60 @@ export function DeviceDetailPage() {
   const { isSuperAdmin } = useAuth();
   const basePath = isSuperAdmin ? '/super-admin' : '/admin';
   const goBack = useBackNavigation(`${basePath}/devices`);
-  const [device, setDevice] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { device, loaded } = useLiveDevice(deviceId);
+  const { value: pendingCommand } = useRealtimeValue(
+    deviceId ? `${NODES.deviceCommands}/${deviceId}/pendingCommand` : null
+  );
+  const { value: commandResults } = useRealtimeValue(
+    deviceId ? `${NODES.deviceCommandResults}/${deviceId}` : null
+  );
   const [commandLoading, setCommandLoading] = useState(false);
   const [readings, setReadings] = useState([]);
 
-  const fetchDevice = useCallback(async () => {
+  const fetchReadings = useCallback(async () => {
     try {
-      const [deviceRes, readingsRes] = await Promise.allSettled([
-        deviceService.getById(deviceId),
-        usageService.getDeviceReadings(deviceId),
-      ]);
-      if (deviceRes.status === 'fulfilled' && deviceRes.value.data?.success) {
-        setDevice({ ...deviceRes.value.data.data, deviceId });
-      }
-      if (readingsRes.status === 'fulfilled' && readingsRes.value.data?.success) {
-        const list = extractList(readingsRes.value.data.data);
+      const readingsRes = await usageService.getDeviceReadings(deviceId);
+      if (readingsRes.data?.success) {
+        const list = extractList(readingsRes.data.data);
         setReadings(list.map((r) => ({
           time: r.timestamp ? dayjs(r.timestamp).format('HH:mm') : '',
           flow: r.flowRate || r.flow || 0,
         })));
       }
     } catch {
-      toast.error('Failed to load device');
-    } finally {
-      setLoading(false);
+      // chart stays on fallback data
     }
   }, [deviceId]);
 
   useEffect(() => {
-    fetchDevice();
-    const poll = async () => {
-      try {
-        const { data } = await deviceService.getLiveTelemetry(deviceId);
-        setDevice((prev) => ({
-          ...prev,
-          telemetry: data?.success && data.data ? data.data : (prev?.telemetry || {}),
-        }));
-      } catch {
-        // keep last known telemetry when the poll fails
+    fetchReadings();
+  }, [fetchReadings]);
+
+  // Append live telemetry to the chart so it advances without polling.
+  const liveTelemetry = device?.telemetry;
+  useEffect(() => {
+    const lastTelemetry = liveTelemetry?.lastTelemetry;
+    if (!lastTelemetry?.timestamp) return;
+    setReadings((prev) => {
+      const last = prev[prev.length - 1];
+      if (last && last.time === dayjs(lastTelemetry.timestamp).format('HH:mm')) {
+        return prev;
       }
-    };
-    poll();
-    const timer = setInterval(poll, 5000);
-    return () => clearInterval(timer);
-  }, [deviceId, fetchDevice]);
+      const next = [
+        ...prev,
+        {
+          time: dayjs(lastTelemetry.timestamp).format('HH:mm'),
+          flow: lastTelemetry.flowRate || 0,
+        },
+      ];
+      return next.slice(-50);
+    });
+  }, [liveTelemetry?.lastTelemetry]);
+
+  const lastCommand = useMemo(
+    () => commandResults?.lastCommand || null,
+    [commandResults]
+  );
 
   const sendCommand = async (action) => {
     setCommandLoading(true);
@@ -91,7 +101,6 @@ export function DeviceDetailPage() {
       const { data } = await fn();
       if (data?.success) {
         toast.success(`Command "${action}" sent`);
-        fetchDevice();
       } else {
         toast.error(data?.message || 'Command failed');
       }
@@ -102,7 +111,7 @@ export function DeviceDetailPage() {
     }
   };
 
-  if (loading) return <LoadingScreen />;
+  if (!loaded) return <LoadingScreen />;
   if (!device) return <PageHeader title="Device not found" />;
 
   const telemetry = device.telemetry || {};
@@ -147,6 +156,24 @@ export function DeviceDetailPage() {
         <Card sx={{ mb: 3 }}>
           <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
             <Typography variant="h6" sx={{ mb: 2 }}>Controls</Typography>
+            {pendingCommand && (
+              <Chip
+                icon={<HourglassEmpty />}
+                label={`${pendingCommand.action} command pending…`}
+                color="warning"
+                size="small"
+                sx={{ mb: 2 }}
+              />
+            )}
+            {!pendingCommand && lastCommand && (
+              <Chip
+                icon={<CheckCircle />}
+                label={`Last: ${lastCommand.action} · ${lastCommand.status}${lastCommand.message ? ` (${lastCommand.message})` : ''}`}
+                color={lastCommand.status === 'SUCCESS' ? 'success' : 'default'}
+                size="small"
+                sx={{ mb: 2 }}
+              />
+            )}
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} useFlexGap>
               <Button variant="contained" color="success" startIcon={<PlayArrow />}
                 fullWidth

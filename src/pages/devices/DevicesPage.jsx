@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, Stack,
@@ -9,7 +9,7 @@ import {
 } from '@mui/icons-material';
 import { PageHeader, DataTable, StatusChip, ConfirmDialog, IdBadge, BuildingSelector, RoomSelector } from '@/components/common';
 import { deviceService } from '@/services';
-import { extractList } from '@/utils/response';
+import { useLiveDevices } from '@/services/realtime';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -53,8 +53,7 @@ export function DevicesPage() {
   const location = useLocation();
   const { isSuperAdmin } = useAuth();
   const basePath = isSuperAdmin ? '/super-admin' : '/admin';
-  const [devices, setDevices] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { devices, loaded } = useLiveDevices();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -63,20 +62,7 @@ export function DevicesPage() {
   const [saving, setSaving] = useState(false);
   const [provision, setProvision] = useState(null);
 
-  const fetchData = useCallback(async () => {
-    try {
-      const dRes = await deviceService.getAll();
-      if (dRes.data?.success) {
-        setDevices(extractList(dRes.data.data));
-      }
-    } catch {
-      toast.error('Failed to load devices');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => { fetchData(); }, [fetchData]);
+  const loading = !loaded;
 
   const openCreate = () => {
     setEditing(null);
@@ -107,7 +93,6 @@ export function DevicesPage() {
         }
       }
       setDialogOpen(false);
-      fetchData();
     } catch (err) {
       toast.error(err?.message || 'Failed to save device');
     } finally {
@@ -122,7 +107,6 @@ export function DevicesPage() {
       await deviceService.delete(deleteTarget.deviceId);
       toast.success('Device deleted');
       setDeleteTarget(null);
-      fetchData();
     } catch (err) {
       toast.error(err?.message || 'Failed to delete device');
     } finally {

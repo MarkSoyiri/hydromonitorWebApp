@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Box, Card, CardContent, Typography, Button, Stack, Avatar,
   Chip, Autocomplete, TextField as MuiTextField,
@@ -7,49 +7,32 @@ import {
 } from '@mui/material';
 import { AdminPanelSettings, Shield, Edit, Delete, Business } from '@mui/icons-material';
 import { PageHeader, StatCard, StatusChip, ConfirmDialog } from '@/components/common';
-import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api';
-import { buildingService } from '@/services/buildingService';
+import { apiPost, apiPut, apiDelete } from '@/services/api';
 import { ENDPOINTS } from '@/constants';
-import { extractList } from '@/utils/response';
+import { NODES, useRealtimeMap } from '@/services/realtime';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 export function AdminManagementPage() {
-  const [admins, setAdmins] = useState([]);
-  const [buildings, setBuildings] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const usersState = useRealtimeMap(NODES.users);
+  const buildingsState = useRealtimeMap(NODES.buildings);
+
+  const admins = useMemo(
+    () => Object.values(usersState.data || {}).filter((u) => u && (u.role === 'ADMIN' || u.role === 'SUPER_ADMIN')),
+    [usersState.data]
+  );
+  const buildings = useMemo(
+    () => Object.values(buildingsState.data || {}),
+    [buildingsState.data]
+  );
+  const loading = !usersState.loaded || !buildingsState.loaded;
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [saving, setSaving] = useState(false);
   const [selectedBuildings, setSelectedBuildings] = useState([]);
   const [form, setForm] = useState({ fullName: '', email: '', password: '', phoneNumber: '', role: 'ADMIN' });
-
-  const fetchAdmins = useCallback(async () => {
-    try {
-      const { data } = await apiGet(ENDPOINTS.USERS);
-      if (data?.success) {
-        setAdmins(extractList(data.data));
-      }
-    } catch {
-      toast.error('Failed to load admins');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const fetchBuildings = useCallback(async () => {
-    try {
-      const { data } = await buildingService.getAll();
-      if (data?.success) {
-        setBuildings(extractList(data.data));
-      }
-    } catch {
-      // silently fail
-    }
-  }, []);
-
-  useEffect(() => { fetchAdmins(); fetchBuildings(); }, [fetchAdmins, fetchBuildings]);
 
   const getAdminBuildingIds = (admin) => {
     if (admin.buildingIds && typeof admin.buildingIds === 'object') {
@@ -111,7 +94,6 @@ export function AdminManagementPage() {
         toast.success('Admin created');
       }
       setDialogOpen(false);
-      fetchAdmins();
     } catch (err) {
       if (err?.errors && Array.isArray(err.errors)) {
         err.errors.forEach((e) => toast.error(e.message));
@@ -129,7 +111,6 @@ export function AdminManagementPage() {
       await apiDelete(`${ENDPOINTS.USERS}/${getUserId(deleteTarget)}`);
       toast.success('Admin deleted');
       setDeleteTarget(null);
-      fetchAdmins();
     } catch (err) {
       toast.error(err?.message || 'Failed to delete admin');
     }

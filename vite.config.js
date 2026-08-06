@@ -35,7 +35,7 @@ export default defineConfig({
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
           mui: ['@mui/material', '@mui/icons-material'],
-          firebase: ['firebase/app', 'firebase/auth'],
+          firebase: ['firebase/app', 'firebase/auth', 'firebase/database'],
           charts: ['chart.js', 'react-chartjs-2', 'recharts'],
         },
       },

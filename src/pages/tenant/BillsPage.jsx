@@ -3,48 +3,58 @@ import { Box, Grid, Card, CardContent, Typography, Button, Chip, List, ListItem,
 import { Receipt, Payment as PaymentIcon, Download } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { billingService } from '@/services';
-import { extractList } from '@/utils/response';
+import {
+  NODES, useRealtimeValue, useRealtimeMap,
+} from '@/services/realtime';
+import dayjs from 'dayjs';
 
 export function BillsPage() {
   const { profile } = useAuth();
-  const [bills, setBills] = useState([]);
-  const [currentBill, setCurrentBill] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const [currentRes, historyRes] = await Promise.allSettled([
-          billingService.getCurrentBill(),
-          billingService.getHistory(),
-        ]);
-        if (!cancelled) {
-          const current = currentRes.status === 'fulfilled' && currentRes.value?.data?.success
-            ? currentRes.value.data.data : null;
-          const history = historyRes.status === 'fulfilled' && historyRes.value?.data?.success
-            ? extractList(historyRes.value.data.data) : [];
-          if (current) {
-            setCurrentBill(current);
-            setBills([current, ...history]);
-          } else {
-            setBills(history);
-          }
-        }
-      } catch {
-        // silently fail
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    load();
-    return () => { cancelled = true; };
-  }, []);
+  const tenantUid = profile?.uid || profile?.currentUser?.uid;
 
-  const currentBillAmount = currentBill?.amount ?? profile?.billing?.currentBill ?? 0;
-  const totalPaid = profile?.billing?.totalPaid ?? 0;
-  const outstandingBalance = currentBill?.outstandingBalance ?? profile?.billing?.outstandingBalance ?? 0;
+  const userLive = useRealtimeValue(tenantUid ? `${NODES.users}/${tenantUid}` : null);
+  const liveUser = userLive.value;
+  const liveProfile = liveUser ? { ...profile, ...liveUser, uid: tenantUid } : profile;
+
+  const rateLive = useRealtimeValue(`${NODES.rates}/current`);
+  const pricePerUnit = rateLive.value?.pricePerUnit ?? 0;
+
+  const billingMap = useRealtimeMap(tenantUid ? `${NODES.billingHistory}/${tenantUid}` : null);
+  const paymentList = (Object.values(billingMap.data || {}) || [])
+    .filter((p) => p && typeof p === 'object')
+    .map((p) => ({
+      ...p,
+      billId: p.paymentId,
+      id: p.paymentId,
+      status: 'PAID',
+      amount: p.amount || 0,
+      period: p.recordedAt ? dayjs(p.recordedAt).format('MMM D, YYYY') : '',
+      billDate: p.recordedAt ? dayjs(p.recordedAt).format('MMM D, YYYY') : '',
+    }))
+    .sort((a, b) => (b.recordedAt || 0) - (a.recordedAt || 0));
+
+  const currentUsage = liveProfile?.usage?.totalUsageMonth ?? 0;
+  const currentBillAmount = currentUsage * pricePerUnit;
+  const totalPaid = liveProfile?.billing?.totalPaid ?? 0;
+  const outstandingBalance = liveProfile?.billing?.outstandingBalance ?? Math.max(currentBillAmount - totalPaid, 0);
+
+  const currentBill = {
+    billId: 'current',
+    id: 'current',
+    status: outstandingBalance > 0 ? 'PENDING' : 'PAID',
+    amount: currentBillAmount,
+    period: 'Current period',
+    billDate: 'Current period',
+    usage: currentUsage,
+  };
+
+  const bills = [currentBill, ...paymentList];
+
+  useEffect(() => {
+    if (profile && userLive.loaded) setLoading(false);
+  }, [profile, userLive.loaded]);
 
   if (loading) {
     return (

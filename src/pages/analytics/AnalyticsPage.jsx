@@ -9,6 +9,7 @@ import {
 } from 'recharts';
 import { motion } from 'framer-motion';
 import { analyticsService } from '@/services';
+import { useLiveTick, NODES } from '@/services/realtime';
 
 const fallbackWeeklyUsage = [
   { day: 'Mon', usage: 0, avg: 0 },
@@ -80,7 +81,18 @@ export function AnalyticsPage() {
     }
   }, []);
 
+  // Refetch server-computed analytics on a debounced live telemetry/alert tick.
+  const tick = useLiveTick([NODES.deviceTelemetry, NODES.alerts]);
+
   useEffect(() => { fetchAnalytics(); }, [fetchAnalytics]);
+
+  useEffect(() => {
+    if (tick === 0) return;
+    const timer = setTimeout(() => {
+      fetchAnalytics();
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [tick, fetchAnalytics]);
 
   const weeklyUsage = analytics?.weeklyUsage || fallbackWeeklyUsage;
   const monthlyTrend = analytics?.monthlyTrend || fallbackMonthlyTrend;

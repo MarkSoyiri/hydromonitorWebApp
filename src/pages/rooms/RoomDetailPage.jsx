@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Box, Grid, Card, CardContent, Typography, IconButton, Button,
@@ -14,6 +14,7 @@ import { extractList } from '@/utils/response';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBackNavigation } from '@/hooks/useBackNavigation';
+import { NODES, useRealtimeValue } from '@/services/realtime';
 import toast from 'react-hot-toast';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import dayjs from 'dayjs';
@@ -25,11 +26,35 @@ export function RoomDetailPage() {
   const { isSuperAdmin, isAdmin, assignedBuildings } = useAuth();
   const basePath = isSuperAdmin ? '/super-admin' : '/admin';
   const goBack = useBackNavigation(`${basePath}/rooms`);
-  const [room, setRoom] = useState(null);
-  const [tenant, setTenant] = useState(null);
   const [readings, setReadings] = useState([]);
-  const [loading, setLoading] = useState(true);
 
+  const roomLive = useRealtimeValue(roomId ? `${NODES.rooms}/${roomId}` : null);
+  const room = roomLive.value ? { ...roomLive.value, roomId } : roomLive.value;
+  const tenantLive = useRealtimeValue(room?.tenantId ? `${NODES.users}/${room.tenantId}` : null);
+  const tenant = tenantLive.value ? { ...tenantLive.value, tenantId: room.tenantId } : tenantLive.value;
+
+  const loading = !roomLive.loaded || (!!room?.tenantId && !tenantLive.loaded);
+
+  useEffect(() => {
+    if (!room?.device?.deviceId) {
+      setReadings([]);
+      return undefined;
+    }
+    let active = true;
+    usageService.getDeviceReadings(room.device.deviceId)
+      .then(({ data }) => {
+        if (!active || !data?.success) return;
+        const list = extractList(data.data);
+        setReadings(list.map((r) => ({
+          time: r.timestamp ? dayjs(r.timestamp).format('HH:mm') : '',
+          flow: r.flowRate || r.flow || r.usage || 0,
+        })));
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [room?.device?.deviceId]);
+
+  const canManage = isSuperAdmin || (isAdmin && assignedBuildings?.some((b) => b.buildingId === room?.buildingId));
   const [unassignDialogOpen, setUnassignDialogOpen] = useState(false);
   const [unassigning, setUnassigning] = useState(false);
 
@@ -39,54 +64,7 @@ export function RoomDetailPage() {
   const [selectedTenant, setSelectedTenant] = useState(null);
   const [loadingTenants, setLoadingTenants] = useState(false);
 
-  const fetchRoom = useCallback(async () => {
-    try {
-      const { data } = await roomService.getById(roomId);
-      if (data?.success) {
-        const roomData = { ...data.data, roomId };
-        setRoom(roomData);
-
-        if (roomData.tenantId) {
-          try {
-            const { data: tData } = await tenantService.getById(roomData.tenantId);
-            if (tData?.success) {
-              setTenant({ ...tData.data, tenantId: roomData.tenantId });
-            }
-          } catch {
-            // tenant fetch failed silently
-          }
-        } else {
-          setTenant(null);
-        }
-
-        const deviceId = roomData.device?.deviceId;
-        if (deviceId) {
-          try {
-            const { data: readingsData } = await usageService.getDeviceReadings(deviceId);
-            if (readingsData?.success) {
-              const list = extractList(readingsData.data);
-              setReadings(list.map((r) => ({
-                time: r.timestamp ? dayjs(r.timestamp).format('HH:mm') : '',
-                flow: r.flowRate || r.flow || r.usage || 0,
-              })));
-            }
-          } catch {
-            // readings fetch failed silently
-          }
-        }
-      }
-    } catch {
-      toast.error('Failed to load room');
-    } finally {
-      setLoading(false);
-    }
-  }, [roomId]);
-
-  useEffect(() => { fetchRoom(); }, [fetchRoom]);
-
-  const canManage = isSuperAdmin || (isAdmin && assignedBuildings?.some((b) => b.buildingId === room?.buildingId));
-
-  const handleUnassign = async () => {
+const handleUnassign = async () => {
     if (!room?.tenantId) {
       toast.error('This room has no tenant assigned');
       return;
@@ -104,8 +82,6 @@ export function RoomDetailPage() {
       await roomService.unassignTenant(roomId, room.tenantId);
       toast.success(`${tenant?.fullName || 'Tenant'} has been removed from Room ${room.roomNumber}`);
       setUnassignDialogOpen(false);
-      setTenant(null);
-      await fetchRoom();
     } catch (err) {
       const msg = err?.message || 'Failed to unassign tenant';
       if (err?.isNotFound) {
@@ -158,7 +134,6 @@ export function RoomDetailPage() {
       toast.success(`${selectedTenant.fullName} assigned to Room ${room.roomNumber}`);
       setAssignDialogOpen(false);
       setSelectedTenant(null);
-      fetchRoom();
     } catch (err) {
       toast.error(err?.message || 'Failed to assign tenant');
     } finally {

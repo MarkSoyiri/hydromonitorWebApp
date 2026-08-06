@@ -24,6 +24,15 @@ import { analyticsService } from '@/services/analyticsService';
 import { usageService } from '@/services/usageService';
 import { apiGet } from '@/services/api';
 import { ENDPOINTS } from '@/constants';
+import {
+  useLiveDevices,
+  useLiveAlerts,
+  useLiveTenants,
+  useRealtimeList,
+  useRealtimeValue,
+  useLiveTick,
+  NODES,
+} from '@/services/realtime';
 import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
@@ -133,6 +142,54 @@ export function BuildingDetailPage() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState(0);
 
+  // Live data: REST list shapes == raw RTDB node shapes, so subscribing the
+  // nodes keeps every tab current without refetching.
+  const { devices: liveDevices, loaded: devicesLoaded } = useLiveDevices();
+  const { alerts: liveAlerts, loaded: alertsLoaded } = useLiveAlerts();
+  const { tenants: liveTenants, loaded: tenantsLoaded } = useLiveTenants();
+  const roomsState = useRealtimeList(NODES.rooms);
+  const buildingLive = useRealtimeValue(`buildings/${buildingId}`);
+
+  useEffect(() => {
+    if (!devicesLoaded) return;
+    setDevices(liveDevices.filter((d) => d.buildingId === buildingId));
+  }, [liveDevices, devicesLoaded, buildingId]);
+
+  useEffect(() => {
+    if (!alertsLoaded) return;
+    setAlerts(liveAlerts.filter((a) => a.buildingId === buildingId));
+  }, [liveAlerts, alertsLoaded, buildingId]);
+
+  useEffect(() => {
+    if (!tenantsLoaded) return;
+    setTenants(liveTenants.filter((t) => t.buildingId === buildingId));
+  }, [liveTenants, tenantsLoaded, buildingId]);
+
+  useEffect(() => {
+    setRooms(roomsState.data.filter((r) => r.buildingId === buildingId));
+  }, [roomsState.data, buildingId]);
+
+  useEffect(() => {
+    if (buildingLive.loaded) {
+      setBuilding(buildingLive.value ? { ...buildingLive.value, buildingId } : null);
+    }
+  }, [buildingLive.value, buildingLive.loaded, buildingId]);
+
+  // Building analytics are server-computed; refetch on a debounced live tick.
+  const analyticsTick = useLiveTick([NODES.devices, NODES.alerts]);
+  useEffect(() => {
+    if (analyticsTick === 0) return;
+    const timer = setTimeout(async () => {
+      try {
+        const anRes = await analyticsService.getBuildingAnalytics(buildingId);
+        if (anRes.data?.success) setAnalytics(anRes.data.data);
+      } catch {
+        /* analytics may not exist yet */
+      }
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [analyticsTick, buildingId]);
+
   const [roomDialogOpen, setRoomDialogOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
   const [roomForm, setRoomForm] = useState({ roomNumber: '', floor: '', roomType: '', capacity: '', status: 'VACANT' });
@@ -216,26 +273,8 @@ export function BuildingDetailPage() {
 
   const fetchAll = useCallback(async () => {
     try {
-      const [bRes, rRes, dRes, tRes, aRes] = await Promise.all([
-        buildingService.getById(buildingId),
-        roomService.getAll(buildingId),
-        deviceService.getAll(),
-        tenantService.getAll(),
-        alertService.getAll({ buildingId }),
-      ]);
-
-      if (bRes.data?.success) setBuilding({ ...bRes.data.data, buildingId });
-      if (rRes.data?.success) setRooms(extractList(rRes.data.data));
-      if (dRes.data?.success) {
-        const allDevices = extractList(dRes.data.data);
-        setDevices(allDevices.filter((d) => d.buildingId === buildingId));
-      }
-      if (tRes.data?.success) {
-        const allTenants = extractList(tRes.data.data);
-        setTenants(allTenants.filter((t) => t.buildingId === buildingId));
-      }
-      if (aRes.data?.success) setAlerts(extractList(aRes.data.data));
-
+      // Building rooms/devices/tenants/alerts now stream live; this only
+      // seeds admins and the first analytics load.
       try {
         const anRes = await analyticsService.getBuildingAnalytics(buildingId);
         if (anRes.data?.success) setAnalytics(anRes.data.data);
@@ -245,13 +284,21 @@ export function BuildingDetailPage() {
 
       fetchBuildingAdmins();
     } catch {
-      toast.error('Failed to load building details');
-    } finally {
-      setLoading(false);
+      // live data still streams even if seeding fails
     }
   }, [buildingId, fetchBuildingAdmins]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  useEffect(() => {
+    setLoading(!(
+      devicesLoaded &&
+      alertsLoaded &&
+      tenantsLoaded &&
+      roomsState.loaded &&
+      buildingLive.loaded
+    ));
+  }, [devicesLoaded, alertsLoaded, tenantsLoaded, roomsState.loaded, buildingLive.loaded]);
 
   useEffect(() => {
     if (tab === 4 && devices.length > 0 && usageData.length === 0) {

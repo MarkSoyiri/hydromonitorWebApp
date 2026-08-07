@@ -146,11 +146,16 @@ export function useLiveDevices() {
   const telemetryState = useRealtimeMap(NODES.deviceTelemetry);
 
   const devices = useMemo(
-    () =>
-      attachTelemetryToDevices(
-        Object.values(devicesState.data || {}),
-        telemetryState.data || {}
-      ),
+    () => {
+      const raw = Object.entries(devicesState.data || {});
+      const rows = raw.map(([key, device]) => ({
+        ...device,
+        // RTDB keys are the canonical deviceId; fall back to the node key for
+        // records whose identity fields were lost by legacy writes.
+        deviceId: device?.deviceId || key,
+      }));
+      return attachTelemetryToDevices(rows, telemetryState.data || {});
+    },
     [devicesState.data, telemetryState.data]
   );
 

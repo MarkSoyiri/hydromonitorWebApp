@@ -285,13 +285,13 @@ export function DeviceDetailPage() {
                   Transfer
                 </Button>
               )}
-              {!isSuperAdmin && canManageDevice && lifecycle === DEVICE_LIFECYCLE.AVAILABLE && (
+              {canManageDevice && lifecycle === DEVICE_LIFECYCLE.AVAILABLE && (
                 <Button fullWidth size="small" variant="contained" startIcon={<MeetingRoom />}
                   onClick={openRoomDialog} disabled={actionLoading}>
                   Assign to Room
                 </Button>
               )}
-              {!isSuperAdmin && canManageDevice && lifecycle === DEVICE_LIFECYCLE.ACTIVE && (
+              {canManageDevice && lifecycle === DEVICE_LIFECYCLE.ACTIVE && (
                 <Button fullWidth size="small" variant="outlined" color="warning" startIcon={<SwapHoriz />}
                   onClick={handleUnassign} disabled={actionLoading}>
                   Unassign
@@ -423,7 +423,7 @@ export function DeviceDetailPage() {
         </Dialog>
       )}
 
-      {!isSuperAdmin && canManageDevice && lifecycle === DEVICE_LIFECYCLE.AVAILABLE && (
+      {canManageDevice && lifecycle === DEVICE_LIFECYCLE.AVAILABLE && (
         <Dialog open={roomDialog} onClose={() => setRoomDialog(false)} maxWidth="sm" fullWidth>
           <DialogTitle>Assign Device to Room</DialogTitle>
           <DialogContent>

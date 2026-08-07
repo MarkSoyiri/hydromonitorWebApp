@@ -284,14 +284,14 @@ export function DevicesPage() {
         }
         return (
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
-            {!isSuperAdmin && lifecycle === DEVICE_LIFECYCLE.AVAILABLE && inBuilding && (
+            {lifecycle === DEVICE_LIFECYCLE.AVAILABLE && inBuilding && (
               <Tooltip title="Assign to Room">
                 <IconButton size="small" color="primary" onClick={(e) => { e.stopPropagation(); openAssignRoomFor(row); }}>
                   <MeetingRoom fontSize="small" />
                 </IconButton>
               </Tooltip>
             )}
-            {!isSuperAdmin && lifecycle === DEVICE_LIFECYCLE.ACTIVE && inBuilding && (
+            {lifecycle === DEVICE_LIFECYCLE.ACTIVE && inBuilding && (
               <Tooltip title="Unassign from Room">
                 <IconButton size="small" color="warning" onClick={(e) => { e.stopPropagation(); handleUnassign(row); }}>
                   <SwapHoriz fontSize="small" />

@@ -57,6 +57,27 @@ export const deviceCommandAckPath = (deviceId) =>
 export const deviceTokenPath = (deviceId) =>
   `${ENDPOINTS.DEVICES}/${deviceId}/token`;
 
+export const deviceProvisionPath = () =>
+  `${ENDPOINTS.DEVICES}/provision`;
+
+export const deviceAssignBuildingPath = (deviceId) =>
+  `${ENDPOINTS.DEVICES}/${deviceId}/assign-building`;
+
+export const deviceAssignRoomPath = (deviceId) =>
+  `${ENDPOINTS.DEVICES}/${deviceId}/assign`;
+
+export const deviceUnassignPath = (deviceId) =>
+  `${ENDPOINTS.DEVICES}/${deviceId}/unassign`;
+
+export const deviceMaintenancePath = (deviceId) =>
+  `${ENDPOINTS.DEVICES}/${deviceId}/maintenance`;
+
+export const deviceTransferPath = (deviceId) =>
+  `${ENDPOINTS.DEVICES}/${deviceId}/transfer`;
+
+export const deviceRetirePath = (deviceId) =>
+  `${ENDPOINTS.DEVICES}/${deviceId}/retire`;
+
 export const deviceReadingsPath = (deviceId) =>
   `${ENDPOINTS.TELEMETRY}/${deviceId}/readings`;
 

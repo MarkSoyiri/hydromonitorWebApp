@@ -1,6 +1,7 @@
 import { Chip } from '@mui/material';
 import {
   CheckCircle, Cancel, HourglassEmpty, OfflineBolt, Circle,
+  AutoAwesome, Inventory, Construction, Block,
 } from '@mui/icons-material';
 import { STATUS_COLORS } from '@/constants';
 
@@ -15,6 +16,10 @@ const statusIcons = {
   RESOLVED: <CheckCircle sx={{ fontSize: 14 }} />,
   OPEN: <Circle sx={{ fontSize: 14 }} />,
   CLOSED: <Cancel sx={{ fontSize: 14 }} />,
+  PROVISIONING: <AutoAwesome sx={{ fontSize: 14 }} />,
+  AVAILABLE: <Inventory sx={{ fontSize: 14 }} />,
+  MAINTENANCE: <Construction sx={{ fontSize: 14 }} />,
+  RETIRED: <Block sx={{ fontSize: 14 }} />,
 };
 
 export function StatusChip({ status, size = 'small' }) {

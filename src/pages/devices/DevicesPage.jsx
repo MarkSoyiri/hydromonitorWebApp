@@ -126,7 +126,7 @@ export function DevicesPage() {
 
   const openAssignBuilding = (row) => {
     setBuildingDialog(row);
-    setBuildingForm({ buildingId: row.buildingId || '' });
+    setBuildingForm({ buildingId: '' });
   };
 
   const handleAssignBuilding = async () => {
@@ -184,7 +184,7 @@ export function DevicesPage() {
 
   const openTransfer = (row) => {
     setTransferTarget(row);
-    setTransferForm({ buildingId: row.buildingId || '' });
+    setTransferForm({ buildingId: '' });
   };
 
   const handleTransfer = async () => {

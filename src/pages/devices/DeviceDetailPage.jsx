@@ -73,7 +73,7 @@ export function DeviceDetailPage() {
   }, [device]);
 
   const openBuildingDialog = () => {
-    setBuildingForm({ buildingId: device?.buildingId || '' });
+    setBuildingForm({ buildingId: '' });
     setBuildingDialog(true);
   };
 

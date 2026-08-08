@@ -16,12 +16,21 @@ import toast from 'react-hot-toast';
 export function RoomsPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isSuperAdmin } = useAuth();
+  const { user, isSuperAdmin } = useAuth();
   const basePath = isSuperAdmin ? '/super-admin' : '/admin';
   const roomsState = useRealtimeList(NODES.rooms);
   const buildingsState = useRealtimeMap(NODES.buildings);
-  const rooms = roomsState.data;
-  const buildings = Object.values(buildingsState.data || {});
+  // Admins only manage rooms in buildings assigned to them (building.admins /
+  // owner); the super admin sees everything. Mirrors the backend ownership check.
+  const uid = user?.uid;
+  const allBuildings = Object.values(buildingsState.data || {});
+  const buildings = isSuperAdmin
+    ? allBuildings
+    : allBuildings.filter((b) => (b.admins && b.admins[uid]) || b.ownerAdminId === uid);
+  const allowedBuildingIds = new Set(buildings.map((b) => b.buildingId));
+  const rooms = isSuperAdmin
+    ? roomsState.data
+    : roomsState.data.filter((r) => allowedBuildingIds.has(r.buildingId));
   const loading = !(roomsState.loaded && buildingsState.loaded);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);

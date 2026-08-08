@@ -164,7 +164,7 @@ function BuildingQuickCard({ building, stats, index, onNavigate }) {
 }
 
 export function AdminDashboardPage() {
-  const { profile, assignedBuildings, isAdmin } = useAuth();
+  const { user, profile, assignedBuildings, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const { devices, loaded: devicesLoaded } = useLiveDevices();
@@ -172,9 +172,7 @@ export function AdminDashboardPage() {
   const { tenants, loaded: tenantsLoaded } = useLiveTenants();
   const roomsState = useRealtimeList(NODES.rooms);
   const buildingsState = useRealtimeMap(NODES.buildings);
-
   const rooms = roomsState.data;
-  const buildings = Object.values(buildingsState.data || {});
   const loading = !(
     devicesLoaded &&
     alertsLoaded &&
@@ -204,24 +202,32 @@ export function AdminDashboardPage() {
     return bStats;
   }, [isAdmin, assignedBuildings, rooms, devices, tenants, alerts]);
 
-  const totalRooms = rooms.length;
-  const totalDevices = devices.length;
-  const activeTenants = tenants.filter((t) => t?.status === 'ACTIVE').length;
-  const onlineDevices = devices.filter((d) => d?.online).length;
-  const offlineDevices = totalDevices - onlineDevices;
-  const unresolvedAlerts = alerts.filter((a) => !a.resolved).length;
-  const occupiedRooms = rooms.filter((r) => r.status === 'OCCUPIED').length;
+  // Admins only see data from buildings assigned to them (building.admins /
+  // owner); the super admin sees system-wide totals. Mirrors the backend
+  // ownership check and stays realtime.
+  const uid = user?.uid;
+  const allowedBuildings = isAdmin
+    ? Object.values(buildingsState.data || {}).filter(
+        (b) => (b.admins && b.admins[uid]) || b.ownerAdminId === uid
+      )
+    : Object.values(buildingsState.data || {});
+  const allowedBuildingIds = new Set(allowedBuildings.map((b) => b.buildingId));
 
-  // Today's usage aggregates the buildings' live usage nodes. Scope to the
-  // admin's assigned buildings when provided.
-  const scopedBuildingIds = isAdmin && assignedBuildings.length > 0
-    ? new Set(assignedBuildings.map((b) => b.buildingId))
-    : null;
-  const todayUsage = buildings.reduce(
-    (sum, b) => {
-      if (scopedBuildingIds && !scopedBuildingIds.has(b.buildingId)) return sum;
-      return sum + (b.usage?.totalUsageToday || 0);
-    },
+  const scopedRooms = isAdmin ? rooms.filter((r) => allowedBuildingIds.has(r.buildingId)) : rooms;
+  const scopedDevices = isAdmin ? devices.filter((d) => allowedBuildingIds.has(d.buildingId)) : devices;
+  const scopedTenants = isAdmin ? tenants.filter((t) => allowedBuildingIds.has(t.buildingId)) : tenants;
+  const scopedAlerts = isAdmin ? alerts.filter((a) => allowedBuildingIds.has(a.buildingId)) : alerts;
+
+  const totalRooms = scopedRooms.length;
+  const totalDevices = scopedDevices.length;
+  const activeTenants = scopedTenants.filter((t) => t?.status === 'ACTIVE').length;
+  const onlineDevices = scopedDevices.filter((d) => d?.online).length;
+  const offlineDevices = totalDevices - onlineDevices;
+  const unresolvedAlerts = scopedAlerts.filter((a) => !a.resolved).length;
+  const occupiedRooms = scopedRooms.filter((r) => r.status === 'OCCUPIED').length;
+
+  const todayUsage = allowedBuildings.reduce(
+    (sum, b) => sum + (b.usage?.totalUsageToday || 0),
     0
   );
 

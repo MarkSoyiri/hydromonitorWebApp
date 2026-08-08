@@ -184,7 +184,7 @@ function AdminBuildingCard({ building, stats, index, onClick }) {
 export function BuildingsPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isSuperAdmin, isAdmin } = useAuth();
+  const { user, isSuperAdmin, isAdmin } = useAuth();
   const basePath = isSuperAdmin ? '/super-admin' : '/admin';
 
   const { devices, loaded: devicesLoaded } = useLiveDevices();
@@ -193,7 +193,13 @@ export function BuildingsPage() {
   const roomsState = useRealtimeList(NODES.rooms);
   const buildingsState = useRealtimeMap(NODES.buildings);
 
-  const buildings = Object.values(buildingsState.data || {});
+  // Admins only see buildings assigned to them (building.admins / owner);
+  // the super admin sees all buildings. Mirrors the backend ownership check.
+  const uid = user?.uid;
+  const allBuildings = Object.values(buildingsState.data || {});
+  const buildings = isSuperAdmin
+    ? allBuildings
+    : allBuildings.filter((b) => (b.admins && b.admins[uid]) || b.ownerAdminId === uid);
   const rooms = roomsState.data;
   const loading = !(
     devicesLoaded &&

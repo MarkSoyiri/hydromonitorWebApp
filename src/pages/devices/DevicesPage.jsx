@@ -249,7 +249,7 @@ export function DevicesPage() {
     { field: 'roomId', label: 'Room', width: 160, render: (r) => r.roomId ? <IdBadge id={r.roomId} entity="room" /> : '—' },
     {
       field: 'telemetry', label: 'Online', width: 90,
-      render: (r) => <StatusChip status={r.telemetry?.status || 'OFFLINE'} />,
+      render: (r) => <StatusChip status={r.online ? 'ONLINE' : 'OFFLINE'} />,
     },
     {
       field: 'telemetry', label: 'Valve', width: 80,

@@ -243,7 +243,7 @@ export function DeviceDetailPage() {
           </Box>
           <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
             <StatusChip status={lifecycle} />
-            <StatusChip status={telemetry.status || 'OFFLINE'} />
+            <StatusChip status={device.online ? 'ONLINE' : 'OFFLINE'} />
             <StatusChip status={telemetry.valveStatus === 'OPEN' ? 'OPEN' : 'CLOSED'} />
 
             {telemetry.leakDetected && <Chip icon={<Warning />} label="LEAK" color="error" size="small" />}

@@ -64,8 +64,35 @@ export function telemetryView(node) {
   };
 }
 
+// Mirrors the backend's OfflineDetectionService.OFFLINE_TIMEOUT. The ESP32
+// heartbeats every 60s, so a device with no heartbeat for 2 minutes is offline.
+const STALE_MS = 2 * 60 * 1000;
+
+// Offline is decided by heartbeat freshness so the UI flips without waiting
+// for the server-side offline check (Vercel cron is capped at 1/day on
+// Hobby; a GitHub Actions cron keeps the server flag/alerts in sync too).
+export function isOnline(node, device, now = Date.now()) {
+  if (!node) return device?.online ?? false;
+  if (node.online === false) return false;
+  const heartbeatAt = node.heartbeatAt || 0;
+  return heartbeatAt > 0 && now - heartbeatAt < STALE_MS;
+}
+
+// Re-renders on a fixed cadence so staleness flips offline chips even when no
+// RTDB event arrives (e.g. a device that simply stopped heartbeating).
+function useNow(intervalMs) {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), intervalMs);
+    return () => clearInterval(id);
+  }, [intervalMs]);
+
+  return now;
+}
+
 // Mirrors the backend attachTelemetryToDevices join.
-export function attachTelemetryToDevices(deviceList, telemetryMap) {
+export function attachTelemetryToDevices(deviceList, telemetryMap, now = Date.now()) {
   if (!Array.isArray(deviceList)) return deviceList;
 
   return deviceList.map((device) => {
@@ -75,7 +102,7 @@ export function attachTelemetryToDevices(deviceList, telemetryMap) {
 
     return {
       ...device,
-      online: node?.online ?? device.online ?? false,
+      online: isOnline(node, device, now),
       lastSeen: node?.lastSeen ?? device.lastSeen ?? 0,
       telemetry: node ? telemetryView(node) : device.telemetry ?? null,
     };
@@ -144,6 +171,7 @@ export function useRealtimeValue(path) {
 export function useLiveDevices() {
   const devicesState = useRealtimeMap(NODES.devices);
   const telemetryState = useRealtimeMap(NODES.deviceTelemetry);
+  const now = useNow(15000);
 
   const devices = useMemo(
     () => {
@@ -154,9 +182,9 @@ export function useLiveDevices() {
         // records whose identity fields were lost by legacy writes.
         deviceId: device?.deviceId || key,
       }));
-      return attachTelemetryToDevices(rows, telemetryState.data || {});
+      return attachTelemetryToDevices(rows, telemetryState.data || {}, now);
     },
-    [devicesState.data, telemetryState.data]
+    [devicesState.data, telemetryState.data, now]
   );
 
   return { devices, loaded: devicesState.loaded && telemetryState.loaded };
@@ -170,6 +198,7 @@ export function useLiveDevice(deviceId) {
   const telemetryState = useRealtimeValue(
     deviceId ? `${NODES.deviceTelemetry}/${deviceId}` : null
   );
+  const now = useNow(15000);
 
   const device = useMemo(() => {
     const raw = metadataState.value;
@@ -179,11 +208,11 @@ export function useLiveDevice(deviceId) {
 
     return {
       ...raw,
-      online: node?.online ?? raw.online ?? false,
+      online: isOnline(node, raw, now),
       lastSeen: node?.lastSeen ?? raw.lastSeen ?? 0,
       telemetry: node ? telemetryView(node) : raw.telemetry ?? null,
     };
-  }, [metadataState.value, telemetryState.value]);
+  }, [metadataState.value, telemetryState.value, now]);
 
   return { device, loaded: metadataState.loaded && telemetryState.loaded };
 }

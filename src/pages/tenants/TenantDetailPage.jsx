@@ -21,7 +21,7 @@ import { extractList } from '@/utils/response';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBackNavigation } from '@/hooks/useBackNavigation';
 import {
-  NODES, useRealtimeValue, useLiveAlerts, useLiveTick,
+  NODES, isOnline, useRealtimeValue, useLiveAlerts, useLiveTick,
 } from '@/services/realtime';
 import { motion } from 'framer-motion';
 import dayjs from 'dayjs';
@@ -180,7 +180,7 @@ export function TenantDetailPage() {
   const device = deviceMeta
     ? {
         ...deviceMeta,
-        online: deviceTelemetryLive.value?.online ?? deviceMeta.online ?? false,
+        online: isOnline(deviceTelemetryLive.value, deviceMeta),
         lastSeen: deviceTelemetryLive.value?.lastSeen ?? deviceMeta.lastSeen ?? 0,
         telemetry: deviceMeta.telemetry ?? null,
       }
@@ -480,7 +480,7 @@ export function TenantDetailPage() {
                         Status
                       </Typography>
                       <Box sx={{ mt: 0.25 }}>
-                        <StatusChip status={device.telemetry?.status || device.status || 'OFFLINE'} />
+                        <StatusChip status={device.online ? 'ONLINE' : 'OFFLINE'} />
                       </Box>
                     </Box>
                   </Box>

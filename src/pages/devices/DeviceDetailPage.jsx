@@ -241,7 +241,7 @@ export function DeviceDetailPage() {
               {device.serialNumber} · {device.buildingId || 'No building'}
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', width: { xs: '100%', sm: 'auto' }, justifyContent: { xs: 'flex-start', sm: 'flex-end' } }}>
             <StatusChip status={lifecycle} />
             <StatusChip status={device.online ? 'ONLINE' : 'OFFLINE'} />
             <StatusChip status={telemetry.valveStatus === 'OPEN' ? 'OPEN' : 'CLOSED'} />

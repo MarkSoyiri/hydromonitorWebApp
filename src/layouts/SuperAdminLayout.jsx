@@ -376,14 +376,14 @@ function SuperAdminBottomNav() {
   const location = useLocation();
   const { isDark } = useThemeMode();
 
+  // Keep the mobile bottom nav to frequently visited pages only; the full
+  // menu (Analytics, Logs, ...) stays available in the hamburger drawer.
   const bottomNavItems = [
     { label: 'Dashboard', path: '/super-admin/dashboard', icon: <DashIcon /> },
     { label: 'Buildings', path: '/super-admin/buildings', icon: <Business /> },
-    { label: 'Devices', path: '/super-admin/devices', icon: <DevicesOther /> },
     { label: 'Admins', path: '/super-admin/admins', icon: <AdminPanelSettings /> },
-    { label: 'Analytics', path: '/super-admin/analytics', icon: <Analytics /> },
+    { label: 'Devices', path: '/super-admin/devices', icon: <DevicesOther /> },
     { label: 'Settings', path: '/super-admin/settings', icon: <Settings /> },
-    { label: 'Logs', path: '/super-admin/logs', icon: <ListAlt /> },
   ];
 
   const getValue = () => {

@@ -348,14 +348,13 @@ function AdminBottomNav() {
   const location = useLocation();
   const { isDark } = useThemeMode();
 
+  // Keep the mobile bottom nav to frequently visited pages only; the full
+  // menu (Rooms, Devices, Tenants, Reports, ...) stays available in the
+  // hamburger drawer.
   const bottomNavItems = [
     { label: 'Dashboard', path: '/admin/dashboard', icon: <DashIcon /> },
     { label: 'Buildings', path: '/admin/buildings', icon: <Business /> },
-    { label: 'Rooms', path: '/admin/rooms', icon: <MeetingRoom /> },
-    { label: 'Devices', path: '/admin/devices', icon: <DevicesOther /> },
-    { label: 'Tenants', path: '/admin/tenants', icon: <People /> },
     { label: 'Billing', path: '/admin/billing', icon: <Receipt /> },
-    { label: 'Reports', path: '/admin/reports', icon: <Assessment /> },
     { label: 'Alerts', path: '/admin/alerts', icon: <NotificationsActive /> },
   ];
 

@@ -497,7 +497,7 @@ export function BuildingDetailPage() {
               subtitle={unresolvedAlerts === 0 ? 'All clear' : 'Needs attention'}
             />
           </Grid>
-          <Grid item xs={6} sm={3}>
+          <Grid item xs={12} sm={3}>
             <StatCard title="Monthly Usage" value={`${monthlyUsage.toLocaleString()} L`} icon={<WaterDrop />} color="secondary" subtitle="This month" />
           </Grid>
         </Grid>

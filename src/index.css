@@ -8,6 +8,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
@@ -17,6 +18,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;
+  overflow-x: clip;
+}
+
+@supports not (overflow: clip) {
+  html, body {
+    overflow-x: hidden;
+  }
 }
 
 @media (max-width: 600px) {

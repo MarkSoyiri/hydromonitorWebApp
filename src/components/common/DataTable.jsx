@@ -60,14 +60,14 @@ function MobileCardView({ columns, rows, onRowClick, loading }) {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     {firstCol && (
-                      <Typography sx={{ fontWeight: 600, fontSize: '0.9rem', lineHeight: 1.3, mb: 0.25 }}>
+                      <Typography sx={{ fontWeight: 600, fontSize: '0.9rem', lineHeight: 1.3, mb: 0.25, overflowWrap: 'anywhere' }}>
                         {firstCol.render
                           ? firstCol.render(row, index)
                           : row[firstCol.field || firstCol.key] ?? '—'}
                       </Typography>
                     )}
                     {secondCol && (
-                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem', overflowWrap: 'anywhere' }}>
                         {secondCol.render
                           ? secondCol.render(row, index)
                           : row[secondCol.field || secondCol.key] ?? '—'}
@@ -88,7 +88,7 @@ function MobileCardView({ columns, rows, onRowClick, loading }) {
                       <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.6rem', display: 'block' }}>
                         {col.label}
                       </Typography>
-                      <Typography variant="caption" sx={{ fontSize: '0.75rem', fontWeight: 500 }}>
+                      <Typography variant="caption" sx={{ fontSize: '0.75rem', fontWeight: 500, overflowWrap: 'anywhere' }}>
                         {col.render
                           ? col.render(row, index)
                           : row[col.field || col.key] ?? '—'}

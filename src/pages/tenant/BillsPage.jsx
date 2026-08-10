@@ -40,10 +40,18 @@ export function BillsPage() {
     }))
     .sort((a, b) => (b.recordedAt || 0) - (a.recordedAt || 0));
 
-  const currentUsage = liveProfile?.usage?.totalUsageMonth ?? 0;
-  const currentBillAmount = currentUsage * pricePerUnit;
+  // Mirrors the backend's getTenantBillData: usage falls back to
+  // billing.monthUsage, the billed amount prefers billing.currentBill when
+  // present, and outstanding prefers the stored value.
+  const currentUsage = liveProfile?.usage?.totalUsageMonth ?? liveProfile?.billing?.monthUsage ?? 0;
+  const currentBillAmount = liveProfile?.billing?.currentBill > 0
+    ? liveProfile?.billing?.currentBill
+    : currentUsage * pricePerUnit;
   const totalPaid = liveProfile?.billing?.totalPaid ?? 0;
-  const outstandingBalance = liveProfile?.billing?.outstandingBalance ?? Math.max(currentBillAmount - totalPaid, 0);
+  const storedOutstanding = liveProfile?.billing?.outstandingBalance ?? 0;
+  const outstandingBalance = storedOutstanding > 0
+    ? storedOutstanding
+    : Math.max(currentBillAmount - totalPaid, 0);
 
   const currentBill = {
     billId: 'current',

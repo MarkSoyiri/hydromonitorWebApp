@@ -66,10 +66,12 @@ export function BillingPage() {
     };
   }, [billingHistory]);
 
-  const monthUsage = scopedTenants.reduce((s, t) => s + (t.usage?.totalUsageMonth || 0), 0);
+  const monthUsage = scopedTenants.reduce((s, t) => s + (t.usage?.totalUsageMonth || t.billing?.monthUsage || 0), 0);
+  const storedBills = scopedTenants.reduce((s, t) => s + (t.billing?.currentBill || 0), 0);
+  const billAmount = storedBills > 0 ? storedBills : monthUsage * pricePerUnit;
   const currentBill = {
-    amount: monthUsage * pricePerUnit,
-    status: monthUsage * pricePerUnit > 0 ? 'PENDING' : 'PAID',
+    amount: billAmount,
+    status: billAmount > 0 ? 'PENDING' : 'PAID',
   };
 
   useEffect(() => {

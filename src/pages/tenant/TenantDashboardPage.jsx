@@ -200,10 +200,15 @@ export function TenantDashboardPage() {
   const deviceOnline = device?.telemetry?.status === 'ACTIVE' || device?.online;
   const leakDetected = device?.telemetry?.leakDetected ?? false;
 
-  const currentUsage = liveProfile?.usage?.totalUsageMonth ?? 0;
-  const monthAmount = currentUsage * pricePerUnit;
+  const currentUsage = liveProfile?.usage?.totalUsageMonth ?? liveProfile?.billing?.monthUsage ?? 0;
+  const monthAmount = liveProfile?.billing?.currentBill > 0
+    ? liveProfile?.billing?.currentBill
+    : currentUsage * pricePerUnit;
   const totalPaid = liveProfile?.billing?.totalPaid ?? 0;
-  const outstandingBalance = liveProfile?.billing?.outstandingBalance ?? Math.max(monthAmount - totalPaid, 0);
+  const storedOutstanding = liveProfile?.billing?.outstandingBalance ?? 0;
+  const outstandingBalance = storedOutstanding > 0
+    ? storedOutstanding
+    : Math.max(monthAmount - totalPaid, 0);
   const billAmount = totalPaid > 0 || outstandingBalance > 0 ? outstandingBalance + totalPaid : monthAmount;
   const currentRoomLabel = liveRoom?.roomNumber
     ? `Room ${liveRoom.roomNumber}${liveBuilding?.name ? `, ${liveBuilding.name}` : ''}`

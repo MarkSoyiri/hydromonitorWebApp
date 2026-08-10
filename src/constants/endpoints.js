@@ -16,6 +16,8 @@ export const ENDPOINTS = {
   BILLING: {
     CURRENT: `${API_PREFIX}/billing/current`,
     HISTORY: `${API_PREFIX}/billing/history`,
+    INVOICE: `${API_PREFIX}/billing/invoice`,
+    PAYMENT_INVOICE: (paymentId) => `${API_PREFIX}/billing/invoice/${paymentId}`,
   },
   PAYMENTS: {
     SETUP: `${API_PREFIX}/payments/setup`,

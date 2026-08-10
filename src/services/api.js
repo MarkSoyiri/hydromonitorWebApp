@@ -84,5 +84,7 @@ export const apiGet = (url, params) => api.get(url, { params });
 export const apiPost = (url, data, config) => api.post(url, data, config);
 export const apiPut = (url, data) => api.put(url, data);
 export const apiDelete = (url) => api.delete(url);
+export const apiGetBlob = (url, params) =>
+  api.get(url, { params, responseType: 'blob' });
 
 export default api;

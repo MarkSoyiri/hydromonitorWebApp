@@ -1,26 +1,31 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Box, Card, CardContent, Typography, Chip, Button, List, ListItem, ListItemText, ListItemIcon, Divider, Skeleton } from '@mui/material';
 import { Description, Download } from '@mui/icons-material';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   NODES, useRealtimeMap,
 } from '@/services/realtime';
+import { billingService } from '@/services/billingService';
+import { saveBlob } from '@/services/download';
 import dayjs from 'dayjs';
 
 export function InvoicesPage() {
   const { profile, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(null);
 
   const tenantUid = profile?.uid || profile?.currentUser?.uid;
   const billingMap = useRealtimeMap(tenantUid ? `${NODES.billingHistory}/${tenantUid}` : null);
 
-  const invoices = (Object.values(billingMap.data || {}) || [])
-    .filter((p) => p && typeof p === 'object')
-    .map((p) => ({
+  const invoices = (Object.entries(billingMap.data || {}) || [])
+    .filter(([, p]) => p && typeof p === 'object')
+    .map(([key, p]) => ({
       ...p,
-      billId: p.paymentId,
-      id: p.paymentId,
+      billId: p.paymentId || key,
+      id: p.paymentId || key,
+      paymentId: p.paymentId || key,
       status: 'PAID',
       amount: p.amount || 0,
       date: p.recordedAt ? dayjs(p.recordedAt).format('MMM D, YYYY') : '',
@@ -31,6 +36,19 @@ export function InvoicesPage() {
   useEffect(() => {
     if (profile && billingMap.loaded) setLoading(false);
   }, [profile, billingMap.loaded, authLoading]);
+
+  const handleDownload = useCallback(async (paymentId) => {
+    setDownloading(paymentId);
+    try {
+      const res = await billingService.downloadPaymentInvoice(paymentId);
+      saveBlob(res, paymentId);
+      toast.success('Receipt downloaded.');
+    } catch (err) {
+      toast.error(err?.message || 'Could not download the receipt.');
+    } finally {
+      setDownloading(null);
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -87,8 +105,8 @@ export function InvoicesPage() {
                             <Chip label={inv.status || 'PENDING'} size="small" color={(inv.status === 'PAID' || inv.status === 'Paid') ? 'success' : 'warning'} sx={{ height: 20, fontSize: '0.6rem' }} />
                             <Typography variant="caption" color="text.secondary">Due: {inv.dueDate || ''}</Typography>
                           </Box>
-                          <Button size="small" startIcon={<Download />} variant="outlined" sx={{ fontSize: '0.7rem' }}>
-                            PDF
+                          <Button size="small" startIcon={<Download />} variant="outlined" sx={{ fontSize: '0.7rem' }} onClick={() => handleDownload(inv.paymentId)} disabled={downloading === inv.paymentId}>
+                            {downloading === inv.paymentId ? '…' : 'PDF'}
                           </Button>
                         </Box>
                       }

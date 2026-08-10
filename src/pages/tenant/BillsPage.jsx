@@ -8,6 +8,8 @@ import {
   NODES, useRealtimeValue, useRealtimeMap,
 } from '@/services/realtime';
 import { paymentService } from '@/services/paymentService';
+import { billingService } from '@/services/billingService';
+import { saveBlob } from '@/services/download';
 import dayjs from 'dayjs';
 
 export function BillsPage() {
@@ -16,6 +18,7 @@ export function BillsPage() {
   const [paying, setPaying] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [pendingRef, setPendingRef] = useState(null);
+  const [downloading, setDownloading] = useState(null);
 
   const tenantUid = profile?.uid || profile?.currentUser?.uid;
 
@@ -27,12 +30,13 @@ export function BillsPage() {
   const pricePerUnit = rateLive.value?.pricePerUnit ?? 0;
 
   const billingMap = useRealtimeMap(tenantUid ? `${NODES.billingHistory}/${tenantUid}` : null);
-  const paymentList = (Object.values(billingMap.data || {}) || [])
-    .filter((p) => p && typeof p === 'object')
-    .map((p) => ({
+  const paymentList = (Object.entries(billingMap.data || {}) || [])
+    .filter(([, p]) => p && typeof p === 'object')
+    .map(([key, p]) => ({
       ...p,
-      billId: p.paymentId,
-      id: p.paymentId,
+      billId: p.paymentId || key,
+      id: p.paymentId || key,
+      paymentId: p.paymentId || key,
       status: 'PAID',
       amount: p.amount || 0,
       period: p.recordedAt ? dayjs(p.recordedAt).format('MMM D, YYYY') : '',
@@ -120,6 +124,21 @@ export function BillsPage() {
     }
   }, [paying]);
 
+  const handleDownloadInvoice = useCallback(async (paymentId = null) => {
+    setDownloading(paymentId || 'current');
+    try {
+      const res = paymentId
+        ? await billingService.downloadPaymentInvoice(paymentId)
+        : await billingService.downloadInvoice();
+      saveBlob(res, paymentId || 'invoice');
+      if (!paymentId) toast.success('Invoice downloaded.');
+    } catch (err) {
+      toast.error(err?.message || 'Could not download the invoice.');
+    } finally {
+      setDownloading(null);
+    }
+  }, []);
+
   useEffect(() => {
     if (!pendingRef) return undefined;
     const onFocus = () => verifyPending(pendingRef, true);
@@ -191,9 +210,12 @@ export function BillsPage() {
                 <Typography variant="caption" sx={{ opacity: 0.8, fontWeight: 600 }}>CURRENT BILL</Typography>
                 <Typography variant="h3" sx={{ fontWeight: 800, mt: 1, fontSize: { xs: '1.75rem', sm: '3rem' } }}>GHS {currentBillAmount.toFixed(2)}</Typography>
                 <Typography variant="caption" sx={{ opacity: 0.8 }}>Current period</Typography>
-                <Box sx={{ mt: 2 }}>
-                  <Button variant="contained" fullWidth sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }} endIcon={<PaymentIcon />} onClick={handlePay} disabled={paying || outstandingBalance <= 0}>
+                <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
+                  <Button variant="contained" sx={{ flex: 1, bgcolor: 'rgba(255,255,255,0.2)', color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }} endIcon={<PaymentIcon />} onClick={handlePay} disabled={paying || outstandingBalance <= 0}>
                     {paying ? 'Starting…' : 'Pay Now'}
+                  </Button>
+                  <Button variant="outlined" sx={{ bgcolor: 'rgba(255,255,255,0.15)', color: '#fff', borderColor: 'rgba(255,255,255,0.5)', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)', borderColor: '#fff' } }} endIcon={<Download />} onClick={() => handleDownloadInvoice()} disabled={downloading === 'current'}>
+                    {downloading === 'current' ? '…' : 'Invoice'}
                   </Button>
                 </Box>
               </CardContent>
@@ -254,8 +276,8 @@ export function BillsPage() {
                             <Typography variant="caption" color="text.secondary">Due: {bill.dueDate || ''}</Typography>
                           </Box>
                           <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                            <Button size="small" variant="outlined" startIcon={<Download />} sx={{ fontSize: '0.7rem', width: { xs: '100%', sm: 'auto' } }}>
-                              Invoice
+                            <Button size="small" variant="outlined" startIcon={<Download />} sx={{ fontSize: '0.7rem', width: { xs: '100%', sm: 'auto' } }} onClick={() => handleDownloadInvoice(bill.paymentId)} disabled={downloading === bill.paymentId}>
+                              {downloading === bill.paymentId ? '…' : 'Invoice'}
                             </Button>
                             {bill.status !== 'PAID' && (
                               <Button size="small" variant="contained" startIcon={<PaymentIcon />} sx={{ fontSize: '0.7rem', width: { xs: '100%', sm: 'auto' } }} onClick={handlePay} disabled={paying}>

@@ -6,6 +6,7 @@ export { deviceService } from './deviceService';
 export { tenantService } from './tenantService';
 export { alertService } from './alertService';
 export { billingService } from './billingService';
+export { paymentService } from './paymentService';
 export { usageService } from './usageService';
 export { analyticsService } from './analyticsService';
 export { ratesService } from './ratesService';

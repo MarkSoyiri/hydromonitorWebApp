@@ -17,6 +17,12 @@ export const ENDPOINTS = {
     CURRENT: `${API_PREFIX}/billing/current`,
     HISTORY: `${API_PREFIX}/billing/history`,
   },
+  PAYMENTS: {
+    SETUP: `${API_PREFIX}/payments/setup`,
+    INITIALIZE: `${API_PREFIX}/payments/initialize`,
+    VERIFY: (reference) => `${API_PREFIX}/payments/${reference}/verify`,
+    GET: (reference) => `${API_PREFIX}/payments/${reference}`,
+  },
   RATES: `${API_PREFIX}/rates`,
   ANALYTICS: {
     SYSTEM: `${API_PREFIX}/analytics/system`,

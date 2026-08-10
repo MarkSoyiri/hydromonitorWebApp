@@ -1,16 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Box, Grid, Card, CardContent, Typography, Button, Chip, List, ListItem, ListItemText, ListItemIcon, Divider, Skeleton } from '@mui/material';
-import { Receipt, Payment as PaymentIcon, Download } from '@mui/icons-material';
+import { Receipt, Payment as PaymentIcon, Download, Verified } from '@mui/icons-material';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   NODES, useRealtimeValue, useRealtimeMap,
 } from '@/services/realtime';
+import { paymentService } from '@/services/paymentService';
 import dayjs from 'dayjs';
 
 export function BillsPage() {
   const { profile } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [paying, setPaying] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [pendingRef, setPendingRef] = useState(null);
 
   const tenantUid = profile?.uid || profile?.currentUser?.uid;
 
@@ -56,6 +61,76 @@ export function BillsPage() {
     if (profile && userLive.loaded) setLoading(false);
   }, [profile, userLive.loaded]);
 
+  const verifyPending = useCallback(async (reference, quiet = false) => {
+    if (!reference) return;
+    setVerifying(true);
+    try {
+      const res = await paymentService.verify(reference);
+      const status = res?.data?.data?.status;
+      if (status === 'PAID') {
+        setPendingRef(null);
+        toast.success('Payment received. Thank you!');
+      } else if (!quiet) {
+        toast(status === 'PENDING'
+          ? 'Payment is still being confirmed. It will appear shortly.'
+          : `Payment status: ${status || 'UNKNOWN'}`);
+      }
+    } catch (err) {
+      if (!quiet) toast.error(err?.message || 'Could not verify payment.');
+    } finally {
+      setVerifying(false);
+    }
+  }, []);
+
+  const handlePay = useCallback(async () => {
+    if (paying) return;
+    setPaying(true);
+    let checkoutWindow = null;
+    try {
+      checkoutWindow = window.open('', '_blank');
+      const res = await paymentService.initialize();
+      const data = res?.data?.data;
+      const reference = data?.payment?.reference;
+      const url = data?.authorizationUrl;
+      if (!reference || !url) {
+        checkoutWindow?.close();
+        toast.error('Payment could not be initialized.');
+        return;
+      }
+      setPendingRef(reference);
+      toast('Complete payment in the new tab, then come back here to confirm.', { duration: 5000 });
+      if (checkoutWindow) {
+        checkoutWindow.location.href = url;
+      } else {
+        window.open(url, '_blank');
+      }
+    } catch (err) {
+      checkoutWindow?.close();
+      toast.error(err?.message || 'Payment unavailable right now.');
+    } finally {
+      setPaying(false);
+    }
+  }, [paying]);
+
+  useEffect(() => {
+    if (!pendingRef) return undefined;
+    const onFocus = () => verifyPending(pendingRef, true);
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [pendingRef, verifyPending]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('reference') || params.get('trxref');
+    if (ref) {
+      verifyPending(ref, true);
+      params.delete('reference');
+      params.delete('trxref');
+      const qs = params.toString();
+      window.history.replaceState({}, '', window.location.pathname + (qs ? `?${qs}` : ''));
+    }
+  }, [verifyPending]);
+
   if (loading) {
     return (
       <Box>
@@ -84,6 +159,22 @@ export function BillsPage() {
         </Box>
       </motion.div>
 
+      {pendingRef && (
+        <Card sx={{ borderRadius: 3, mb: 3, bgcolor: 'warning.light', color: 'warning.dark' }}>
+          <CardContent sx={{ p: { xs: 1.5, sm: 2 }, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              Payment {pendingRef} started in a new tab. Finished there? Confirm below.
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button size="small" variant="contained" color="warning" startIcon={verifying ? null : <Verified />} onClick={() => verifyPending(pendingRef)} disabled={verifying}>
+                {verifying ? 'Checking…' : "I've paid — confirm"}
+              </Button>
+              <Button size="small" variant="outlined" onClick={() => setPendingRef(null)}>Dismiss</Button>
+            </Box>
+          </CardContent>
+        </Card>
+      )}
+
       <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
         <Grid container spacing={{ xs: 1.5, sm: 2.5 }} sx={{ mb: 3 }}>
           <Grid item xs={12} sm={4}>
@@ -93,8 +184,8 @@ export function BillsPage() {
                 <Typography variant="h3" sx={{ fontWeight: 800, mt: 1, fontSize: { xs: '1.75rem', sm: '3rem' } }}>GHS {currentBillAmount.toFixed(2)}</Typography>
                 <Typography variant="caption" sx={{ opacity: 0.8 }}>Current period</Typography>
                 <Box sx={{ mt: 2 }}>
-                  <Button variant="contained" fullWidth sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }} endIcon={<PaymentIcon />}>
-                    Pay Now
+                  <Button variant="contained" fullWidth sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }} endIcon={<PaymentIcon />} onClick={handlePay} disabled={paying || outstandingBalance <= 0}>
+                    {paying ? 'Starting…' : 'Pay Now'}
                   </Button>
                 </Box>
               </CardContent>
@@ -159,8 +250,8 @@ export function BillsPage() {
                               Invoice
                             </Button>
                             {bill.status !== 'PAID' && (
-                              <Button size="small" variant="contained" startIcon={<PaymentIcon />} sx={{ fontSize: '0.7rem', width: { xs: '100%', sm: 'auto' } }}>
-                                Pay
+                              <Button size="small" variant="contained" startIcon={<PaymentIcon />} sx={{ fontSize: '0.7rem', width: { xs: '100%', sm: 'auto' } }} onClick={handlePay} disabled={paying}>
+                                {paying ? 'Starting…' : 'Pay'}
                               </Button>
                             )}
                           </Box>

@@ -82,10 +82,10 @@ const deviceColumns = [
     ),
   },
   {
-    field: 'valveState', label: 'Valve', width: 80, align: 'center',
+    field: 'telemetry.valveStatus', label: 'Valve', width: 80, align: 'center',
     render: (d) => (
-      <Typography variant="caption" sx={{ fontWeight: 600, color: d.valveState === 'OPEN' ? 'success.main' : 'error.main' }}>
-        {d.valveState || '—'}
+      <Typography variant="caption" sx={{ fontWeight: 600, color: d.telemetry?.valveStatus === 'OPEN' ? 'success.main' : 'error.main' }}>
+        {d.telemetry?.valveStatus || '—'}
       </Typography>
     ),
   },

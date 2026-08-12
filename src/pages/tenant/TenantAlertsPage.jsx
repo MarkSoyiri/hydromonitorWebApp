@@ -3,7 +3,7 @@ import { Box, Grid, Card, CardContent, Typography, Chip, List, ListItem, ListIte
 import { CheckCircle, Warning, Info, NotificationsActive } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import {
-  NODES, useRealtimeValue, useLiveAlerts, useLiveTelemetry,
+  NODES, useRealtimeValue, useLiveAlertsByBuilding, useLiveTelemetry,
 } from '@/services/realtime';
 import { useAuth } from '@/contexts/AuthContext';
 import dayjs from 'dayjs';
@@ -41,7 +41,7 @@ export function TenantAlertsPage() {
   const { telemetry: liveTelemetry } = useLiveTelemetry(deviceId);
   const leakDetected = liveTelemetry?.leakDetected ?? authDevice?.telemetry?.leakDetected ?? false;
 
-  const { alerts: apiAlerts, loaded: alertsLoaded } = useLiveAlerts();
+  const { alerts: apiAlerts, loaded: alertsLoaded } = useLiveAlertsByBuilding(buildingId);
   const alerts = useMemo(
     () => {
       const relevant = apiAlerts.filter(

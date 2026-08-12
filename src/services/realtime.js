@@ -4,6 +4,9 @@ import {
   ref as dbRef,
   onValue,
   off,
+  query,
+  orderByChild,
+  equalTo,
   connectDatabaseEmulator,
 } from 'firebase/database';
 import app from './firebase';
@@ -247,6 +250,31 @@ export function useLiveAlerts() {
   );
 
   return { alerts, loaded: alertsState.loaded };
+}
+
+// Query-scoped alerts for tenant screens: only alerts in the tenant's own
+// building are fetched, so the RTDB rule `query.equalTo === buildingId`
+// matches (the whole-node useLiveAlerts read is admin-only under the rules).
+export function useLiveAlertsByBuilding(buildingId) {
+  const [state, setState] = useState({ alerts: [], loaded: false });
+
+  useEffect(() => {
+    if (!buildingId) {
+      setState({ alerts: [], loaded: false });
+      return undefined;
+    }
+    const reference = query(
+      dbRef(db, NODES.alerts),
+      orderByChild('buildingId'),
+      equalTo(buildingId)
+    );
+    const handler = (snapshot) =>
+      setState({ alerts: toList(snapshot), loaded: true });
+    onValue(reference, handler, makeErrorHandler(`alerts?buildingId=${buildingId}`));
+    return () => off(reference, 'value', handler);
+  }, [buildingId]);
+
+  return state;
 }
 
 export function useLiveTenants() {

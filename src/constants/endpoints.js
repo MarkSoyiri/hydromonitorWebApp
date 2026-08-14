@@ -24,6 +24,8 @@ export const ENDPOINTS = {
     INITIALIZE: `${API_PREFIX}/payments/initialize`,
     VERIFY: (reference) => `${API_PREFIX}/payments/${reference}/verify`,
     GET: (reference) => `${API_PREFIX}/payments/${reference}`,
+    CANCEL: (reference) => `${API_PREFIX}/payments/${reference}/cancel`,
+    CANCEL_PENDING: `${API_PREFIX}/payments/cancel-pending`,
   },
   RATES: `${API_PREFIX}/rates`,
   ANALYTICS: {

@@ -19,6 +19,12 @@ export const paymentService = {
   verify: (reference) =>
     apiPost(ENDPOINTS.PAYMENTS.VERIFY(reference), {}),
 
+  cancel: (reference) =>
+    apiPost(ENDPOINTS.PAYMENTS.CANCEL(reference), {}),
+
+  cancelPending: () =>
+    apiPost(ENDPOINTS.PAYMENTS.CANCEL_PENDING, {}),
+
   get: (reference) =>
     apiGet(ENDPOINTS.PAYMENTS.GET(reference)),
 };

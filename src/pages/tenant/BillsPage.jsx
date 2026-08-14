@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, Grid, Card, CardContent, Typography, Button, Chip, List, ListItem, ListItemText, ListItemIcon, Divider, Skeleton } from '@mui/material';
-import { Receipt, Payment as PaymentIcon, Download, Verified } from '@mui/icons-material';
+import { Receipt, Payment as PaymentIcon, Download, Verified, Close } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,8 +17,10 @@ export function BillsPage() {
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const [pendingRef, setPendingRef] = useState(null);
   const [downloading, setDownloading] = useState(null);
+  const retriedAfterPendingCancel = useRef(false);
 
   const tenantUid = profile?.uid || profile?.currentUser?.uid;
 
@@ -94,12 +96,9 @@ export function BillsPage() {
     }
   }, []);
 
-  const handlePay = useCallback(async () => {
-    if (paying) return;
-    setPaying(true);
-    let checkoutWindow = null;
+  const openCheckout = useCallback(async () => {
+    let checkoutWindow = window.open('', '_blank');
     try {
-      checkoutWindow = window.open('', '_blank');
       const res = await paymentService.initialize();
       const data = res?.data?.data;
       const reference = data?.payment?.reference;
@@ -118,11 +117,31 @@ export function BillsPage() {
       }
     } catch (err) {
       checkoutWindow?.close();
-      toast.error(err?.message || 'Payment unavailable right now.');
-    } finally {
-      setPaying(false);
+      const message = err?.message || 'Payment unavailable right now.';
+      if (message.toLowerCase().includes('pending') && !retriedAfterPendingCancel.current) {
+        // An abandoned checkout is blocking a new payment. Cancel it and
+        // retry once so the tenant can remake the payment.
+        retriedAfterPendingCancel.current = true;
+        toast('Abandoned payment found. Cancelling it…');
+        try {
+          await paymentService.cancelPending();
+          toast.success('Abandoned payment cancelled. Starting a new one…');
+          await openCheckout();
+        } catch {
+          toast.error('Could not clear the abandoned payment. Please try again.');
+        }
+      } else {
+        toast.error(message);
+      }
     }
-  }, [paying]);
+  }, []);
+
+  const handlePay = useCallback(async () => {
+    if (paying) return;
+    setPaying(true);
+    await openCheckout();
+    setPaying(false);
+  }, [paying, openCheckout]);
 
   const handleDownloadInvoice = useCallback(async (paymentId = null) => {
     setDownloading(paymentId || 'current');
@@ -138,6 +157,20 @@ export function BillsPage() {
       setDownloading(null);
     }
   }, []);
+
+  const handleCancelPending = useCallback(async () => {
+    if (!pendingRef || cancelling) return;
+    setCancelling(true);
+    try {
+      await paymentService.cancel(pendingRef);
+      toast.success('Payment cancelled. You can pay again anytime.');
+    } catch (err) {
+      toast.error(err?.message || 'Could not cancel the payment. Please try again.');
+    } finally {
+      setCancelling(false);
+      setPendingRef(null);
+    }
+  }, [pendingRef, cancelling]);
 
   useEffect(() => {
     if (!pendingRef) return undefined;
@@ -196,7 +229,9 @@ export function BillsPage() {
               <Button size="small" variant="contained" color="warning" startIcon={verifying ? null : <Verified />} onClick={() => verifyPending(pendingRef)} disabled={verifying}>
                 {verifying ? 'Checking…' : "I've paid — confirm"}
               </Button>
-              <Button size="small" variant="outlined" onClick={() => setPendingRef(null)}>Dismiss</Button>
+              <Button size="small" variant="outlined" color="error" startIcon={cancelling ? null : <Close />} onClick={handleCancelPending} disabled={cancelling}>
+                {cancelling ? 'Cancelling…' : 'Cancel payment'}
+              </Button>
             </Box>
           </CardContent>
         </Card>

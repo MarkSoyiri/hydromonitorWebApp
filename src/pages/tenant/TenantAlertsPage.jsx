@@ -36,6 +36,7 @@ export function TenantAlertsPage() {
   const userLive = useRealtimeValue(tenantUid ? `${NODES.users}/${tenantUid}` : null);
   const liveProfile = userLive.value ? { ...profile, ...userLive.value, uid: tenantUid } : profile;
   const buildingId = liveProfile?.buildingId;
+  const roomId = liveProfile?.roomId;
 
   const deviceId = liveProfile?.deviceId || authDevice?.deviceId;
   const { telemetry: liveTelemetry } = useLiveTelemetry(deviceId);
@@ -45,7 +46,8 @@ export function TenantAlertsPage() {
   const alerts = useMemo(
     () => {
       const relevant = apiAlerts.filter(
-        (a) => a.tenantId === tenantUid || (buildingId && a.buildingId === buildingId)
+        (a) => a.tenantId === tenantUid
+          || (roomId && a.roomId === roomId)
       );
       return relevant.map((a) => ({
         ...a,
@@ -54,7 +56,7 @@ export function TenantAlertsPage() {
         time: a.createdAt ? dayjs(a.createdAt).format('MMM D, HH:mm') : 'Just now',
       }));
     },
-    [apiAlerts, tenantUid, buildingId]
+    [apiAlerts, tenantUid, roomId]
   );
 
   useEffect(() => {

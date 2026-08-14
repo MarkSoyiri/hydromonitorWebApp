@@ -44,6 +44,7 @@ const AnalyticsPage = Lazy(lazy(() => import('@/pages/analytics/AnalyticsPage').
 const SettingsPage = Lazy(lazy(() => import('@/pages/settings/SettingsPage').then((m) => ({ default: m.SettingsPage }))));
 const AdminManagementPage = Lazy(lazy(() => import('@/pages/admin/AdminManagementPage').then((m) => ({ default: m.AdminManagementPage }))));
 const LogsPage = Lazy(lazy(() => import('@/pages/superadmin/LogsPage').then((m) => ({ default: m.LogsPage }))));
+const PrivacyPolicyPage = Lazy(lazy(() => import('@/pages/legal/PrivacyPolicyPage').then((m) => ({ default: m.PrivacyPolicyPage }))));
 const NotFoundPage = Lazy(lazy(() => import('@/pages/errors/NotFoundPage').then((m) => ({ default: m.NotFoundPage }))));
 
 export const router = createBrowserRouter([
@@ -58,6 +59,10 @@ export const router = createBrowserRouter([
   {
     path: '/forgot-password',
     element: <PublicRoute><ForgotPasswordPage /></PublicRoute>,
+  },
+  {
+    path: '/privacy',
+    element: <PrivacyPolicyPage />,
   },
   {
     path: '/app',

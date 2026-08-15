@@ -523,10 +523,10 @@ export function ProfilePage() {
                   {analyticsData && (
                     <>
                       <Grid item xs={6} sm={4}>
-                        <StatCard title="Total Usage" value={`${(analyticsData.totalUsage || 0).toLocaleString()} L`} icon={<WaterDrop />} color="primary" index={4} />
+                        <StatCard title="Total Usage" value={`${(analyticsData?.usage?.totalUsageMonth || analyticsData?.usage?.totalUsageLifetime || 0).toLocaleString()} L`} icon={<WaterDrop />} color="primary" index={4} />
                       </Grid>
                       <Grid item xs={6} sm={4}>
-                        <StatCard title="Avg Daily" value={`${(analyticsData.avgDailyUsage || 0).toFixed(0)} L`} icon={<Speed />} color="warning" index={5} />
+                        <StatCard title="Today" value={`${(analyticsData?.usage?.totalUsageToday || 0).toFixed(1)} L`} icon={<Speed />} color="warning" index={5} />
                       </Grid>
                     </>
                   )}

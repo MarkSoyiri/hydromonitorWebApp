@@ -197,6 +197,8 @@ export function TenantDashboardPage() {
   const flowRate = device?.telemetry?.currentFlowRate ?? liveProfile?.usage?.currentFlowRate ?? 0;
   const isFlowing = flowRate > 0;
   const valveOpen = device?.telemetry?.valveStatus === 'OPEN';
+  const todayUsage = liveProfile?.usage?.totalUsageToday
+      ?? todayReadings.reduce((s, r) => s + (r.flowRate || r.flow || r.usage || 0), 0);
   const deviceOnline = device?.telemetry?.status === 'ACTIVE' || device?.online;
   const leakDetected = device?.telemetry?.leakDetected ?? false;
 
@@ -404,7 +406,7 @@ export function TenantDashboardPage() {
                   </ResponsiveContainer>
                 </Box>
                 <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', mt: 1 }}>
-                  {todayReadings.length > 0 ? `${todayReadings.reduce((s, r) => s + (r.flowRate || r.flow || r.usage || 0), 0).toLocaleString()} L today` : 'No usage data available'}
+                  {todayUsage > 0 ? `${todayUsage.toLocaleString()} L today` : 'No usage data available'}
                 </Typography>
               </CardContent>
             </Card>

@@ -2,15 +2,22 @@ import { Box, Container, Typography, Grid, IconButton, Button } from '@mui/mater
 import {
   WaterDrop, Twitter, GitHub, LinkedIn, Mail,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 const FOOTER_LINKS = {
   Product: ['Features', 'Pricing', 'How It Works', 'Integrations'],
   Company: ['About', 'Blog', 'Careers', 'Contact'],
   Support: ['Help Center', 'Documentation', 'API Status', 'Community'],
-  Legal: ['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'GDPR'],
+  Legal: [
+    { label: 'Privacy Policy', to: '/privacy' },
+    { label: 'Terms of Service', to: '/terms' },
+    { label: 'Cookie Policy', to: '/privacy' },
+    { label: 'GDPR', to: '/privacy' },
+  ],
 };
 
 export function Footer() {
+  const navigate = useNavigate();
   const scrollToSection = (id) => {
     const el = document.querySelector(id);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -83,26 +90,30 @@ export function Footer() {
                 {category}
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
-                {links.map((link) => (
-                  <Button
-                    key={link}
-                    onClick={() => scrollToSection('#home')}
-                    sx={{
-                      color: 'rgba(255,255,255,0.35)',
-                      fontWeight: 500,
-                      fontSize: '0.8rem',
-                      textAlign: 'left',
-                      justifyContent: 'flex-start',
-                      px: 0,
-                      py: 0.25,
-                      minWidth: 0,
-                      '&:hover': { color: '#5FA4FF', bgcolor: 'transparent' },
-                      textTransform: 'none',
-                    }}
-                  >
-                    {link}
-                  </Button>
-                ))}
+                {links.map((link) => {
+                  const label = typeof link === 'string' ? link : link.label;
+                  const to = typeof link === 'string' ? null : link.to;
+                  return (
+                    <Button
+                      key={label}
+                      onClick={() => (to ? navigate(to) : scrollToSection('#home'))}
+                      sx={{
+                        color: 'rgba(255,255,255,0.35)',
+                        fontWeight: 500,
+                        fontSize: '0.8rem',
+                        textAlign: 'left',
+                        justifyContent: 'flex-start',
+                        px: 0,
+                        py: 0.25,
+                        minWidth: 0,
+                        '&:hover': { color: '#5FA4FF', bgcolor: 'transparent' },
+                        textTransform: 'none',
+                      }}
+                    >
+                      {label}
+                    </Button>
+                  );
+                })}
               </Box>
             </Grid>
           ))}

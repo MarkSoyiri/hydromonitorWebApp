@@ -134,43 +134,82 @@ export function TenantDashboardPage() {
     return dayjs(r.timestamp).format('YYYY-MM-DD') === todayStr;
   });
 
+  const usageReadings = readings
+    .filter((r) => r.timestamp != null && typeof r.totalUsage === 'number')
+    .sort((a, b) => dayjs(a.timestamp).valueOf() - dayjs(b.timestamp).valueOf());
+
+  // Litres consumed within the open interval (fromTs, toTs]: the last
+  // odometer reading at or before the window start is the base, the last
+  // reading inside the window is the endpoint. Falls back to summing flow
+  // rates when the API payload carries no cumulative totalUsage.
+  const deltaIn = (fromTs, toTs) => {
+    let base = null;
+    let last = null;
+    for (let i = 0; i < usageReadings.length; i++) {
+      const t = dayjs(usageReadings[i].timestamp).valueOf();
+      if (t <= fromTs) base = usageReadings[i].totalUsage;
+      else if (t > toTs) break;
+      else last = usageReadings[i];
+    }
+    if (!last) return 0;
+    return Math.max(0, last.totalUsage - (base != null ? base : last.totalUsage));
+  };
+
   const dailyData = Array.from({ length: 12 }, (_, i) => {
-    const h = i * 2;
-    const hourReadings = todayReadings.filter((r) => dayjs(r.timestamp).hour() === h);
-    const usage = hourReadings.reduce((sum, r) => sum + (r.flowRate || r.flow || r.usage || 0), 0);
-    return { time: `${String(h).padStart(2, '0')}:00`, usage };
+    const slotStart = now.startOf('day').add(i * 2, 'hour');
+    const slotEnd = slotStart.add(2, 'hour');
+    return {
+      time: slotStart.format('HH:00'),
+      usage: usageReadings.length
+        ? deltaIn(slotStart.valueOf(), slotEnd.valueOf())
+        : todayReadings.filter((r) => {
+            const hr = dayjs(r.timestamp).hour();
+            return hr >= i * 2 && hr < i * 2 + 2;
+          }).reduce((sum, r) => sum + (r.flowRate || r.flow || r.usage || 0), 0),
+    };
   });
 
   const weeklyData = Array.from({ length: 7 }, (_, d) => {
-    const dayDate = now.subtract(6 - d, 'day');
-    const dayStr = dayDate.format('YYYY-MM-DD');
-    const lastWeekStr = dayDate.subtract(7, 'day').format('YYYY-MM-DD');
-    const thisWeekReadings = readings.filter((r) => r.timestamp && dayjs(r.timestamp).format('YYYY-MM-DD') === dayStr);
-    const lastWeekReadings = readings.filter((r) => r.timestamp && dayjs(r.timestamp).format('YYYY-MM-DD') === lastWeekStr);
+    const dayStart = now.startOf('day').subtract(6 - d, 'day');
+    const dayEnd = dayStart.add(1, 'day');
+    const dayStr = dayStart.format('YYYY-MM-DD');
+    const lastWeekStart = dayStart.subtract(7, 'day');
+    const lastWeekEnd = dayEnd.subtract(7, 'day');
+    const lastWeekStr = lastWeekStart.format('YYYY-MM-DD');
     return {
-      day: dayDate.format('ddd'),
-      usage: thisWeekReadings.reduce((sum, r) => sum + (r.flowRate || r.flow || r.usage || 0), 0),
-      lastWeek: lastWeekReadings.reduce((sum, r) => sum + (r.flowRate || r.flow || r.usage || 0), 0),
+      day: dayStart.format('ddd'),
+      usage: usageReadings.length
+        ? deltaIn(dayStart.valueOf(), dayEnd.valueOf())
+        : readings.filter((r) => r.timestamp && dayjs(r.timestamp).format('YYYY-MM-DD') === dayStr)
+            .reduce((sum, r) => sum + (r.flowRate || r.flow || r.usage || 0), 0),
+      lastWeek: usageReadings.length
+        ? deltaIn(lastWeekStart.valueOf(), lastWeekEnd.valueOf())
+        : readings.filter((r) => r.timestamp && dayjs(r.timestamp).format('YYYY-MM-DD') === lastWeekStr)
+            .reduce((sum, r) => sum + (r.flowRate || r.flow || r.usage || 0), 0),
     };
   });
 
   const monthlyData = Array.from({ length: 6 }, (_, m) => {
-    const monthDate = now.subtract(5 - m, 'month');
-    const yearAgoDate = monthDate.subtract(1, 'year');
-    const monthReadings = readings.filter((r) => {
-      if (!r.timestamp) return false;
-      const rd = dayjs(r.timestamp);
-      return rd.month() === monthDate.month() && rd.year() === monthDate.year();
-    });
-    const lastYearReadings = readings.filter((r) => {
-      if (!r.timestamp) return false;
-      const rd = dayjs(r.timestamp);
-      return rd.month() === yearAgoDate.month() && rd.year() === yearAgoDate.year();
-    });
+    const monthStart = now.startOf('month').subtract(5 - m, 'month');
+    const monthEnd = monthStart.add(1, 'month');
+    const yearAgoStart = monthStart.subtract(1, 'year');
+    const yearAgoEnd = monthEnd.subtract(1, 'year');
     return {
-      month: monthDate.format('MMM'),
-      usage: monthReadings.reduce((sum, r) => sum + (r.flowRate || r.flow || r.usage || 0), 0),
-      lastYear: lastYearReadings.reduce((sum, r) => sum + (r.flowRate || r.flow || r.usage || 0), 0),
+      month: monthStart.format('MMM'),
+      usage: usageReadings.length
+        ? deltaIn(monthStart.valueOf(), monthEnd.valueOf())
+        : readings.filter((r) => {
+            if (!r.timestamp) return false;
+            const rd = dayjs(r.timestamp);
+            return rd.month() === monthStart.month() && rd.year() === monthStart.year();
+          }).reduce((sum, r) => sum + (r.flowRate || r.flow || r.usage || 0), 0),
+      lastYear: usageReadings.length
+        ? deltaIn(yearAgoStart.valueOf(), yearAgoEnd.valueOf())
+        : readings.filter((r) => {
+            if (!r.timestamp) return false;
+            const rd = dayjs(r.timestamp);
+            return rd.month() === yearAgoStart.month() && rd.year() === yearAgoStart.year();
+          }).reduce((sum, r) => sum + (r.flowRate || r.flow || r.usage || 0), 0),
     };
   });
 
